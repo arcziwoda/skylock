@@ -1,0 +1,20 @@
+stages:
+  - test
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  POETRY_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pypoetry"
+
+cache:
+  paths:
+    - .cache/pip
+    - .cache/pypoetry
+
+test:
+  stage: test
+  image: python:3.12
+  before_script:
+    - pip install poetry
+    - poetry install
+  script:
+    - poetry run pytest
