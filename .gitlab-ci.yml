@@ -1,5 +1,7 @@
 stages:
+  - lint
   - test
+  - build
 
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
@@ -10,11 +12,24 @@ cache:
     - .cache/pip
     - .cache/pypoetry
 
+before_script:
+  - pip install poetry
+  - poetry install
+
+lint:
+  stage: lint
+  image: python:3.12
+  script:
+    - poetry run pylint .
+
 test:
   stage: test
   image: python:3.12
-  before_script:
-    - pip install poetry
-    - poetry install
   script:
     - poetry run pytest
+
+build:
+  stage: build
+  image: python:3.12
+  script:
+    - poetry build
