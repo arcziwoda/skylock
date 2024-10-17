@@ -20,7 +20,7 @@ lint:
   stage: lint
   image: python:3.12
   script:
-    - poetry run pylint .
+    - poetry run pylint cli_client tests
 
 test:
   stage: test
