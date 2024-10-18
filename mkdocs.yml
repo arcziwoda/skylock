@@ -1,0 +1,50 @@
+site_name: CLI Docs
+site_author: Oliwier Szypczyn, Artur Kempiński, Filip Budzyński
+
+theme:
+  name: material
+  palette:
+    primary: blue
+    accent: light blue
+  font:
+    text: Roboto
+    code: Roboto Mono
+  features:
+    - navigation.tabs
+    - navigation.top
+    - search.highlight
+    - search.share
+    - toc.integrate
+    - content.code.annotate
+    - content.tabs.link
+    - navigation.instant
+    - navigation.sections
+
+nav:
+  - Home: index.md
+  - commands: commands.md
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+  - git-revision-date-localized:
+      enabled: true
+      type: timeago
+      fallback_to_build_date: true
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - footnotes
+  - meta
+  - toc:
+      permalink: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/gitlab
+      link: https://gitlab-stud.elka.pw.edu.pl/oszypczy/zprp-cli-client
