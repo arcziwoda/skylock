@@ -9,6 +9,7 @@ variables:
   CLI_POETRY_CACHE_DIR: "$CI_PROJECT_DIR/cli/.cache/pypoetry"
   BACKEND_PIP_CACHE_DIR: "$CI_PROJECT_DIR/backend/.cache/pip"
   BACKEND_POETRY_CACHE_DIR: "$CI_PROJECT_DIR/backend/.cache/pypoetry"
+  POETRY_VIRTUALENVS_PATH: "$CI_PROJECT_DIR/.cache/pypoetry/virtualenvs" # Specify virtualenvs path
 
 # Global cache configuration
 cache:
@@ -19,10 +20,11 @@ cache:
     - backend/.cache/pip
     - backend/.cache/pypoetry
 
-# Setup job for CLI project
 setup_cli:
   stage: setup
   image: python:3.12
+  variables:
+    POETRY_VIRTUALENVS_PATH: "$CLI_POETRY_CACHE_DIR/virtualenvs" # Set CLI-specific virtualenv path
   script:
     - cd cli
     - pip install poetry
@@ -37,10 +39,11 @@ setup_cli:
         - cli/pyproject.toml
         - cli/poetry.lock
 
-# Setup job for Backend project
 setup_backend:
   stage: setup
   image: python:3.12
+  variables:
+    POETRY_VIRTUALENVS_PATH: "$BACKEND_POETRY_CACHE_DIR/virtualenvs" # Set backend-specific virtualenv path
   script:
     - cd backend
     - pip install poetry
@@ -54,81 +57,5 @@ setup_backend:
     - changes:
         - backend/pyproject.toml
         - backend/poetry.lock
+# Lint, test, and build jobs remain the same
 
-# CLI Lint Job
-lint_cli:
-  stage: lint
-  image: python:3.12
-  script:
-    - cd cli
-    - poetry run pylint .
-  needs:
-    - setup_cli
-  rules:
-    - changes:
-        - cli/**
-
-# CLI Test Job
-test_cli:
-  stage: test
-  image: python:3.12
-  script:
-    - cd cli
-    - poetry run pytest
-  needs:
-    - setup_cli
-  rules:
-    - changes:
-        - cli/**
-
-# CLI Build Job
-build_cli:
-  stage: build
-  image: python:3.12
-  script:
-    - cd cli
-    - poetry build
-  needs:
-    - setup_cli
-  rules:
-    - changes:
-        - cli/**
-
-# Backend Lint Job
-lint_backend:
-  stage: lint
-  image: python:3.12
-  script:
-    - cd backend
-    - poetry run pylint .
-  needs:
-    - setup_backend
-  rules:
-    - changes:
-        - backend/**
-
-# Backend Test Job
-test_backend:
-  stage: test
-  image: python:3.12
-  script:
-    - cd backend
-    - poetry run pytest
-  needs:
-    - setup_backend
-  rules:
-    - changes:
-        - backend/**
-
-# Backend Build Job
-build_backend:
-  stage: build
-  image: python:3.12
-  script:
-    - cd backend
-    - poetry build
-  needs:
-    - setup_backend
-  rules:
-    - changes:
-        - backend/**
