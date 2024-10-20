@@ -5,35 +5,25 @@ stages:
   - build
 
 variables:
-  CLI_PIP_CACHE_DIR: "$CI_PROJECT_DIR/cli/.cache/pip"
-  CLI_POETRY_CACHE_DIR: "$CI_PROJECT_DIR/cli/.cache/pypoetry"
-  BACKEND_PIP_CACHE_DIR: "$CI_PROJECT_DIR/backend/.cache/pip"
-  BACKEND_POETRY_CACHE_DIR: "$CI_PROJECT_DIR/backend/.cache/pypoetry"
-  POETRY_VIRTUALENVS_PATH: "$CI_PROJECT_DIR/.cache/pypoetry/virtualenvs" # Specify virtualenvs path
+  CLI_VENV_DIR: "$CI_PROJECT_DIR/cli/.venv"
+  BACKEND_VENV_DIR: "$CI_PROJECT_DIR/backend/.venv"
 
-# Global cache configuration
 cache:
   key: $CI_COMMIT_REF_SLUG
   paths:
-    - cli/.cache/pip
-    - cli/.cache/pypoetry
-    - backend/.cache/pip
-    - backend/.cache/pypoetry
+    - cli/.venv
+    - backend/.venv
 
 setup_cli:
   stage: setup
   image: python:3.12
-  variables:
-    POETRY_VIRTUALENVS_PATH: "$CLI_POETRY_CACHE_DIR/virtualenvs" # Set CLI-specific virtualenv path
   script:
     - cd cli
+    - python -m venv $CLI_VENV_DIR
+    - source $CLI_VENV_DIR/bin/activate
     - pip install poetry
+    - poetry config virtualenvs.create false
     - poetry install
-  cache:
-    key: cli-poetry-cache
-    paths:
-      - cli/.cache/pip
-      - cli/.cache/pypoetry
   rules:
     - changes:
         - cli/pyproject.toml
@@ -42,36 +32,30 @@ setup_cli:
 setup_backend:
   stage: setup
   image: python:3.12
-  variables:
-    POETRY_VIRTUALENVS_PATH: "$BACKEND_POETRY_CACHE_DIR/virtualenvs" # Set backend-specific virtualenv path
   script:
     - cd backend
+    - python -m venv $BACKEND_VENV_DIR
+    - source $BACKEND_VENV_DIR/bin/activate
     - pip install poetry
+    - poetry config virtualenvs.create false
     - poetry install
-  cache:
-    key: backend-poetry-cache
-    paths:
-      - backend/.cache/pip
-      - backend/.cache/pypoetry
   rules:
     - changes:
         - backend/pyproject.toml
         - backend/poetry.lock
 
-# CLI Lint Job
 lint_cli:
   stage: lint
   image: python:3.12
   script:
     - cd cli
-    - poetry run pylint .
+    - poetry run pylint cli_client tests
   needs:
     - setup_cli
   rules:
     - changes:
         - cli/**
 
-# CLI Test Job
 test_cli:
   stage: test
   image: python:3.12
@@ -84,52 +68,24 @@ test_cli:
     - changes:
         - cli/**
 
-# CLI Build Job
-build_cli:
-  stage: build
-  image: python:3.12
-  script:
-    - cd cli
-    - poetry build
-  needs:
-    - setup_cli
-  rules:
-    - changes:
-        - cli/**
-
-# Backend Lint Job
 lint_backend:
   stage: lint
   image: python:3.12
   script:
     - cd backend
-    - poetry run pylint .
+    - poetry run pylint zprp_file_sharing tests
   needs:
     - setup_backend
   rules:
     - changes:
         - backend/**
 
-# Backend Test Job
 test_backend:
   stage: test
   image: python:3.12
   script:
     - cd backend
     - poetry run pytest
-  needs:
-    - setup_backend
-  rules:
-    - changes:
-        - backend/**
-
-# Backend Build Job
-build_backend:
-  stage: build
-  image: python:3.12
-  script:
-    - cd backend
-    - poetry build
   needs:
     - setup_backend
   rules:
