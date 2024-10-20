@@ -10,13 +10,16 @@ variables:
   BACKEND_PIP_CACHE_DIR: "$CI_PROJECT_DIR/backend/.cache/pip"
   BACKEND_POETRY_CACHE_DIR: "$CI_PROJECT_DIR/backend/.cache/pypoetry"
 
+# Global cache configuration
 cache:
+  key: $CI_COMMIT_REF_SLUG
   paths:
     - cli/.cache/pip
     - cli/.cache/pypoetry
     - backend/.cache/pip
     - backend/.cache/pypoetry
 
+# Setup job for CLI project
 setup_cli:
   stage: setup
   image: python:3.12
@@ -34,6 +37,7 @@ setup_cli:
         - cli/pyproject.toml
         - cli/poetry.lock
 
+# Setup job for Backend project
 setup_backend:
   stage: setup
   image: python:3.12
@@ -51,6 +55,7 @@ setup_backend:
         - backend/pyproject.toml
         - backend/poetry.lock
 
+# CLI Lint Job
 lint_cli:
   stage: lint
   image: python:3.12
@@ -63,6 +68,7 @@ lint_cli:
     - changes:
         - cli/**
 
+# CLI Test Job
 test_cli:
   stage: test
   image: python:3.12
@@ -75,6 +81,7 @@ test_cli:
     - changes:
         - cli/**
 
+# CLI Build Job
 build_cli:
   stage: build
   image: python:3.12
@@ -87,6 +94,7 @@ build_cli:
     - changes:
         - cli/**
 
+# Backend Lint Job
 lint_backend:
   stage: lint
   image: python:3.12
@@ -99,6 +107,7 @@ lint_backend:
     - changes:
         - backend/**
 
+# Backend Test Job
 test_backend:
   stage: test
   image: python:3.12
@@ -111,6 +120,7 @@ test_backend:
     - changes:
         - backend/**
 
+# Backend Build Job
 build_backend:
   stage: build
   image: python:3.12
