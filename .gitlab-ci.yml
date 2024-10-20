@@ -1,35 +1,94 @@
 stages:
+  - setup
   - lint
   - test
-  - build
 
 variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-  POETRY_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pypoetry"
+  CLI_VENV_DIR: "$CI_PROJECT_DIR/cli/.venv"
+  BACKEND_VENV_DIR: "$CI_PROJECT_DIR/backend/.venv"
 
-cache:
-  paths:
-    - .cache/pip
-    - .cache/pypoetry
+setup_cli:
+  stage: setup
+  image: python:3.12
+  script:
+    - cd cli
+    - python -m venv $CLI_VENV_DIR
+    - source $CLI_VENV_DIR/bin/activate
+    - pip install poetry
+    - poetry config virtualenvs.create false
+    - poetry install
+  rules:
+    - changes:
+        - cli/**
+  artifacts:
+    paths:
+      - cli/.venv
 
-before_script:
-  - pip install poetry
-  - poetry install
+setup_backend:
+  stage: setup
+  image: python:3.12
+  script:
+    - cd backend
+    - python -m venv $BACKEND_VENV_DIR
+    - source $BACKEND_VENV_DIR/bin/activate
+    - pip install poetry
+    - poetry config virtualenvs.create false
+    - poetry install
+  rules:
+    - changes:
+        - backend/**
+  artifacts:
+    paths:
+      - backend/.venv
 
-lint:
+lint_cli:
   stage: lint
   image: python:3.12
   script:
+    - cd cli
+    - source $CLI_VENV_DIR/bin/activate
     - poetry run pylint cli_client tests
+  needs:
+    - setup_cli
+  rules:
+    - changes:
+        - cli/**
 
-test:
+test_cli:
   stage: test
   image: python:3.12
   script:
+    - cd cli
+    - source $CLI_VENV_DIR/bin/activate
     - poetry run pytest
+  needs:
+    - setup_cli
+  rules:
+    - changes:
+        - cli/**
 
-build:
-  stage: build
+lint_backend:
+  stage: lint
   image: python:3.12
   script:
-    - poetry build
+    - cd backend
+    - source $BACKEND_VENV_DIR/bin/activate
+    - poetry run pylint zprp_file_sharing tests
+  needs:
+    - setup_backend
+  rules:
+    - changes:
+        - backend/**
+
+test_backend:
+  stage: test
+  image: python:3.12
+  script:
+    - cd backend
+    - source $BACKEND_VENV_DIR/bin/activate
+    - poetry run pytest
+  needs:
+    - setup_backend
+  rules:
+    - changes:
+        - backend/**
