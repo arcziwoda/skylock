@@ -2,17 +2,10 @@ stages:
   - setup
   - lint
   - test
-  - build
 
 variables:
   CLI_VENV_DIR: "$CI_PROJECT_DIR/cli/.venv"
   BACKEND_VENV_DIR: "$CI_PROJECT_DIR/backend/.venv"
-
-cache:
-  key: $CI_COMMIT_REF_SLUG
-  paths:
-    - cli/.venv
-    - backend/.venv
 
 setup_cli:
   stage: setup
@@ -26,8 +19,10 @@ setup_cli:
     - poetry install
   rules:
     - changes:
-        - cli/pyproject.toml
-        - cli/poetry.lock
+        - cli/**
+  artifacts:
+    paths:
+      - cli/.venv
 
 setup_backend:
   stage: setup
@@ -41,14 +36,17 @@ setup_backend:
     - poetry install
   rules:
     - changes:
-        - backend/pyproject.toml
-        - backend/poetry.lock
+        - backend/**
+  artifacts:
+    paths:
+      - backend/.venv
 
 lint_cli:
   stage: lint
   image: python:3.12
   script:
     - cd cli
+    - source $CLI_VENV_DIR/bin/activate
     - poetry run pylint cli_client tests
   needs:
     - setup_cli
@@ -61,6 +59,7 @@ test_cli:
   image: python:3.12
   script:
     - cd cli
+    - source $CLI_VENV_DIR/bin/activate
     - poetry run pytest
   needs:
     - setup_cli
@@ -73,6 +72,7 @@ lint_backend:
   image: python:3.12
   script:
     - cd backend
+    - source $BACKEND_VENV_DIR/bin/activate
     - poetry run pylint zprp_file_sharing tests
   needs:
     - setup_backend
@@ -85,6 +85,7 @@ test_backend:
   image: python:3.12
   script:
     - cd backend
+    - source $BACKEND_VENV_DIR/bin/activate
     - poetry run pytest
   needs:
     - setup_backend
