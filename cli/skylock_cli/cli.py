@@ -3,7 +3,7 @@ This module contains commands the user can run to interact with the SkyLock
 """
 
 import typer
-from skylock_cli.commands.auth import register_user
+from skylock_cli.commands.auth import login_user, register_user
 
 app = typer.Typer()
 
@@ -18,11 +18,12 @@ def register(username: str, password: str):
 
 
 @app.command()
-def login():
+def login(username: str, password: str):
     """
     Login to the SkyLock
     """
-    typer.echo("Login to the SkyLock")
+    token = login_user(username, password)
+    typer.secho(f"Token received: {token.access_token}", fg=typer.colors.GREEN)
 
 
 @app.command()
