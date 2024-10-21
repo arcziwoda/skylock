@@ -1,5 +1,5 @@
 """
-This module contains commands for a CLI application.
+This module contains commands the user can run to interact with the SkyLock 
 """
 
 from typing import Optional

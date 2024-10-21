@@ -1,3 +1,3 @@
-# CLI main commands
+# User commands
 
-::: cli_client.app
+::: skylock_cli.app

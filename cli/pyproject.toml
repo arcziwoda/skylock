@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "cli_client"
+name = "skylock_cli"
 version = "0.1.0"
 description = ""
 authors = ["Oliwier Szypczyn <01178608@pw.edu.pl>"]
@@ -17,10 +17,14 @@ mkdocs-material = "^9.5.41"
 mkdocstrings = "^0.26.2"
 mkdocs-material-extensions = "^1.3.1"
 mkdocs-git-revision-date-localized-plugin = "^1.2.9"
+pre-commit = "^4.0.1"
+mkdocstrings-python = "^1.12.2"
+pymdown-extensions = "^10.11.2"
+pygments = "^2.18.0"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-cli = "cli_client.app:app"
+slock = "skylock_cli.app:app"
