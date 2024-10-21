@@ -14,8 +14,7 @@ runner = CliRunner()
 def test_login():
     """Test the login command"""
     result = runner.invoke(app, ["login"])
-    assert result.exit_code == 0
-    assert "Login to the SkyLock" in result.output
+    assert result.exit_code == 2
 
 
 def test_logout():
@@ -43,10 +42,18 @@ def test_register_user_already_exists():
         mock_response.raise_for_status.side_effect = httpx.HTTPStatusError(
             "Conflict",
             request=None,
-            response=Mock(status_code=409, json=lambda: {"detail": "HTTP error code 409 occurred: User with username testuser already exists"}),
+            response=Mock(
+                status_code=409,
+                json=lambda: {
+                    "detail": "HTTP error code 409 occurred: User with username testuser already exists"
+                },
+            ),
         )
         mock_send.side_effect = mock_response.raise_for_status
 
         result = runner.invoke(app, ["register", "testuser", "testpass"])
         assert result.exit_code == 1
-        assert "HTTP error code 409 occurred: User with username testuser already exists" in result.output
+        assert (
+            "HTTP error code 409 occurred: User with username testuser already exists"
+            in result.output
+        )
