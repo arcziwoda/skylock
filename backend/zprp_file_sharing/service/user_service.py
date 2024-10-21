@@ -2,7 +2,7 @@ import bcrypt
 from ..repository.user_repository import UserRepository
 from ..repository.model.user_entity import UserEntity
 from ..core.security import create_jwt_for_user
-from ..exceptions import UserAlreadyExists, InvalidCredentialsException
+from ..core.exceptions import UserAlreadyExists, InvalidCredentialsException
 
 
 class UserService:
