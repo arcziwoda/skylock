@@ -3,7 +3,7 @@ stages:
   - lint
   - test
 
-defualt:
+workflow:
   rules:
     - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"
 
