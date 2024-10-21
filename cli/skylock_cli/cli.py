@@ -3,9 +3,18 @@ This module contains commands the user can run to interact with the SkyLock
 """
 
 import typer
-from skylock_cli.commands.auth.register import register_user
+from skylock_cli.commands.auth import register_user
 
 app = typer.Typer()
+
+
+@app.command()
+def register(username: str, password: str):
+    """
+    Register a new user
+    """
+    register_user(username, password)
+    typer.secho("User registered successfully", fg=typer.colors.GREEN)
 
 
 @app.command()
@@ -22,15 +31,6 @@ def logout():
     Logout of the SkyLock
     """
     typer.echo("Logout of the SkyLock")
-
-
-@app.command()
-def register(user_login: str, user_password: str):
-    """
-    Register a new user
-    """
-    typer.echo(f"Registering new user with login: {user_login}")
-    register_user(user_login, user_password)
 
 
 if __name__ == "__main__":

@@ -22,7 +22,7 @@ theme:
 
 nav:
   - Home: index.md
-  - commands: commands.md
+  - CLI: cli.md
 
 plugins:
   - search
