@@ -47,7 +47,7 @@ lint_cli:
   script:
     - cd cli
     - source $CLI_VENV_DIR/bin/activate
-    - poetry run pylint cli_client tests
+    - poetry run pylint skylock_cli tests
   needs:
     - setup_cli
   rules:
