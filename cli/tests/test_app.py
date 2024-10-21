@@ -4,14 +4,14 @@ Tests for the main app.py module.
 
 from unittest import mock
 from typer.testing import CliRunner
-from cli_client.app import app
+from skylock_cli.app import app
 
 runner = CliRunner()
 
 
 def test_hello():
     """Test the hello command with a mocked name."""
-    with mock.patch("cli_client.app.get_name", return_value="MockName"):
+    with mock.patch("skylock_cli.app.get_name", return_value="MockName"):
         result = runner.invoke(app, ["hello"])
         assert result.exit_code == 0
         assert "Hello MockName!" in result.output

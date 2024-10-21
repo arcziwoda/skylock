@@ -1,4 +1,4 @@
-site_name: CLI Docs
+site_name: SkyLock CLI - Docs
 site_author: Oliwier Szypczyn, Artur Kempiński, Filip Budzyński
 
 theme:
@@ -43,6 +43,9 @@ markdown_extensions:
   - meta
   - toc:
       permalink: true
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
 
 extra:
   social:
