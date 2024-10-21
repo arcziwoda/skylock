@@ -43,5 +43,5 @@ python -m zprp_file_sharing.main
 
 After running the app, the full API documentation will be available at:
 
-- **Swagger UI:** '<http://localhost:8000/docs>'
-- **Redoc:** '<http://localhost:8000/redoc>'
+- **Swagger UI:** <http://localhost:8000/docs>
+- **Redoc:** <http://localhost:8000/redoc>
