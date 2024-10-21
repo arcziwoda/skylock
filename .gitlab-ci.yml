@@ -3,6 +3,10 @@ stages:
   - lint
   - test
 
+workflow:
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"
+
 variables:
   CLI_VENV_DIR: "$CI_PROJECT_DIR/cli/.venv"
   BACKEND_VENV_DIR: "$CI_PROJECT_DIR/backend/.venv"
