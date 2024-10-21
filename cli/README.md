@@ -22,7 +22,7 @@ This user command line interface enables to:
 
 Once installed, the CLI provides a range of commands to interact with your account and file system on SkyLock. Below are some examples of common actions:
 
-**TODO**: Put example instructions here
+**TODO**: Put example instructions here in the future
 
 ## Installation
 
