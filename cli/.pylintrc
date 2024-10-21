@@ -1,5 +1,3 @@
 [MESSAGES CONTROL]
 disable=
-    C0103,  # Invalid module name
-    E0401,  # Import error
     C0301   # Line too long
