@@ -1,9 +1,10 @@
-from fastapi import FastAPI
 from contextlib import asynccontextmanager
-import uvicorn
 
-from .repository.config.db_config import create_tables
+import uvicorn
+from fastapi import FastAPI
+
 from .api.auth_routes import router as auth_router
+from .repository.config.db_config import create_tables
 
 
 @asynccontextmanager

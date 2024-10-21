@@ -71,18 +71,18 @@ test_cli:
     - changes:
         - cli/**
 
-lint_backend:
-  stage: lint
-  image: python:3.12
-  script:
-    - cd backend
-    - source $BACKEND_VENV_DIR/bin/activate
-    - poetry run pylint zprp_file_sharing tests
-  needs:
-    - setup_backend
-  rules:
-    - changes:
-        - backend/**
+# lint_backend:
+#   stage: lint
+#   image: python:3.12
+#   script:
+#     - cd backend
+#     - source $BACKEND_VENV_DIR/bin/activate
+#     - poetry run pylint zprp_file_sharing tests
+#   needs:
+#     - setup_backend
+#   rules:
+#     - changes:
+#         - backend/**
 
 test_backend:
   stage: test

@@ -1,11 +1,11 @@
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
-from .model.token_response import TokenResponse
-from ..service.user_service import UserService
-from ..exceptions import InvalidCredentialsException, UserAlreadyExists
 from ..dependencies import get_user_service
+from ..exceptions import InvalidCredentialsException, UserAlreadyExists
+from ..service.user_service import UserService
 from .model.login_user_request import LoginUserRequest
 from .model.register_user_request import RegisterUserRequest
+from .model.token_response import TokenResponse
 
 router = APIRouter()
 
