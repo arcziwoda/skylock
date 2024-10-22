@@ -1,3 +1,8 @@
+"""
+Module for exceptions raised by the SkyLock API
+"""
+
+
 class SkyLockAPIError(Exception):
     """Base exception for SkyLock API errors"""
 
