@@ -39,9 +39,14 @@ def test_register_user_already_exists():
     """Test the register command when the user already exists"""
     with patch("skylock_cli.commands.auth.send_register_request") as mock_send:
         mock_send.side_effect = UserAlreadyExistsError(
-            "User with username already exists", status_code=409, detail="User with username testuser already exists"
+            "User with username already exists",
+            status_code=409,
+            detail="User with username testuser already exists",
         )
 
         result = runner.invoke(app, ["register", "testuser", "testpass"])
         assert result.exit_code == 1
-        assert "UserAlreadyExistsError occurred: User with username testuser already exists (409)" in result.output
+        assert (
+            "UserAlreadyExistsError occurred: User with username testuser already exists (409)"
+            in result.output
+        )

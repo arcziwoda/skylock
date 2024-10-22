@@ -29,7 +29,9 @@ def send_login_request(user: User) -> Token:
     url = "/auth/login"
 
     with HTTPExceptionHandler():
-        response = client.post(url, json=user.model_dump(), headers=API_HEADERS).raise_for_status()
+        response = client.post(
+            url, json=user.model_dump(), headers=API_HEADERS
+        ).raise_for_status()
 
     token_data = response.json()
     if not token_data:

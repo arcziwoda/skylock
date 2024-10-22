@@ -27,9 +27,15 @@ class HTTPExceptionHandler:
                 detail = exc_value.response.text or "An error occurred"
 
             if status_code == HTTPStatus.CONFLICT:
-                raise UserAlreadyExistsError("User with username already exists", status_code, detail) from exc_value
+                raise UserAlreadyExistsError(
+                    "User with username already exists", status_code, detail
+                ) from exc_value
 
             if status_code == HTTPStatus.UNAUTHORIZED:
-                raise AuthenticationError("Failed to authenticate user", status_code, detail) from exc_value
+                raise AuthenticationError(
+                    "Failed to authenticate user", status_code, detail
+                ) from exc_value
 
-            raise SkyLockAPIError(f"HTTP error occurred: {detail}", status_code, detail) from exc_value
+            raise SkyLockAPIError(
+                f"HTTP error occurred: {detail}", status_code, detail
+            ) from exc_value
