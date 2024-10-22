@@ -1,3 +1,3 @@
-# Main module to run the CLI commands
+# Main module with CLI commands
 
 ::: skylock_cli.cli

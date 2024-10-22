@@ -4,6 +4,7 @@ site_author: Oliwier Szypczyn, Artur Kempiński, Filip Budzyński
 theme:
   name: material
   palette:
+    scheme: slate
     primary: blue
     accent: light blue
   font:
@@ -22,7 +23,10 @@ theme:
 
 nav:
   - Home: index.md
-  - CLI: cli.md
+  - CLI Commands: cli.md
+  - API:
+      - Endpoints: api_endpoints.md
+      - Exceptions: api_exceptions.md
 
 plugins:
   - search
@@ -50,4 +54,4 @@ markdown_extensions:
 extra:
   social:
     - icon: fontawesome/brands/gitlab
-      link: https://gitlab-stud.elka.pw.edu.pl/oszypczy/zprp-cli-client
+      link: https://gitlab-stud.elka.pw.edu.pl/oszypczy/zprp-skylock
