@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "zprp-file-sharing"
+name = "skylock"
 version = "0.1.0"
 description = ""
 authors = ["akempins <01178535@pw.edu.pl>"]
@@ -15,6 +15,7 @@ passlib = "^1.7.4"
 sqlalchemy = "^2.0.36"
 uvicorn = "^0.32.0"
 bcrypt = "^4.2.0"
+python-dotenv = "^1.0.1"
 
 
 [build-system]

@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from .model.user_entity import UserEntity
+from skylock.repository.model.user_entity import UserEntity
 
 
 class UserRepository:

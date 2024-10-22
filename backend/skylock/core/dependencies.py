@@ -1,6 +1,6 @@
-from ..repository.user_repository import UserRepository
-from ..repository.config.db_config import SessionLocal
-from ..service.user_service import UserService
+from skylock.repository.user_repository import UserRepository
+from skylock.repository.config import SessionLocal
+from skylock.service.user_service import UserService
 from fastapi import Depends
 
 
