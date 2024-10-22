@@ -12,4 +12,4 @@ COPY . .
 
 ENV PYTHONUNBUFFERED=1
 
-CMD ["python", "-m", "zprp_file_sharing.main"]
+CMD ["python", "-m", "skylock.main"]
