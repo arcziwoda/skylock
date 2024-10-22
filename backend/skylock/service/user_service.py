@@ -12,12 +12,6 @@ class UserService:
     def __init__(self, user_repository: UserRepository):
         self.user_repository = user_repository
 
-    def _hash_password(self, password: str) -> str:
-        return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-
-    def _verify_password(self, password: str, hashed_password: str):
-        return bcrypt.checkpw(password.encode("utf-8"), hashed_password.encode("utf-8"))
-
     def register_user(self, username: str, password: str) -> User:
         existing_user = self.user_repository.get_user_by_username(username)
         if existing_user:
@@ -36,3 +30,13 @@ class UserService:
             token = create_jwt_for_user(username)
             return Token(access_token=token, token_type="bearer")
         raise InvalidCredentialsException
+
+    def get_user_by_username(self, username: str) -> User:
+        user_entity = self.user_repository.get_user_by_username(username)
+        return User(id=user_entity.id, username=user_entity.username)
+
+    def _hash_password(self, password: str) -> str:
+        return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+    def _verify_password(self, password: str, hashed_password: str):
+        return bcrypt.checkpw(password.encode("utf-8"), hashed_password.encode("utf-8"))
