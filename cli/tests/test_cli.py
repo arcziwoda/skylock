@@ -1,52 +1,114 @@
 """
-Tests for the main app.py module.
+Tests for the CLI commands.
 """
 
-from unittest.mock import patch
+import unittest
+from unittest.mock import patch, Mock
 from typer.testing import CliRunner
 from skylock_cli.cli import app
-from skylock_cli.api.http_exceptions import UserAlreadyExistsError
-
+from skylock_cli.api.http_exceptions import (
+    UserAlreadyExistsError,
+    SkyLockAPIError,
+    AuthenticationError,
+)
 
 runner = CliRunner()
 
 
-def test_login():
-    """Test the login command"""
-    result = runner.invoke(app, ["login"])
-    assert result.exit_code == 2
+class TestCLICommands(unittest.TestCase):
+    """Test cases for the CLI commands"""
 
-
-def test_logout():
-    """Test the logout command"""
-    result = runner.invoke(app, ["logout"])
-    assert result.exit_code == 0
-    assert "Logout of the SkyLock" in result.output
-
-
-def test_register_success():
-    """Test the register command"""
-    with patch("skylock_cli.commands.auth.send_register_request") as mock_send:
+    @patch("skylock_cli.core.auth.send_register_request")
+    def test_register_success(self, mock_send):
+        """Test the register command"""
         mock_send.return_value = None
 
-        result = runner.invoke(app, ["register", "testuser1", "testpass1"])
-
-        assert result.exit_code == 0
-        assert "User registered successfully" in result.output
-
-
-def test_register_user_already_exists():
-    """Test the register command when the user already exists"""
-    with patch("skylock_cli.commands.auth.send_register_request") as mock_send:
-        mock_send.side_effect = UserAlreadyExistsError(
-            "User with username already exists",
-            status_code=409,
-            detail="User with username testuser already exists",
+        result = runner.invoke(
+            app, ["register", "testuser1"], input="testpass1\ntestpass1"
         )
 
-        result = runner.invoke(app, ["register", "testuser", "testpass"])
-        assert result.exit_code == 1
-        assert (
-            "UserAlreadyExistsError occurred: User with username testuser already exists (409)"
-            in result.output
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("User registered successfully", result.output)
+
+    @patch("skylock_cli.core.auth.send_register_request")
+    def test_register_user_already_exists(self, mock_send):
+        """Test the register command when the user already exists"""
+        mock_send.side_effect = UserAlreadyExistsError("testuser")
+
+        result = runner.invoke(
+            app, ["register", "testuser"], input="testpass\ntestpass"
         )
+        self.assertEqual(result.exit_code, 1)
+        self.assertIn("User with username `testuser` already exists!", result.output)
+
+    @patch("skylock_cli.core.auth.send_register_request")
+    def test_register_skylock_api_error(self, mock_send):
+        """Test the register command when a SkyLockAPIError occurs"""
+        mock_send.side_effect = SkyLockAPIError("An unexpected API error occurred")
+
+        result = runner.invoke(
+            app, ["register", "testuser2"], input="testpass2\ntestpass2"
+        )
+        self.assertEqual(result.exit_code, 1)
+        self.assertIn("An unexpected API error occurred", result.output)
+
+    @patch("skylock_cli.core.auth.send_register_request")
+    def test_register_connection_error(self, mock_send):
+        """Test the register command when a ConnectionError occurs (backend is offline)"""
+        mock_send.side_effect = ConnectionError(
+            "Failed to connect to the server. Please check your network connection."
+        )
+
+        result = runner.invoke(
+            app, ["register", "testuser3"], input="testpass3\ntestpass3"
+        )
+        self.assertEqual(result.exit_code, 1)
+        self.assertIn(
+            "Failed to connect to the server. Please check your network \nconnection.",
+            result.output,
+        )
+
+    @patch("skylock_cli.core.auth.send_login_request")
+    def test_login_success(self, mock_send):
+        """Test the login command"""
+        mock_send.return_value = Mock(access_token="test_token")
+
+        result = runner.invoke(app, ["login", "testuser"], input="testpass")
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("Token received: test_token", result.output)
+
+    @patch("skylock_cli.core.auth.send_login_request")
+    def test_login_authentication_error(self, mock_send):
+        """Test the login command when an AuthenticationError occurs"""
+        mock_send.side_effect = AuthenticationError()
+
+        result = runner.invoke(app, ["login", "testuser"], input="wrongpass")
+        self.assertEqual(result.exit_code, 1)
+        self.assertIn("Invalid username or password", result.output)
+
+    @patch("skylock_cli.core.auth.send_login_request")
+    def test_login_skylock_api_error(self, mock_send):
+        """Test the login command when a SkyLockAPIError occurs"""
+        mock_send.side_effect = SkyLockAPIError("An unexpected API error occurred")
+
+        result = runner.invoke(app, ["login", "testuser"], input="testpass")
+        self.assertEqual(result.exit_code, 1)
+        self.assertIn("An unexpected API error occurred", result.output)
+
+    @patch("skylock_cli.core.auth.send_login_request")
+    def test_login_connection_error(self, mock_send):
+        """Test the login command when a ConnectionError occurs (backend is offline)"""
+        mock_send.side_effect = ConnectionError(
+            "Failed to connect to the server. Please check your network connection."
+        )
+
+        result = runner.invoke(app, ["login", "testuser"], input="testpass")
+        self.assertEqual(result.exit_code, 1)
+        self.assertIn(
+            "Failed to connect to the server. Please check your network \nconnection.",
+            result.output,
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()
