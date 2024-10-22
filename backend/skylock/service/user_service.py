@@ -5,7 +5,11 @@ from skylock.service.model.user import User
 from skylock.repository.user_repository import UserRepository
 from skylock.repository.model.user_entity import UserEntity
 from skylock.core.security import create_jwt_for_user
-from skylock.core.exceptions import UserAlreadyExists, InvalidCredentialsException
+from skylock.core.exceptions import (
+    UserAlreadyExists,
+    InvalidCredentialsException,
+    UserNotFoundException,
+)
 
 
 class UserService:
@@ -33,6 +37,8 @@ class UserService:
 
     def get_user_by_username(self, username: str) -> User:
         user_entity = self.user_repository.get_user_by_username(username)
+        if not user_entity:
+            raise UserNotFoundException
         return User(id=user_entity.id, username=user_entity.username)
 
     def _hash_password(self, password: str) -> str:

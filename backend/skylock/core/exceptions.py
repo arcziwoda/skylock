@@ -20,3 +20,11 @@ class InvalidCredentialsException(Exception):
     def __init__(self, message="Invalid credentials"):
         self.message = message
         super().__init__(self.message)
+
+
+class UserNotFoundException(Exception):
+    """Exception raised when trying to retrive non existent user"""
+
+    def __init__(self, message="User not found"):
+        self.message = message
+        super().__init__(self.message)

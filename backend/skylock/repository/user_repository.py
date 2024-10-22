@@ -1,12 +1,13 @@
 from sqlalchemy.orm import Session
 from skylock.repository.model.user_entity import UserEntity
+from typing import Optional
 
 
 class UserRepository:
     def __init__(self, db_session: Session):
         self.db_session = db_session
 
-    def get_user_by_username(self, username: str) -> UserEntity:
+    def get_user_by_username(self, username: str) -> Optional[UserEntity]:
         return (
             self.db_session.query(UserEntity)
             .filter(UserEntity.username == username)
