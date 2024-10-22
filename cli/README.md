@@ -20,18 +20,11 @@ This user command line interface enables to:
 
 ## Usage
 
-Once installed, the CLI provides a range of commands to interact with your account and file system on SkyLock. Below are some examples of common actions:
-
 **TODO**: Put example instructions here in the future
 
 ## Installation
 
-1. Install the cli using pip:
-   ```bash
-   pip install slock
-   ```
-
-2. Once installed, you can use the `slock` command to interact with your account.
+**TODO**: Put example instructions of how to use the package once we deploy
 
 ## Configuration
 
@@ -47,10 +40,16 @@ cd zprp-cli/cli
 poetry install
 ```
 
-Run tests:
+## Tests:
 
 ```bash
 pytest
+```
+
+## Documentation:
+
+```bash
+mkdocs serve --dev-addr 0.0.0.0:8090
 ```
 
 ## License

@@ -1,4 +1,4 @@
-# File Sharing API
+# SkyLock - API
 
 This is a FastAPI-based application for managing file sharing with features like user registration, authentication, and more.
 
