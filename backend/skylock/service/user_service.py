@@ -24,7 +24,7 @@ class UserService:
         hashed_password = self._hash_password(password)
         new_user = UserEntity(username=username, password=hashed_password)
 
-        self.user_repository.create_user(new_user)
+        new_user = self.user_repository.create_user(new_user)
 
         return User(id=new_user.id, username=new_user.username)
 
