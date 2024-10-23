@@ -17,11 +17,3 @@ def create_config_file() -> None:
 
     with config_file_path.open("w", encoding="utf-8") as f:
         json.dump({"context": {}}, f, indent=4)
-
-
-def config_file_exists() -> bool:
-    """Checks if the config file exists."""
-
-    config_file_path = Path(CONFIG_DIR) / CONFIG_FILE_NAME
-
-    return config_file_path.exists()
