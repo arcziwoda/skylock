@@ -6,6 +6,8 @@ from skylock_cli.model.token import Token
 from skylock_cli.model.user import User
 from skylock_cli.api.http_client import send_login_request, send_register_request
 from skylock_cli.utils.api_exception_handler import APIExceptionHandler
+from skylock_cli.core.context_manager import ContextManager
+from skylock_cli.model.context import Context
 
 
 def register_user(login: str, password: str) -> None:
@@ -38,4 +40,5 @@ def login_user(login: str, password: str) -> Token:
     user = User(username=login, password=password)
     with APIExceptionHandler():
         token = send_login_request(user)
-    return token
+    context = Context(token=token)
+    ContextManager.save_context(context)

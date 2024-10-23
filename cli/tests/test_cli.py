@@ -5,6 +5,7 @@ Tests for the CLI commands.
 import unittest
 from unittest.mock import patch, Mock
 from typer.testing import CliRunner
+from skylock_cli.model.token import Token
 from skylock_cli.cli import app
 from skylock_cli.api.http_exceptions import (
     UserAlreadyExistsError,
@@ -69,13 +70,17 @@ class TestCLICommands(unittest.TestCase):
         )
 
     @patch("skylock_cli.core.auth.send_login_request")
-    def test_login_success(self, mock_send):
+    @patch("skylock_cli.core.auth.ContextManager.save_context")
+    def test_login_success(self, mock_save_context, mock_send):
         """Test the login command"""
-        mock_send.return_value = Mock(access_token="test_token")
+        mock_send.return_value = Mock(
+            Token(access_token="test_token", token_type="bearer")
+        )
 
         result = runner.invoke(app, ["login", "testuser"], input="testpass")
         self.assertEqual(result.exit_code, 0)
-        self.assertIn("Token received: test_token", result.output)
+        self.assertIn("User logged in successfully", result.output)
+        mock_save_context.assert_called_once()
 
     @patch("skylock_cli.core.auth.send_login_request")
     def test_login_authentication_error(self, mock_send):
