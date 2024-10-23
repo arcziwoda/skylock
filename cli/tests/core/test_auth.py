@@ -8,6 +8,8 @@ from io import StringIO
 from http import HTTPStatus
 from click import exceptions
 from skylock_cli.core.auth import register_user, login_user
+from skylock_cli.model.context import Context
+from skylock_cli.model.token import Token
 
 
 class TestRegisterUser(unittest.TestCase):
@@ -33,7 +35,9 @@ class TestRegisterUser(unittest.TestCase):
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
                 register_user("testuser", "testpass")
-            self.assertIn("User with username `testuser` already exists!", mock_stderr.getvalue())
+            self.assertIn(
+                "User with username `testuser` already exists!", mock_stderr.getvalue()
+            )
 
     @patch("skylock_cli.api.http_client.client.post")
     def test_register_skylock_api_error(self, mock_post):
@@ -50,28 +54,44 @@ class TestRegisterUser(unittest.TestCase):
     @patch("skylock_cli.api.http_client.client.post")
     def test_register_connection_error(self, mock_post):
         """Test registration when a ConnectionError occurs (backend is offline)"""
-        mock_post.side_effect = ConnectionError("Failed to connect to the server. Please check your network connection.")
+        mock_post.side_effect = ConnectionError(
+            "Failed to connect to the server. Please check your network connection."
+        )
 
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
                 register_user("testuser", "testpass")
-            self.assertIn("Failed to connect to the server. Please check your network \nconnection.", mock_stderr.getvalue())
+            self.assertIn(
+                "Failed to connect to the server. Please check your network \nconnection.",
+                mock_stderr.getvalue(),
+            )
 
 
 class TestLoginUser(unittest.TestCase):
     """Test cases for the login_user function from core.auth"""
 
     @patch("skylock_cli.api.http_client.client.post")
-    def test_login_success(self, mock_post):
+    @patch("skylock_cli.core.auth.ContextManager.save_context")
+    def test_login_success(self, mock_save_context, mock_post):
         """Test successful login"""
         mock_response = Mock()
         mock_response.status_code = HTTPStatus.OK
-        mock_response.json.return_value = {"access_token": "test_token", "token_type": "bearer"}
+        mock_response.json.return_value = {
+            "access_token": "test_token",
+            "token_type": "bearer",
+        }
         mock_post.return_value = mock_response
 
-        token = login_user("testuser", "testpass")
-        self.assertEqual(token.access_token, "test_token")
-        self.assertEqual(token.token_type, "bearer")
+        login_user("testuser", "testpass")
+        mock_post.assert_called_once()
+        mock_save_context.assert_called_once()
+
+        args, _ = mock_save_context.call_args
+        context = args[0]
+        self.assertIsInstance(context, Context)
+        self.assertIsInstance(context.token, Token)
+        self.assertEqual(context.token.access_token, "test_token")
+        self.assertEqual(context.token.token_type, "bearer")
 
     @patch("skylock_cli.api.http_client.client.post")
     def test_login_token_not_found(self, mock_post):
@@ -113,12 +133,17 @@ class TestLoginUser(unittest.TestCase):
     @patch("skylock_cli.api.http_client.client.post")
     def test_login_connection_error(self, mock_post):
         """Test login when a ConnectionError occurs (backend is offline)"""
-        mock_post.side_effect = ConnectionError("Failed to connect to the server. Please check your network connection.")
+        mock_post.side_effect = ConnectionError(
+            "Failed to connect to the server. Please check your network connection."
+        )
 
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
                 login_user("testuser", "testpass")
-            self.assertIn("Failed to connect to the server. Please check your network \nconnection.", mock_stderr.getvalue())
+            self.assertIn(
+                "Failed to connect to the server. Please check your network \nconnection.",
+                mock_stderr.getvalue(),
+            )
 
 
 if __name__ == "__main__":

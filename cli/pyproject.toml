@@ -23,6 +23,7 @@ pymdown-extensions = "^10.11.2"
 pygments = "^2.18.0"
 httpx = "^0.27.2"
 pydantic = "^2.9.2"
+appdirs = "^1.4.4"
 
 [build-system]
 requires = ["poetry-core"]
@@ -30,3 +31,4 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 slock = "skylock_cli.cli:app"
+setup_config = "skylock_cli.scripts.setup_config:create_config_file"

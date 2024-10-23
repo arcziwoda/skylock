@@ -37,7 +37,7 @@ To contribute or modify the CLI client, clone this repository and install the re
 ```bash
 git clone https://gitlab-stud.elka.pw.edu.pl/oszypczy/zprp-cli-client.git
 cd zprp-cli/cli
-poetry install
+make install
 ```
 
 ## Tests:

@@ -40,8 +40,8 @@ def login(username: str) -> None:
         None
     """
     password = typer.prompt("Password", hide_input=True)
-    token = login_user(username, password)
-    typer.secho(f"Token received: {token.access_token}", fg=typer.colors.GREEN)
+    login_user(username, password)
+    typer.secho("User logged in successfully", fg=typer.colors.GREEN)
 
 
 if __name__ == "__main__":
