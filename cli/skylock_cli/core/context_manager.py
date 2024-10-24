@@ -33,4 +33,4 @@ class ContextManager:
         """Save context to the JSON file."""
         cls.ensure_context_file_exists()
         with cls.context_file_path.open("w", encoding="utf-8") as file:
-            json.dump({"context": context.model_dump_json()}, file, indent=4)
+            json.dump({"context": context.model_dump()}, file, indent=4)

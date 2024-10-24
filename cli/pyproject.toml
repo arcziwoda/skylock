@@ -24,6 +24,7 @@ pygments = "^2.18.0"
 httpx = "^0.27.2"
 pydantic = "^2.9.2"
 appdirs = "^1.4.4"
+art = "^6.3"
 
 [build-system]
 requires = ["poetry-core"]
