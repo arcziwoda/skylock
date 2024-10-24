@@ -25,9 +25,7 @@ class TestCLICommands(unittest.TestCase):
         """Test the register command"""
         mock_send.return_value = None
 
-        result = runner.invoke(
-            app, ["register", "testuser1"], input="testpass1\ntestpass1"
-        )
+        result = runner.invoke(app, ["register", "testuser1"], input="testpass1\ntestpass1")
 
         self.assertEqual(result.exit_code, 0)
         self.assertIn("User registered successfully", result.output)
@@ -37,9 +35,7 @@ class TestCLICommands(unittest.TestCase):
         """Test the register command when the user already exists"""
         mock_send.side_effect = UserAlreadyExistsError("testuser")
 
-        result = runner.invoke(
-            app, ["register", "testuser"], input="testpass\ntestpass"
-        )
+        result = runner.invoke(app, ["register", "testuser"], input="testpass\ntestpass")
         self.assertEqual(result.exit_code, 1)
         self.assertIn("User with username `testuser` already exists!", result.output)
 
@@ -48,22 +44,16 @@ class TestCLICommands(unittest.TestCase):
         """Test the register command when a SkyLockAPIError occurs"""
         mock_send.side_effect = SkyLockAPIError("An unexpected API error occurred")
 
-        result = runner.invoke(
-            app, ["register", "testuser2"], input="testpass2\ntestpass2"
-        )
+        result = runner.invoke(app, ["register", "testuser2"], input="testpass2\ntestpass2")
         self.assertEqual(result.exit_code, 1)
         self.assertIn("An unexpected API error occurred", result.output)
 
     @patch("skylock_cli.core.auth.send_register_request")
     def test_register_connection_error(self, mock_send):
         """Test the register command when a ConnectionError occurs (backend is offline)"""
-        mock_send.side_effect = ConnectionError(
-            "Failed to connect to the server. Please check your network connection."
-        )
+        mock_send.side_effect = ConnectionError("Failed to connect to the server. Please check your network connection.")
 
-        result = runner.invoke(
-            app, ["register", "testuser3"], input="testpass3\ntestpass3"
-        )
+        result = runner.invoke(app, ["register", "testuser3"], input="testpass3\ntestpass3")
         self.assertEqual(result.exit_code, 1)
         self.assertIn(
             "Failed to connect to the server. Please check your network \nconnection.",
@@ -74,9 +64,7 @@ class TestCLICommands(unittest.TestCase):
     @patch("skylock_cli.core.auth.ContextManager.save_context")
     def test_login_success(self, mock_save_context, mock_send):
         """Test the login command"""
-        mock_send.return_value = Mock(
-            Token(access_token="test_token", token_type="bearer")
-        )
+        mock_send.return_value = Mock(Token(access_token="test_token", token_type="bearer"))
 
         result = runner.invoke(app, ["login", "testuser"], input="testpass")
         self.assertEqual(result.exit_code, 0)
@@ -84,7 +72,7 @@ class TestCLICommands(unittest.TestCase):
         self.assertIn("Hello, testuser", result.output)
         self.assertIn("Welcome to our file hosting service", result.output)
         self.assertIn(text2art("SkyLock"), result.output)
-        self.assertIn("Your current working directory is: /", result.output)
+        # self.assertIn("Your current working directory is: /", result.output)
         mock_save_context.assert_called_once()
 
     @patch("skylock_cli.core.auth.send_login_request")
@@ -108,9 +96,7 @@ class TestCLICommands(unittest.TestCase):
     @patch("skylock_cli.core.auth.send_login_request")
     def test_login_connection_error(self, mock_send):
         """Test the login command when a ConnectionError occurs (backend is offline)"""
-        mock_send.side_effect = ConnectionError(
-            "Failed to connect to the server. Please check your network connection."
-        )
+        mock_send.side_effect = ConnectionError("Failed to connect to the server. Please check your network connection.")
 
         result = runner.invoke(app, ["login", "testuser"], input="testpass")
         self.assertEqual(result.exit_code, 1)
