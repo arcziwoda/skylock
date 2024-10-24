@@ -4,7 +4,7 @@ Script to create the config file.
 
 from pathlib import Path
 import json
-from skylock_cli.config import CONFIG_DIR, CONFIG_FILE_NAME
+from skylock_cli.config import CONFIG_DIR, CONFIG_FILE_NAME, EMPTY_CONTEXT
 
 
 def create_config_file() -> None:
@@ -16,4 +16,4 @@ def create_config_file() -> None:
     config_dir_path.mkdir(parents=True, exist_ok=True)
 
     with config_file_path.open("w", encoding="utf-8") as f:
-        json.dump({"context": {}}, f, indent=4)
+        json.dump({"context": EMPTY_CONTEXT}, f, indent=4)

@@ -7,13 +7,16 @@ from unittest.mock import patch
 from pathlib import Path
 import json
 from skylock_cli.scripts.setup_config import create_config_file
+from skylock_cli.config import EMPTY_CONTEXT
 
 
 class TestCreateConfigFile(unittest.TestCase):
     """Test the create_config_file function."""
 
     @patch("skylock_cli.scripts.setup_config.CONFIG_DIR", "/tmp/test_skylock_config")
-    @patch("skylock_cli.scripts.setup_config.CONFIG_FILE_NAME", "test_skylock_config.json")
+    @patch(
+        "skylock_cli.scripts.setup_config.CONFIG_FILE_NAME", "test_skylock_config.json"
+    )
     def test_create_config_file(self):
         """Test the create_config_file function."""
 
@@ -31,7 +34,7 @@ class TestCreateConfigFile(unittest.TestCase):
         # Check the content written to the file
         with config_file_path.open("r", encoding="utf-8") as f:
             content = json.load(f)
-            self.assertEqual(content, {"context": {}})
+            self.assertEqual(content, {"context": EMPTY_CONTEXT})
 
         # Clean up: delete the created file and directory
         config_file_path.unlink()  # Delete the file

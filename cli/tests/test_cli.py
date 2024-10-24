@@ -5,6 +5,7 @@ Tests for the CLI commands.
 import unittest
 from unittest.mock import patch, Mock
 from typer.testing import CliRunner
+from art import text2art
 from skylock_cli.model.token import Token
 from skylock_cli.cli import app
 from skylock_cli.api.http_exceptions import (
@@ -80,6 +81,10 @@ class TestCLICommands(unittest.TestCase):
         result = runner.invoke(app, ["login", "testuser"], input="testpass")
         self.assertEqual(result.exit_code, 0)
         self.assertIn("User logged in successfully", result.output)
+        self.assertIn("Hello, testuser", result.output)
+        self.assertIn("Welcome to our file hosting service", result.output)
+        self.assertIn(text2art("SkyLock"), result.output)
+        self.assertIn("Your current working directory is: /", result.output)
         mock_save_context.assert_called_once()
 
     @patch("skylock_cli.core.auth.send_login_request")

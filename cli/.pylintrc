@@ -1,6 +1,5 @@
 [MESSAGES CONTROL]
-disable=
-    C0301   # Line too long
+disable=C0301,W0511
 
 [MASTER]
 init-hook='import sys; sys.path.append(".")'
