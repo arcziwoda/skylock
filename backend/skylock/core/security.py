@@ -1,12 +1,14 @@
 from datetime import datetime, timedelta, timezone
+from typing import Optional
 
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 
 from skylock.core.env import JWT_SECRET
+from skylock.service.model.user import User
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -14,19 +16,26 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 def get_current_user(
     token: str = Depends(oauth2_scheme),
-) -> str:
+) -> User:
     try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
-        username = payload.get("sub")
-        if username is None:
+        user = get_user_from_jwt(token)
+        if user is None:
             raise HTTPException(status_code=401, detail="Invalid token")
-        return username
+        return user
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
 
-def create_jwt_for_user(username: str) -> str:
+def create_jwt_for_user(user: User) -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode = {"sub": username, "exp": expire}
+    to_encode = {"id": user.id, "sub": user.username, "exp": expire}
     encoded_jwt = jwt.encode(to_encode, JWT_SECRET, algorithm=ALGORITHM)
     return encoded_jwt
+
+
+def get_user_from_jwt(token: str) -> Optional[User]:
+    payload = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
+    id = payload.get("id")
+    username = payload.get("sub")
+    if id and username:
+        return User(id=id, username=username)
