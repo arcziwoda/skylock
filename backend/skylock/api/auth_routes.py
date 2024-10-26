@@ -1,13 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from skylock.service.model.user import User
-
-from skylock.core.dependencies import get_user_service
-from skylock.core.exceptions import InvalidCredentialsException, UserAlreadyExists
+from skylock.api.dependencies import get_user_service
+from skylock.utils.exceptions import InvalidCredentialsException, UserAlreadyExists
 from skylock.service.user_service import UserService
-from skylock.api.model.login_user_request import LoginUserRequest
-from skylock.api.model.register_user_request import RegisterUserRequest
-from skylock.service.model.token import Token
+from skylock.api import models
 
 router = APIRouter(tags=["Auth"], prefix="/auth")
 
@@ -23,19 +19,16 @@ router = APIRouter(tags=["Auth"], prefix="/auth")
     },
 )
 def register_user(
-    request: RegisterUserRequest, user_service: UserService = Depends(get_user_service)
-) -> User:
-    try:
-        return user_service.register_user(
-            username=request.username, password=request.password
-        )
-    except UserAlreadyExists as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+    request: models.RegisterUserRequest, user_service: UserService = Depends(get_user_service)
+) -> models.User:
+    return user_service.register_user(
+        username=request.username, password=request.password
+    )
 
 
 @router.post(
     "/login",
-    response_model=Token,
+    response_model=models.Token,
     summary="Authenticate user and get JWT token",
     description="This endpoint allows an existing user to authenticate using their username and password. A JWT token is returned if the credentials are valid.",
     responses={
@@ -44,11 +37,8 @@ def register_user(
     },
 )
 def login_user(
-    request: LoginUserRequest, user_service: UserService = Depends(get_user_service)
-) -> Token:
-    try:
-        return user_service.login_user(
-            username=request.username, password=request.password
-        )
-    except InvalidCredentialsException as e:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
+    request: models.LoginUserRequest, user_service: UserService = Depends(get_user_service)
+) -> models.Token:
+    return user_service.login_user(
+        username=request.username, password=request.password
+    )

@@ -12,4 +12,4 @@ COPY . .
 
 ENV PYTHONUNBUFFERED=1
 
-CMD ["python", "-m", "skylock.main"]
+ENTRYPOINT [ "./entrypoint_dev.sh" ]
