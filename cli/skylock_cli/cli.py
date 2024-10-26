@@ -25,6 +25,7 @@ def register(username: str) -> None:
     if password != confirm_password:
         typer.secho("Passwords do not match. Please try again.", fg=typer.colors.RED)
         raise typer.Exit(code=1)
+
     register_user(username, password)
     typer.secho("User registered successfully", fg=typer.colors.GREEN)
 
@@ -41,12 +42,15 @@ def login(username: str) -> None:
         None
     """
     password = typer.prompt("Password", hide_input=True)
-    login_user(username, password)
+    cwd = login_user(username, password)
+
     typer.secho("User logged in successfully", fg=typer.colors.GREEN)
     typer.secho("Hello, " + username, fg=typer.colors.GREEN)
     typer.secho("Welcome to our file hosting service", fg=typer.colors.BLUE, bold=True)
-    ascii_art = text2art("SkyLock")
-    typer.secho(ascii_art, fg=typer.colors.BLUE)
+    typer.secho(text2art("SkyLock"), fg=typer.colors.BLUE)
+    typer.secho(
+        "Your current working directory is: " + str(cwd.path), fg=typer.colors.BLUE
+    )
 
 
 if __name__ == "__main__":

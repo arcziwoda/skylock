@@ -8,3 +8,11 @@ API_URL = "http://localhost:8000/api/v1"
 API_HEADERS = {"Content-Type": "application/json"}
 CONFIG_FILE_NAME = "skylock_config.json"
 CONFIG_DIR = appdirs.user_config_dir("skylock")
+
+EMPTY_CONTEXT = {
+    "token": {
+        "access_token": "",
+        "token_type": "",
+    },
+    "user_dir": {"path": ""},
+}
