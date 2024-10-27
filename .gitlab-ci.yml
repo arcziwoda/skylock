@@ -75,7 +75,7 @@ lint_backend:
   script:
     - cd backend
     - source $BACKEND_VENV_DIR/bin/activate
-    - poetry run pylint skyclock
+    - poetry run pylint skylock
   needs:
     - setup_backend
   rules:
