@@ -1,6 +1,6 @@
-from sqlalchemy import String, Integer
-from sqlalchemy import Column, orm
 import uuid
+
+from sqlalchemy import orm
 
 
 class Base(orm.DeclarativeBase):

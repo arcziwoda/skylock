@@ -19,11 +19,12 @@ def get_current_user(
 ) -> models.User:
     try:
         user = get_user_from_jwt(token)
-        if user is None:
-            raise HTTPException(status_code=401, detail="Invalid token")
-        return user
-    except JWTError:
+    except JWTError as e:
+        raise HTTPException(status_code=401, detail="Invalid token") from e
+
+    if user is None:
         raise HTTPException(status_code=401, detail="Invalid token")
+    return user
 
 
 def create_jwt_for_user(user: models.User) -> str:
@@ -35,7 +36,8 @@ def create_jwt_for_user(user: models.User) -> str:
 
 def get_user_from_jwt(token: str) -> Optional[models.User]:
     payload = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
-    id = payload.get("id")
+    user_id = payload.get("id")
     username = payload.get("sub")
-    if id and username:
-        return models.User(id=id, username=username)
+    if user_id and username:
+        return models.User(id=user_id, username=username)
+    return None

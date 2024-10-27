@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 
 from skylock.api.dependencies import get_user_service
-from skylock.utils.exceptions import InvalidCredentialsException, UserAlreadyExists
 from skylock.service.user_service import UserService
 from skylock.api import models
 
@@ -19,7 +18,8 @@ router = APIRouter(tags=["Auth"], prefix="/auth")
     },
 )
 def register_user(
-    request: models.RegisterUserRequest, user_service: UserService = Depends(get_user_service)
+    request: models.RegisterUserRequest,
+    user_service: UserService = Depends(get_user_service),
 ) -> models.User:
     return user_service.register_user(
         username=request.username, password=request.password
@@ -37,8 +37,7 @@ def register_user(
     },
 )
 def login_user(
-    request: models.LoginUserRequest, user_service: UserService = Depends(get_user_service)
+    request: models.LoginUserRequest,
+    user_service: UserService = Depends(get_user_service),
 ) -> models.Token:
-    return user_service.login_user(
-        username=request.username, password=request.password
-    )
+    return user_service.login_user(username=request.username, password=request.password)

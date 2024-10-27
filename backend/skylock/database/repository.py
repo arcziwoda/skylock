@@ -18,8 +18,8 @@ class DatabaseRepository(Generic[Model]):
         self.session.refresh(entity)
         return entity
 
-    def get_by_id(self, id: uuid.UUID) -> Optional[Model]:
-        return self.session.get(self.model, id)
+    def get_by_id(self, entity_id: uuid.UUID) -> Optional[Model]:
+        return self.session.get(self.model, entity_id)
 
     def filter(self, *expressions: BinaryExpression) -> list[Model]:
         query = select(self.model)
