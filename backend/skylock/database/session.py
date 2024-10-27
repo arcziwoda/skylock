@@ -9,7 +9,7 @@ def get_db_session():
     engine = create_engine(DATABASE_URL)
     factory = sessionmaker(bind=engine)
     with factory() as session:
-        try: 
+        try:
             yield session
             session.commit()
         except SQLAlchemyError:

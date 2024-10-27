@@ -8,7 +8,7 @@ app = FastAPI(title="File Sharing API", version="1.0.0", root_path="/api/v1")
 
 
 @app.exception_handler(UserAlreadyExists)
-def user_already_exists_handler(request: Request, exc: UserAlreadyExists):
+def user_already_exists_handler(_request: Request, exc: UserAlreadyExists):
     return JSONResponse(
         status_code=409,
         content={"detail": str(exc)},
@@ -16,7 +16,7 @@ def user_already_exists_handler(request: Request, exc: UserAlreadyExists):
 
 
 @app.exception_handler(InvalidCredentialsException)
-def invalid_credentials_handler(request: Request, exc: InvalidCredentialsException):
+def invalid_credentials_handler(_request: Request, _exc: InvalidCredentialsException):
     return JSONResponse(
         status_code=401,
         content={"detail": "Invalid credentials provided"},
