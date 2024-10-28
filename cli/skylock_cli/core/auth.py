@@ -43,4 +43,4 @@ def login_user(login: str, password: str) -> Context:
 
     new_context = Context(token=token, user_dir=UserDir())
     ContextManager.update_context(new_context)
-    return new_context
+    return ContextManager.get_context()

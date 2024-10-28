@@ -3,11 +3,14 @@ Tests for the CLI commands.
 """
 
 import unittest
+import json
 from pathlib import Path
 from unittest.mock import patch, Mock
 from typer.testing import CliRunner
 from art import text2art
 from skylock_cli.model.token import Token
+from skylock_cli.model.context import Context
+from skylock_cli.model.user_dir import UserDir
 from skylock_cli.cli import app
 from skylock_cli.api.http_exceptions import (
     UserAlreadyExistsError,
@@ -15,6 +18,7 @@ from skylock_cli.api.http_exceptions import (
     AuthenticationError,
     UserUnauthorizedError,
     DirectoryAlreadyExistsError,
+    TokenNotFoundError,
 )
 
 runner = CliRunner()
@@ -73,13 +77,36 @@ class TestCLICommands(unittest.TestCase):
             result.output,
         )
 
-    @patch("skylock_cli.core.auth.send_login_request")
-    @patch("skylock_cli.core.auth.ContextManager.save_context")
-    def test_login_success(self, mock_save_context, mock_send):
-        """Test the login command"""
-        mock_send.return_value = Mock(
-            Token(access_token="test_token", token_type="bearer")
+    @patch("skylock_cli.core.auth.send_register_request")
+    def test_register_password_mismatch(self, _mock_send):
+        """Test the register command when the passwords do not match"""
+        result = runner.invoke(
+            app, ["register", "testuser4"], input="testpass4\ntestpass5"
         )
+        self.assertEqual(result.exit_code, 1)
+        self.assertIn("Passwords do not match. Please try again.", result.output)
+
+    @patch("skylock_cli.core.auth.send_login_request")
+    @patch("skylock_cli.core.context_manager.ContextManager.ensure_context_file_exists")
+    @patch(
+        "skylock_cli.core.context_manager.ContextManager.context_file_path",
+        Path("/tmp/test_skylock_config/test_skylock_config.json"),
+    )
+    def test_login_success(self, _mock_ensure_context_file_exists, mock_send):
+        """Test the login command"""
+        # Create a context file with old token and cwd
+        config_dir_path = Path("/tmp/test_skylock_config")
+        config_dir_path.mkdir(parents=True, exist_ok=True)
+        config_file_path = config_dir_path / "test_skylock_config.json"
+
+        old_token = Token(access_token="old_token", token_type="bearer")
+        old_cwd = UserDir(path=Path("/old_cwd"))
+        old_context = Context(token=old_token, user_dir=old_cwd)
+        with open(config_file_path, "w", encoding="utf-8") as file:
+            json.dump({"context": old_context.model_dump()}, file, indent=4)
+
+        new_token = Token(access_token="new_token", token_type="bearer")
+        mock_send.return_value = new_token
 
         result = runner.invoke(app, ["login", "testuser"], input="testpass")
         self.assertEqual(result.exit_code, 0)
@@ -87,8 +114,17 @@ class TestCLICommands(unittest.TestCase):
         self.assertIn("Hello, testuser", result.output)
         self.assertIn("Welcome to our file hosting service", result.output)
         self.assertIn(text2art("SkyLock"), result.output)
-        self.assertIn("Your current working directory is: /", result.output)
-        mock_save_context.assert_called_once()
+        self.assertIn("Your current working directory is: /old_cwd", result.output)
+
+        with open(config_file_path, "r", encoding="utf-8") as file:
+            data = json.load(file)
+            new_context = Context(**data.get("context", {}))
+            self.assertEqual(new_context.user_dir.path, Path("/old_cwd"))
+            self.assertEqual(new_context.token.access_token, "new_token")
+
+        # Clean up: delete the created file and directory
+        config_file_path.unlink()
+        config_dir_path.rmdir()
 
     @patch("skylock_cli.core.auth.send_login_request")
     def test_login_authentication_error(self, mock_send):
@@ -107,6 +143,15 @@ class TestCLICommands(unittest.TestCase):
         result = runner.invoke(app, ["login", "testuser"], input="testpass")
         self.assertEqual(result.exit_code, 1)
         self.assertIn("An unexpected API error occurred", result.output)
+
+    @patch("skylock_cli.core.auth.send_login_request")
+    def test_login_token_not_found_error(self, mock_send):
+        """Test the login command when a TokenNotFoundError occurs"""
+        mock_send.side_effect = TokenNotFoundError()
+
+        result = runner.invoke(app, ["login", "testuser"], input="testpass")
+        self.assertEqual(result.exit_code, 1)
+        self.assertIn("Token not found in the response", result.output)
 
     @patch("skylock_cli.core.auth.send_login_request")
     def test_login_connection_error(self, mock_send):
