@@ -72,7 +72,7 @@ class TestCLICommands(unittest.TestCase):
         self.assertIn("Hello, testuser", result.output)
         self.assertIn("Welcome to our file hosting service", result.output)
         self.assertIn(text2art("SkyLock"), result.output)
-        # self.assertIn("Your current working directory is: /", result.output)
+        self.assertIn("Your current working directory is: /", result.output)
         mock_save_context.assert_called_once()
 
     @patch("skylock_cli.core.auth.send_login_request")

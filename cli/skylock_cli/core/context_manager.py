@@ -34,3 +34,13 @@ class ContextManager:
         cls.ensure_context_file_exists()
         with cls.context_file_path.open("w", encoding="utf-8") as file:
             json.dump({"context": context.model_dump()}, file, indent=4)
+
+    @classmethod
+    def update_context(cls, new_context: Context) -> None:
+        """Update the context."""
+        old_context = cls.get_context()
+        final_context = Context(
+            token=new_context.token,
+            user_dir=old_context.user_dir or new_context.user_dir,
+        )
+        cls.save_context(final_context)
