@@ -5,6 +5,7 @@ This module contains commands the user can run to interact with the SkyLock.
 import typer
 from art import text2art
 from skylock_cli.core.auth import register_user, login_user
+from skylock_cli.core.dir_operations import create_directory
 
 app = typer.Typer(pretty_exceptions_show_locals=False)
 
@@ -48,7 +49,27 @@ def login(username: str) -> None:
     typer.secho("Hello, " + username, fg=typer.colors.GREEN)
     typer.secho("Welcome to our file hosting service", fg=typer.colors.BLUE, bold=True)
     typer.secho(text2art("SkyLock"), fg=typer.colors.BLUE)
-    typer.secho(f"Your current working directory is: {str(context.user_dir)}", fg=typer.colors.BLUE)
+    typer.secho(
+        f"Your current working directory is: {str(context.user_dir)}",
+        fg=typer.colors.BLUE,
+    )
+
+
+@app.command()
+def mkdir(directory_name: str) -> None:
+    """
+    Create a new directory in the SkyLock.
+
+    Args:
+        directory (str): The name of the new directory.
+
+    Returns:
+        None
+    """
+    create_directory(directory_name)
+    typer.secho(
+        f"Directory {directory_name} created successfully", fg=typer.colors.GREEN
+    )
 
 
 if __name__ == "__main__":
