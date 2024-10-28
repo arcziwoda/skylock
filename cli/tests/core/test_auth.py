@@ -32,12 +32,16 @@ class TestRegisterUser(unittest.TestCase):
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
                 register_user("testuser", "testpass")
-            self.assertIn("User with username `testuser` already exists!", mock_stderr.getvalue())
+            self.assertIn(
+                "User with username `testuser` already exists!", mock_stderr.getvalue()
+            )
 
     @patch("skylock_cli.api.http_client.client.post")
     def test_register_skylock_api_error(self, mock_post):
         """Test registration with a SkyLockAPIError"""
-        mock_post.return_value = mock_response_with_status(HTTPStatus.INTERNAL_SERVER_ERROR)
+        mock_post.return_value = mock_response_with_status(
+            HTTPStatus.INTERNAL_SERVER_ERROR
+        )
 
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
@@ -47,7 +51,9 @@ class TestRegisterUser(unittest.TestCase):
     @patch("skylock_cli.api.http_client.client.post")
     def test_register_connection_error(self, mock_post):
         """Test registration when a ConnectionError occurs (backend is offline)"""
-        mock_post.side_effect = ConnectionError("Failed to connect to the server. Please check your network connection.")
+        mock_post.side_effect = ConnectionError(
+            "Failed to connect to the server. Please check your network connection."
+        )
 
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
@@ -110,7 +116,9 @@ class TestLoginUser(unittest.TestCase):
     @patch("skylock_cli.api.http_client.client.post")
     def test_login_skylock_api_error(self, mock_post):
         """Test login with a SkyLockAPIError"""
-        mock_post.return_value = mock_response_with_status(HTTPStatus.INTERNAL_SERVER_ERROR)
+        mock_post.return_value = mock_response_with_status(
+            HTTPStatus.INTERNAL_SERVER_ERROR
+        )
 
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
@@ -120,7 +128,9 @@ class TestLoginUser(unittest.TestCase):
     @patch("skylock_cli.api.http_client.client.post")
     def test_login_connection_error(self, mock_post):
         """Test login when a ConnectionError occurs (backend is offline)"""
-        mock_post.side_effect = ConnectionError("Failed to connect to the server. Please check your network connection.")
+        mock_post.side_effect = ConnectionError(
+            "Failed to connect to the server. Please check your network connection."
+        )
 
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
