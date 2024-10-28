@@ -76,7 +76,9 @@ class TestContextManager(unittest.TestCase):
             data = json.load(f)
             context_data = data.get("context")
             self.assertIsInstance(context_data, dict)
-            self.assertEqual(context_data.get("token").get("access_token"), "test_token")
+            self.assertEqual(
+                context_data.get("token").get("access_token"), "test_token"
+            )
             self.assertEqual(context_data.get("token").get("token_type"), "bearer")
 
         mock_ensure_context_file_exists.assert_called_once()
