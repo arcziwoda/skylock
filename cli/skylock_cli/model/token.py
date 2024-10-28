@@ -1,8 +1,9 @@
 """
-Why should i write module docstrings on a pydantic class? pylint :[
+Module that contains the token model.
 """
 
-from pydantic import BaseModel
+from typing import Optional
+from pydantic import BaseModel, Field
 
 
 class Token(BaseModel):
@@ -14,5 +15,5 @@ class Token(BaseModel):
         token_type (str): The type of the token, typically 'Bearer'.
     """
 
-    access_token: str
-    token_type: str
+    access_token: Optional[str] = Field(default="")
+    token_type: Optional[str] = Field(default="")

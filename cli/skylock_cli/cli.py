@@ -42,15 +42,13 @@ def login(username: str) -> None:
         None
     """
     password = typer.prompt("Password", hide_input=True)
-    cwd = login_user(username, password)
+    context = login_user(username, password)
 
     typer.secho("User logged in successfully", fg=typer.colors.GREEN)
     typer.secho("Hello, " + username, fg=typer.colors.GREEN)
     typer.secho("Welcome to our file hosting service", fg=typer.colors.BLUE, bold=True)
     typer.secho(text2art("SkyLock"), fg=typer.colors.BLUE)
-    typer.secho(
-        "Your current working directory is: " + str(cwd.path), fg=typer.colors.BLUE
-    )
+    typer.secho(f"Your current working directory is: {str(context.user_dir)}", fg=typer.colors.BLUE)
 
 
 if __name__ == "__main__":

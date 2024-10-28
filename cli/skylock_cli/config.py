@@ -14,5 +14,5 @@ EMPTY_CONTEXT = {
         "access_token": "",
         "token_type": "",
     },
-    "user_dir": {"path": ""},
+    "user_dir": {"path": "/"},
 }
