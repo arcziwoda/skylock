@@ -10,6 +10,7 @@ from click import exceptions
 from skylock_cli.core.auth import register_user, login_user
 from skylock_cli.model.context import Context
 from skylock_cli.model.token import Token
+from tests.helpers import mock_response_with_status
 
 
 class TestRegisterUser(unittest.TestCase):
@@ -18,9 +19,7 @@ class TestRegisterUser(unittest.TestCase):
     @patch("skylock_cli.api.http_client.client.post")
     def test_register_success(self, mock_post):
         """Test successful registration"""
-        mock_response = Mock()
-        mock_response.status_code = HTTPStatus.CREATED
-        mock_post.return_value = mock_response
+        mock_post.return_value = mock_response_with_status(HTTPStatus.CREATED)
 
         register_user("testuser", "testpass")
         mock_post.assert_called_once()
@@ -28,23 +27,17 @@ class TestRegisterUser(unittest.TestCase):
     @patch("skylock_cli.api.http_client.client.post")
     def test_register_user_already_exists(self, mock_post):
         """Test registration when the user already exists"""
-        mock_response = Mock()
-        mock_response.status_code = HTTPStatus.CONFLICT
-        mock_post.return_value = mock_response
+        mock_post.return_value = mock_response_with_status(HTTPStatus.CONFLICT)
 
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
                 register_user("testuser", "testpass")
-            self.assertIn(
-                "User with username `testuser` already exists!", mock_stderr.getvalue()
-            )
+            self.assertIn("User with username `testuser` already exists!", mock_stderr.getvalue())
 
     @patch("skylock_cli.api.http_client.client.post")
     def test_register_skylock_api_error(self, mock_post):
         """Test registration with a SkyLockAPIError"""
-        mock_response = Mock()
-        mock_response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
-        mock_post.return_value = mock_response
+        mock_post.return_value = mock_response_with_status(HTTPStatus.INTERNAL_SERVER_ERROR)
 
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
@@ -54,9 +47,7 @@ class TestRegisterUser(unittest.TestCase):
     @patch("skylock_cli.api.http_client.client.post")
     def test_register_connection_error(self, mock_post):
         """Test registration when a ConnectionError occurs (backend is offline)"""
-        mock_post.side_effect = ConnectionError(
-            "Failed to connect to the server. Please check your network connection."
-        )
+        mock_post.side_effect = ConnectionError("Failed to connect to the server. Please check your network connection.")
 
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
@@ -109,9 +100,7 @@ class TestLoginUser(unittest.TestCase):
     @patch("skylock_cli.api.http_client.client.post")
     def test_login_authentication_error(self, mock_post):
         """Test login with authentication error"""
-        mock_response = Mock()
-        mock_response.status_code = HTTPStatus.UNAUTHORIZED
-        mock_post.return_value = mock_response
+        mock_post.return_value = mock_response_with_status(HTTPStatus.UNAUTHORIZED)
 
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
@@ -121,9 +110,7 @@ class TestLoginUser(unittest.TestCase):
     @patch("skylock_cli.api.http_client.client.post")
     def test_login_skylock_api_error(self, mock_post):
         """Test login with a SkyLockAPIError"""
-        mock_response = Mock()
-        mock_response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR
-        mock_post.return_value = mock_response
+        mock_post.return_value = mock_response_with_status(HTTPStatus.INTERNAL_SERVER_ERROR)
 
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
@@ -133,9 +120,7 @@ class TestLoginUser(unittest.TestCase):
     @patch("skylock_cli.api.http_client.client.post")
     def test_login_connection_error(self, mock_post):
         """Test login when a ConnectionError occurs (backend is offline)"""
-        mock_post.side_effect = ConnectionError(
-            "Failed to connect to the server. Please check your network connection."
-        )
+        mock_post.side_effect = ConnectionError("Failed to connect to the server. Please check your network connection.")
 
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):

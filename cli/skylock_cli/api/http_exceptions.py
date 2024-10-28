@@ -13,6 +13,9 @@ class SkyLockAPIError(Exception):
     """
 
     def __init__(self, message: Optional[str]) -> None:
+        message = (
+            message + " (Internal Server Error)" if message else "Internal Server Error"
+        )
         super().__init__(message)
         self.message = message
 
@@ -42,4 +45,24 @@ class TokenNotFoundError(SkyLockAPIError):
 
     def __init__(self) -> None:
         message = "Token not found in the response!"
+        super().__init__(message)
+
+
+class DirectoryAlreadyExistsError(SkyLockAPIError):
+    """Exception raised when attempting to create a directory that already exists.
+
+    Args:
+        directory_name (str): The name of the directory that already exists.
+    """
+
+    def __init__(self, directory_name: str) -> None:
+        message = f"Directory `{directory_name}` already exists!"
+        super().__init__(message)
+
+
+class UserUnauthorizedError(SkyLockAPIError):
+    """Exception raised when the user is unauthorized to perform an operation."""
+
+    def __init__(self) -> None:
+        message = "User is unauthorized. Please login to use this command."
         super().__init__(message)
