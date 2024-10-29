@@ -81,14 +81,12 @@ def send_mkdir_request(token: Token, path: Path) -> None:
         token (Token): The token object containing authentication token.
         path (str): The path of the directory to be created.
     """
-    url = "/folders"
-    query_params = urlencode({"path": str(path)})
+    url = f"/folders/{str(path)}"
 
     auth = BearerAuth(token)
 
     response = client.post(
         url=url,
-        params=query_params,
         auth=auth,
         headers=API_HEADERS,
     )
