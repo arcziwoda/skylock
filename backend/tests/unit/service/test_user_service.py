@@ -1,13 +1,12 @@
 from unittest.mock import MagicMock, patch
 
-import bcrypt
+import argon2
 import pytest
 import uuid
 
 from skylock.utils.exceptions import (
     InvalidCredentialsException,
     UserAlreadyExists,
-    UserNotFoundException,
 )
 from skylock.database.models import UserEntity
 from skylock.database.repository import UserRepository
@@ -32,9 +31,7 @@ def user_data():
         "id": uuid.uuid4(),
         "username": "testuser",
         "password": "password123",
-        "hashed_password": bcrypt.hashpw(
-            "password123".encode("utf-8"), bcrypt.gensalt()
-        ).decode("utf-8"),
+        "hashed_password": argon2.PasswordHasher().hash("password123"),
     }
 
 
@@ -103,21 +100,3 @@ def test_login_user_not_found(user_service, mock_user_repository, user_data):
 
     with pytest.raises(InvalidCredentialsException):
         user_service.login_user(user_data["username"], user_data["password"])
-
-
-def test_get_by_username_successful(
-    user_service, mock_user_repository, user_data, user_entity
-):
-    mock_user_repository.get_by_username.return_value = user_entity
-
-    result = user_service.get_by_username(user_data["username"])
-
-    assert result.username == user_data["username"]
-    mock_user_repository.get_by_username.assert_called_once_with(user_data["username"])
-
-
-def test_get_by_username_not_found(user_service, mock_user_repository, user_data):
-    mock_user_repository.get_by_username.return_value = None
-
-    with pytest.raises(UserNotFoundException):
-        user_service.get_by_username(user_data["username"])
