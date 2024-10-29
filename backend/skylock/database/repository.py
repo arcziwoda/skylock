@@ -36,3 +36,23 @@ class UserRepository(DatabaseRepository[models.UserEntity]):
         stmt = select(self.model).where(models.UserEntity.username == username)
         result = self.session.execute(stmt).scalar_one_or_none()
         return result
+
+
+class FolderRepository(DatabaseRepository[models.FolderEntity]):
+    def __init__(self, session: Session):
+        super().__init__(models.FolderEntity, session)
+
+    def get_by_name_and_parent_id(
+        self, name: str, parent_id: uuid.UUID | None
+    ) -> Optional[models.FolderEntity]:
+        stmt = select(self.model).where(
+            models.FolderEntity.name == name
+            and models.FolderEntity.parent_folder_id == parent_id
+        )
+        result = self.session.execute(stmt).scalar_one_or_none()
+        return result
+
+
+class FileRepository(DatabaseRepository[models.FileEntity]):
+    def __init__(self, session: Session):
+        super().__init__(models.FileEntity, session)

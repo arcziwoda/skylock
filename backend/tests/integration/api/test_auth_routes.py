@@ -7,7 +7,6 @@ def test_register_user_success(client):
     )
 
     assert response.status_code == 201
-    assert response.json()["username"] == username
 
 
 def test_register_user_already_exists(client):

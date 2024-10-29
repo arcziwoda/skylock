@@ -15,7 +15,7 @@ class UserService:
         self.user_repository = user_repository
         self.password_hasher = argon2.PasswordHasher()
 
-    def register_user(self, username: str, password: str) -> models.User:
+    def register_user(self, username: str, password: str) -> db_models.UserEntity:
         existing_user_entity = self.user_repository.get_by_username(username)
         if existing_user_entity:
             raise UserAlreadyExists(f"User with username {username} already exists")
@@ -25,18 +25,22 @@ class UserService:
             username=username, password=hashed_password
         )
 
-        new_user_entity = self.user_repository.save(new_user_entity)
-
-        return models.User.model_validate(new_user_entity)
+        return self.user_repository.save(new_user_entity)
 
     def login_user(self, username: str, password: str) -> models.Token:
         user_entity = self.user_repository.get_by_username(username)
-        if user_entity and self.verify_password(user_entity.password, password):
+        if user_entity and self._verify_password(user_entity.password, password):
             token = create_jwt_for_user(models.User.model_validate(user_entity))
             return models.Token(access_token=token, token_type="bearer")
         raise InvalidCredentialsException
 
-    def verify_password(self, hashed_password, password):
+    def verify_user(self, username: str, password: str) -> bool:
+        user_entity = self.user_repository.get_by_username(username)
+        if user_entity and self._verify_password(user_entity.password, password):
+            return True
+        return False
+
+    def _verify_password(self, hashed_password, password) -> bool:
         try:
             self.password_hasher.verify(hashed_password, password)
             return True
