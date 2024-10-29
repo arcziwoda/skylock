@@ -15,7 +15,7 @@ class UserService:
         self.user_repository = user_repository
         self.password_hasher = argon2.PasswordHasher()
 
-    def register_user(self, username: str, password: str) -> models.User:
+    def register_user(self, username: str, password: str) -> db_models.UserEntity:
         existing_user_entity = self.user_repository.get_by_username(username)
         if existing_user_entity:
             raise UserAlreadyExists(f"User with username {username} already exists")
@@ -25,9 +25,7 @@ class UserService:
             username=username, password=hashed_password
         )
 
-        new_user_entity = self.user_repository.save(new_user_entity)
-
-        return models.User.model_validate(new_user_entity)
+        return self.user_repository.save(new_user_entity)
 
     def login_user(self, username: str, password: str) -> models.Token:
         user_entity = self.user_repository.get_by_username(username)

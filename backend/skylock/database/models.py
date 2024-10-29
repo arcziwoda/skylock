@@ -41,11 +41,11 @@ class FolderEntity(Base):
     )
 
     files: orm.Mapped[List["FileEntity"]] = orm.relationship(
-        "FileEntity", back_populates="folder", lazy="selectin"
+        "FileEntity", back_populates="folder", lazy="dynamic"
     )
 
     subfolders: orm.Mapped[List["FolderEntity"]] = orm.relationship(
-        "FolderEntity", back_populates="parent_folder", lazy="selectin"
+        "FolderEntity", back_populates="parent_folder", lazy="dynamic"
     )
 
     owner: orm.Mapped[UserEntity] = orm.relationship(

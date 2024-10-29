@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, status
 
-from skylock.api.dependencies import get_user_service
+from skylock.api.dependencies import get_resource_service, get_user_service
+from skylock.service.resource_service import ResourceService
 from skylock.service.user_service import UserService
 from skylock.api import models
 
@@ -20,10 +21,13 @@ router = APIRouter(tags=["Auth"], prefix="/auth")
 def register_user(
     request: models.RegisterUserRequest,
     user_service: UserService = Depends(get_user_service),
+    resource_service: ResourceService = Depends(get_resource_service),
 ) -> models.User:
-    return user_service.register_user(
+    user = user_service.register_user(
         username=request.username, password=request.password
     )
+    resource_service.create_root_folder_for_user(user.id)
+    return models.User.model_validate(user)
 
 
 @router.post(

@@ -1,7 +1,8 @@
 from fastapi import Depends
 
-from skylock.database.repository import UserRepository
+from skylock.database.repository import FileRepository, FolderRepository, UserRepository
 from skylock.database.session import get_db_session
+from skylock.service.resource_service import ResourceService
 from skylock.service.user_service import UserService
 
 
@@ -9,5 +10,22 @@ def get_user_repository(db=Depends(get_db_session)) -> UserRepository:
     return UserRepository(db)
 
 
+def get_folder_repository(db=Depends(get_db_session)) -> FolderRepository:
+    return FolderRepository(db)
+
+
+def get_file_repository(db=Depends(get_db_session)) -> FileRepository:
+    return FileRepository(db)
+
+
 def get_user_service(user_repository=Depends(get_user_repository)) -> UserService:
     return UserService(user_repository)
+
+
+def get_resource_service(
+    file_repository=Depends(get_file_repository),
+    folder_repository=Depends(get_folder_repository),
+) -> ResourceService:
+    return ResourceService(
+        file_repository=file_repository, folder_repository=folder_repository
+    )
