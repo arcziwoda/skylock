@@ -39,7 +39,7 @@ def send_register_request(user: User) -> None:
     if response.status_code == HTTPStatus.CONFLICT:
         raise UserAlreadyExistsError(user.username)
     if response.status_code != HTTPStatus.CREATED:
-        raise SkyLockAPIError("Failed to register user")
+        raise SkyLockAPIError("Failed to register user (Internal Server Error)")
 
 
 def send_login_request(user: User) -> Token:
@@ -64,7 +64,7 @@ def send_login_request(user: User) -> Token:
     if response.status_code == HTTPStatus.UNAUTHORIZED:
         raise AuthenticationError()
     if response.status_code != HTTPStatus.OK:
-        raise SkyLockAPIError("Failed to login user")
+        raise SkyLockAPIError("Failed to login user (Internal Server Error)")
 
     token_data = response.json()
     if not token_data:
@@ -97,4 +97,4 @@ def send_mkdir_request(token: Token, path: Path) -> None:
         raise DirectoryAlreadyExistsError(path)
 
     if response.status_code != HTTPStatus.CREATED:
-        raise SkyLockAPIError("Failed to create directory")
+        raise SkyLockAPIError("Failed to create directory (Internal Server Error)")
