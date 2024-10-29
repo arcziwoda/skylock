@@ -1,13 +1,7 @@
 from fastapi import APIRouter, Depends, status
 
-from skylock.api.dependencies import (
-    get_resource_service,
-    get_skylock_facade,
-    get_user_service,
-)
-from skylock.service.resource_service import ResourceService
-from skylock.service.user_service import UserService
 from skylock.api import models
+from skylock.api.dependencies import get_skylock_facade
 from skylock.skylock_facade import SkylockFacade
 
 router = APIRouter(tags=["Auth"], prefix="/auth")
