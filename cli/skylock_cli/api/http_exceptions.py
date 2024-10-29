@@ -2,8 +2,6 @@
 Module for exceptions raised by the SkyLock API.
 """
 
-from typing import Optional
-
 
 class SkyLockAPIError(Exception):
     """Base exception for SkyLock API errors.
@@ -12,10 +10,7 @@ class SkyLockAPIError(Exception):
         message (Optional[str]): The error message associated with the exception.
     """
 
-    def __init__(self, message: Optional[str]) -> None:
-        message = (
-            message + " (Internal Server Error)" if message else "Internal Server Error"
-        )
+    def __init__(self, message: str) -> None:
         super().__init__(message)
         self.message = message
 
