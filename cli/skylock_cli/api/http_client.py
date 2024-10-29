@@ -2,7 +2,6 @@
 Module to handle HTTP requests to API
 """
 
-from urllib.parse import urlencode
 from pathlib import Path
 from http import HTTPStatus
 from httpx import Client
