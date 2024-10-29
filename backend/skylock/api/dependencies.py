@@ -4,6 +4,7 @@ from skylock.database.repository import FileRepository, FolderRepository, UserRe
 from skylock.database.session import get_db_session
 from skylock.service.resource_service import ResourceService
 from skylock.service.user_service import UserService
+from skylock.skylock_facade import SkylockFacade
 
 
 def get_user_repository(db=Depends(get_db_session)) -> UserRepository:
@@ -29,3 +30,10 @@ def get_resource_service(
     return ResourceService(
         file_repository=file_repository, folder_repository=folder_repository
     )
+
+
+def get_skylock_facade(
+    user_service: UserService = Depends(get_user_service),
+    resource_service: ResourceService = Depends(get_resource_service),
+) -> SkylockFacade:
+    return SkylockFacade(user_service=user_service, resource_service=resource_service)

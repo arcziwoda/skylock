@@ -1,9 +1,14 @@
 from fastapi import APIRouter, Depends, status
 
-from skylock.api.dependencies import get_resource_service, get_user_service
+from skylock.api.dependencies import (
+    get_resource_service,
+    get_skylock_facade,
+    get_user_service,
+)
 from skylock.service.resource_service import ResourceService
 from skylock.service.user_service import UserService
 from skylock.api import models
+from skylock.skylock_facade import SkylockFacade
 
 router = APIRouter(tags=["Auth"], prefix="/auth")
 
@@ -20,14 +25,9 @@ router = APIRouter(tags=["Auth"], prefix="/auth")
 )
 def register_user(
     request: models.RegisterUserRequest,
-    user_service: UserService = Depends(get_user_service),
-    resource_service: ResourceService = Depends(get_resource_service),
-) -> models.User:
-    user = user_service.register_user(
-        username=request.username, password=request.password
-    )
-    resource_service.create_root_folder_for_user(user.id)
-    return models.User.model_validate(user)
+    skylock: SkylockFacade = Depends(get_skylock_facade),
+):
+    skylock.register_user(username=request.username, password=request.password)
 
 
 @router.post(
@@ -42,6 +42,6 @@ def register_user(
 )
 def login_user(
     request: models.LoginUserRequest,
-    user_service: UserService = Depends(get_user_service),
+    skylock: SkylockFacade = Depends(get_skylock_facade),
 ) -> models.Token:
-    return user_service.login_user(username=request.username, password=request.password)
+    return skylock.login_user(username=request.username, password=request.password)

@@ -1,6 +1,5 @@
 import pathlib
 import uuid
-from typing import List
 
 from skylock.database import models as db_models
 from skylock.database.repository import FileRepository, FolderRepository
@@ -30,7 +29,7 @@ class ResourceService:
 
         return current_folder
 
-    def add_folder_for_user(self, path: str, user_id: uuid.UUID):
+    def create_folder_for_user(self, path: str, user_id: uuid.UUID):
         parsed_path = self._parse_path(path)
         filename = parsed_path.name
         parent_path = parsed_path.parent
@@ -45,18 +44,6 @@ class ResourceService:
         self._folder_repository.save(
             db_models.FolderEntity(name=folder_name, owner_id=user_id)
         )
-
-    def get_folder_contents(
-        self, path: str
-    ) -> List[db_models.FolderEntity | db_models.FileEntity]:
-        parsed_path = self._parse_path(path)
-        contents = []
-        folder = self.get_folder_by_path(str(parsed_path))
-
-        contents += folder.subfolders
-        contents += folder.files
-
-        return contents
 
     def _parse_path(self, path: str) -> pathlib.PurePosixPath:
         parsed_path = pathlib.PurePosixPath(path)
