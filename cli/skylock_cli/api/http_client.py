@@ -3,6 +3,7 @@ Module to handle HTTP requests to API
 """
 
 from pathlib import Path
+from urllib.parse import quote
 from http import HTTPStatus
 from httpx import Client
 from skylock_cli.config import API_URL, API_HEADERS
@@ -80,8 +81,7 @@ def send_mkdir_request(token: Token, path: Path) -> None:
         token (Token): The token object containing authentication token.
         path (str): The path of the directory to be created.
     """
-    url = f"/folders{str(path)}"
-
+    url = "/folders" + quote(str(path))
     auth = BearerAuth(token)
 
     response = client.post(
