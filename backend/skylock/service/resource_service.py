@@ -4,6 +4,7 @@ from typing import List
 from skylock.database import models as db_models
 from skylock.database.repository import FileRepository, FolderRepository
 from skylock.utils.exceptions import (
+    FolderNotEmptyException,
     InvalidPathException,
     ResourceAlreadyExistsException,
     ResourceNotFoundException,
@@ -45,6 +46,14 @@ class ResourceService:
             name=folder_name, parent_folder=parent, owner_id=user_id
         )
         new_folder = self._folder_repository.save(new_folder)
+
+    def delete_folder(self, path: str):
+        parsed_path = self._parse_path(path)
+        folder = self.get_folder_by_path(str(parsed_path))
+        has_folder_children = bool(self.get_folder_children(folder))
+        if has_folder_children:
+            raise FolderNotEmptyException
+        self._folder_repository.delete(folder)
 
     def create_root_folder_for_user(self, user_id: str):
         folder_name = user_id

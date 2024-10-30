@@ -37,3 +37,11 @@ class InvalidPathException(Exception):
     def __init__(self, message="Invalid path format"):
         self.message = message
         super().__init__(self.message)
+
+
+class FolderNotEmptyException(Exception):
+    """Exception raised when trying to do forbidden operation on not empty folder"""
+
+    def __init__(self, message="Folder not empty"):
+        self.message = message
+        super().__init__(self.message)

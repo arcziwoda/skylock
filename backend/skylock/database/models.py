@@ -20,10 +20,10 @@ class UserEntity(Base):
     password: orm.Mapped[str] = orm.mapped_column(nullable=False)
 
     folders: orm.Mapped[List["FolderEntity"]] = orm.relationship(
-        "FolderEntity", back_populates="owner", lazy="dynamic"
+        "FolderEntity", back_populates="owner", lazy="selectin"
     )
     files: orm.Mapped[List["FileEntity"]] = orm.relationship(
-        "FileEntity", back_populates="owner"
+        "FileEntity", back_populates="owner", lazy="selectin"
     )
 
 
@@ -41,11 +41,11 @@ class FolderEntity(Base):
     )
 
     files: orm.Mapped[List["FileEntity"]] = orm.relationship(
-        "FileEntity", back_populates="folder", lazy="dynamic"
+        "FileEntity", back_populates="folder", lazy="selectin"
     )
 
     subfolders: orm.Mapped[List["FolderEntity"]] = orm.relationship(
-        "FolderEntity", back_populates="parent_folder", lazy="dynamic"
+        "FolderEntity", back_populates="parent_folder", lazy="selectin"
     )
 
     owner: orm.Mapped[UserEntity] = orm.relationship(
