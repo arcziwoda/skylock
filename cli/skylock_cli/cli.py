@@ -67,7 +67,9 @@ def mkdir(directory_name: str) -> None:
         None
     """
     dir_path = create_directory(directory_name)
-    typer.secho(f"Directory {str(dir_path)} created successfully", fg=typer.colors.GREEN)
+    typer.secho(
+        f"Directory {str(dir_path)} created successfully", fg=typer.colors.GREEN
+    )
 
 
 if __name__ == "__main__":

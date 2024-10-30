@@ -1,3 +1,7 @@
+"""
+Module to send directory requests to the SkyLock backend API.
+"""
+
 from urllib.parse import quote
 from pathlib import Path
 from http import HTTPStatus
@@ -33,7 +37,9 @@ def send_mkdir_request(token: Token, path: Path) -> None:
         raise api_exceptions.DirectoryAlreadyExistsError(path)
 
     if response.status_code != HTTPStatus.CREATED:
-        raise api_exceptions.SkyLockAPIError("Failed to create directory (Internal Server Error)")
+        raise api_exceptions.SkyLockAPIError(
+            "Failed to create directory (Internal Server Error)"
+        )
 
 
 def send_rmdir_request(token: Token, path: Path) -> None:
@@ -60,4 +66,6 @@ def send_rmdir_request(token: Token, path: Path) -> None:
         raise api_exceptions.DirectoryNotFoundError(path)
 
     if response.status_code != HTTPStatus.NO_CONTENT:
-        raise api_exceptions.SkyLockAPIError("Failed to delete directory (Internal Server Error)")
+        raise api_exceptions.SkyLockAPIError(
+            "Failed to delete directory (Internal Server Error)"
+        )
