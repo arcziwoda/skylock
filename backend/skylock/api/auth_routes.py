@@ -13,8 +13,24 @@ router = APIRouter(tags=["Auth"], prefix="/auth")
     summary="Register a new user",
     description="This endpoint allows a new user to register with a unique username and password. If the username already exists, a 409 Conflict error will be raised.",
     responses={
-        201: {"description": "User successfully registered"},
-        409: {"description": "User with the provided username already exists"},
+        201: {
+            "description": "User successfully registered",
+            "content": {
+                "application/json": {
+                    "example": {"message": "User successfully registered"}
+                }
+            },
+        },
+        409: {
+            "description": "User with the provided username already exists",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "User with username {username} already exists"
+                    }
+                }
+            },
+        },
     },
 )
 def register_user(
@@ -22,6 +38,7 @@ def register_user(
     skylock: SkylockFacade = Depends(get_skylock_facade),
 ):
     skylock.register_user(username=request.username, password=request.password)
+    return {"message": "User successfully registered"}
 
 
 @router.post(
@@ -30,8 +47,20 @@ def register_user(
     summary="Authenticate user and get JWT token",
     description="This endpoint allows an existing user to authenticate using their username and password. A JWT token is returned if the credentials are valid.",
     responses={
-        200: {"description": "Successful login, JWT token returned"},
-        401: {"description": "Invalid credentials provided"},
+        200: {
+            "description": "Successful login, JWT token returned",
+            "content": {
+                "application/json": {
+                    "example": {"access_token": "{JWT_TOKEN}", "token_type": "bearer"}
+                }
+            },
+        },
+        401: {
+            "description": "Invalid credentials provided",
+            "content": {
+                "application/json": {"example": {"detail": "Invalid credentials"}}
+            },
+        },
     },
 )
 def login_user(

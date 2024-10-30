@@ -4,9 +4,9 @@ from sqlalchemy import orm, ForeignKey
 
 
 class Base(orm.DeclarativeBase):
-    id: orm.Mapped[uuid.UUID] = orm.mapped_column(
+    id: orm.Mapped[str] = orm.mapped_column(
         primary_key=True,
-        default=uuid.uuid4,
+        default=lambda: str(uuid.uuid4()),
     )
 
 

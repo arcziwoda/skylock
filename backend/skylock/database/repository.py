@@ -1,7 +1,9 @@
-import uuid
-from typing import Generic, TypeVar, Type, Optional
-from sqlalchemy import BinaryExpression, select
+from typing import Generic, Optional, Type, TypeVar
+
+from sqlalchemy import select
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.interfaces import ColumnElement
+
 from skylock.database import models
 
 Model = TypeVar("Model", bound=models.Base)
@@ -18,14 +20,20 @@ class DatabaseRepository(Generic[Model]):
         self.session.refresh(entity)
         return entity
 
-    def get_by_id(self, entity_id: uuid.UUID) -> Optional[Model]:
+    def get_by_id(self, entity_id: str) -> Optional[Model]:
         return self.session.get(self.model, entity_id)
 
-    def filter(self, *expressions: BinaryExpression) -> list[Model]:
+    def filter(self, *expressions: ColumnElement) -> list[Model]:
         query = select(self.model)
         if expressions:
             query = query.where(*expressions)
-        return list(self.session.execute(query).scalars().all())
+        return list(self.session.execute(query).scalars())
+
+    def filter_one_or_none(self, *expressions: ColumnElement) -> Optional[Model]:
+        query = select(self.model)
+        if expressions:
+            query = query.where(*expressions)
+        return self.session.execute(query).scalar_one_or_none()
 
 
 class UserRepository(DatabaseRepository[models.UserEntity]):
@@ -33,9 +41,7 @@ class UserRepository(DatabaseRepository[models.UserEntity]):
         super().__init__(models.UserEntity, session)
 
     def get_by_username(self, username: str) -> Optional[models.UserEntity]:
-        stmt = select(self.model).where(models.UserEntity.username == username)
-        result = self.session.execute(stmt).scalar_one_or_none()
-        return result
+        return self.filter_one_or_none(models.UserEntity.username == username)
 
 
 class FolderRepository(DatabaseRepository[models.FolderEntity]):
@@ -43,14 +49,12 @@ class FolderRepository(DatabaseRepository[models.FolderEntity]):
         super().__init__(models.FolderEntity, session)
 
     def get_by_name_and_parent_id(
-        self, name: str, parent_id: uuid.UUID | None
+        self, name: str, parent_id: str | None
     ) -> Optional[models.FolderEntity]:
-        stmt = select(self.model).where(
-            models.FolderEntity.name == name
-            and models.FolderEntity.parent_folder_id == parent_id
+        return self.filter_one_or_none(
+            models.FolderEntity.parent_folder_id == parent_id,
+            models.FolderEntity.name == name,
         )
-        result = self.session.execute(stmt).scalar_one_or_none()
-        return result
 
 
 class FileRepository(DatabaseRepository[models.FileEntity]):
