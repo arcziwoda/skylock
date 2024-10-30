@@ -52,6 +52,9 @@ class FolderEntity(Base):
         "UserEntity", back_populates="folders"
     )
 
+    def is_root(self) -> bool:
+        return self.parent_folder_id is None
+
 
 class FileEntity(Base):
     __tablename__ = "files"

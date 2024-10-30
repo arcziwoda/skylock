@@ -1,6 +1,8 @@
 import pathlib
 from typing import List
 
+from fastapi import HTTPException
+
 from skylock.database import models as db_models
 from skylock.database.repository import FileRepository, FolderRepository
 from skylock.utils.exceptions import (
@@ -47,11 +49,17 @@ class ResourceService:
         )
         new_folder = self._folder_repository.save(new_folder)
 
-    def delete_folder(self, path: str):
+    def delete_folder(self, path: str, is_recursively: bool = False):
         parsed_path = self._parse_path(path)
         folder = self.get_folder_by_path(str(parsed_path))
+
+        if folder.is_root():
+            raise HTTPException(
+                403, "Deleting your root folder is forbidden"
+            )  # TODO: think about something smarter
+
         has_folder_children = bool(self.get_folder_children(folder))
-        if has_folder_children:
+        if not is_recursively and has_folder_children:
             raise FolderNotEmptyException
         self._folder_repository.delete(folder)
 
@@ -74,6 +82,8 @@ class ResourceService:
 
         if parsed_path.is_absolute():
             parsed_path = parsed_path.relative_to("/")
+
+        print(str(parsed_path))
 
         if not parsed_path.parts:
             raise InvalidPathException
