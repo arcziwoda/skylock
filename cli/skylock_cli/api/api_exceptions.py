@@ -67,9 +67,33 @@ class DirectoryNotFoundError(SkyLockAPIError):
         super().__init__(message)
 
 
+class DirectoryMissingError(SkyLockAPIError):
+    """Exception raised when a directory is missing.
+
+    Args:
+        missing (str): The path of the missing directory.
+    """
+
+    def __init__(self, missing: str) -> None:
+        message = f"Directory `{missing}` is missing! Use the --parent flag to create parent directories."
+        super().__init__(message)
+
+
 class UserUnauthorizedError(SkyLockAPIError):
     """Exception raised when the user is unauthorized to perform an operation."""
 
     def __init__(self) -> None:
         message = "User is unauthorized. Please login to use this command."
+        super().__init__(message)
+
+
+class InvalidPathError(SkyLockAPIError):
+    """Exception raised when the path is invalid.
+
+    Args:
+        path (str): The path that is invalid.
+    """
+
+    def __init__(self, path: str) -> None:
+        message = f"Invalid path `{path}`!"
         super().__init__(message)
