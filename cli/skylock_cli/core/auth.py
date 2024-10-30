@@ -3,7 +3,7 @@ Module that contains logic for the cli commands related to authentication
 """
 
 from skylock_cli.api.auth_requests import send_login_request, send_register_request
-from skylock_cli.utils.api_exception_handler import APIExceptionHandler
+from skylock_cli.utils.cli_exception_handler import CLIExceptionHandler
 from skylock_cli.core.context_manager import ContextManager
 from skylock_cli.model import user, user_dir, context
 
@@ -20,7 +20,7 @@ def register_user(login: str, password: str) -> None:
         None
     """
     _user = user.User(username=login, password=password)
-    with APIExceptionHandler():
+    with CLIExceptionHandler():
         send_register_request(_user)
 
 
@@ -36,7 +36,7 @@ def login_user(login: str, password: str) -> context.Context:
         Token: The token object containing the authentication token.
     """
     _user = user.User(username=login, password=password)
-    with APIExceptionHandler():
+    with CLIExceptionHandler():
         token = send_login_request(_user)
 
     new_context = context.Context(token=token, user_dir=user_dir.UserDir())
