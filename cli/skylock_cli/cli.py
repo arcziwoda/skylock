@@ -5,7 +5,7 @@ This module contains commands the user can run to interact with the SkyLock.
 import typer
 from art import text2art
 from skylock_cli.core.auth import register_user, login_user
-from skylock_cli.core.resource_operations import create_directory
+from skylock_cli.core.dir_operations import create_directory, remove_directory
 
 app = typer.Typer(pretty_exceptions_show_locals=False)
 
@@ -57,7 +57,7 @@ def login(username: str) -> None:
 
 @app.command()
 def mkdir(
-    directory_name: str,
+    directory_path: str,
     parent: bool = typer.Option(
         False, "-p", "--parent", help="Create parent directories as needed"
     ),
@@ -66,15 +66,40 @@ def mkdir(
     Create a new directory in the SkyLock.
 
     Args:
-        directory (str): The name of the new directory.
+        directory_path (str): The path of the new directory.
         parent (bool): If True, create parent directories as needed.
 
     Returns:
         None
     """
-    dir_path = create_directory(directory_name, parent)
+    created_path = create_directory(directory_path, parent)
     typer.secho(
-        f"Directory {str(dir_path)} created successfully", fg=typer.colors.GREEN
+        f"Directory {str(created_path)} created successfully", fg=typer.colors.GREEN
+    )
+
+
+@app.command()
+def rmdir(
+    directory_path: str,
+    recursive: bool = typer.Option(
+        False,
+        "-r",
+        "--recursive",
+        help="Remove directories and their contents recursively",
+    ),
+) -> None:
+    """
+    Remove a directory from the SkyLock.
+
+    Args:
+        directory_path (str): The path of the directory to remove.
+        recursive (bool): If True, remove directories and their contents recursively.
+    Returns:
+        None
+    """
+    removed_path = remove_directory(directory_path, recursive)
+    typer.secho(
+        f"Directory {str(removed_path)} removed successfully", fg=typer.colors.GREEN
     )
 
 

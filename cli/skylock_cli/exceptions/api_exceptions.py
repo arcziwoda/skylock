@@ -79,6 +79,18 @@ class DirectoryMissingError(SkyLockAPIError):
         super().__init__(message)
 
 
+class DirectoryNotEmptyError(SkyLockAPIError):
+    """Exception raised when attempting to delete a non-empty directory.
+
+    Args:
+        directory_path (str): The path of the non-empty directory.
+    """
+
+    def __init__(self, directory_path: str) -> None:
+        message = f"Directory `{directory_path}` is not empty! Use the --recursive flag to delete it recursively."
+        super().__init__(message)
+
+
 class UserUnauthorizedError(SkyLockAPIError):
     """Exception raised when the user is unauthorized to perform an operation."""
 

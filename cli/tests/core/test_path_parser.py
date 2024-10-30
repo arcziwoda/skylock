@@ -2,7 +2,7 @@
 
 import unittest
 from pathlib import Path
-from skylock_cli.core.path_parser import parse_path
+from skylock_cli.core.path_parser import parse_path, is_directory
 
 
 class TestParsePath(unittest.TestCase):
@@ -56,6 +56,18 @@ class TestParsePath(unittest.TestCase):
         user_input_path = Path("~/documents/file.txt")
         result = parse_path(cwd, user_input_path)
         self.assertEqual(result, Path("/documents/file.txt"))
+
+    def test_is_directory(self):
+        """Test the case where the user input path is a directory"""
+        path = "/home/user/documents/"
+        result = is_directory(path)
+        self.assertTrue(result)
+
+    def test_is_not_directory(self):
+        """Test the case where the user input path is not a directory"""
+        path = "/home/user/documents/file"
+        result = is_directory(path)
+        self.assertFalse(result)
 
 
 if __name__ == "__main__":

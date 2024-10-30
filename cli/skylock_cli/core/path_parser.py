@@ -12,3 +12,10 @@ def parse_path(cwd: Path, user_input_path: Path) -> Path:
     if user_input_path.is_absolute():
         return user_input_path
     return (cwd / user_input_path).resolve()
+
+
+def is_directory(path: str) -> bool:
+    """
+    Check if the path is a directory
+    """
+    return path.endswith("/")
