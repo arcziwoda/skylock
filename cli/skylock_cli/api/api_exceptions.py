@@ -47,11 +47,23 @@ class DirectoryAlreadyExistsError(SkyLockAPIError):
     """Exception raised when attempting to create a directory that already exists.
 
     Args:
-        directory_name (str): The name of the directory that already exists.
+        directory_path (str): The path of the directory that already exists.
     """
 
-    def __init__(self, directory_name: str) -> None:
-        message = f"Directory `{directory_name}` already exists!"
+    def __init__(self, directory_path: str) -> None:
+        message = f"Directory `{directory_path}` already exists!"
+        super().__init__(message)
+
+
+class DirectoryNotFoundError(SkyLockAPIError):
+    """Exception raised when attempting to delete a directory that does not exist.
+
+    Args:
+        directory_path (str): The path of the directory that does not exist.
+    """
+
+    def __init__(self, directory_path: str) -> None:
+        message = f"Directory `{directory_path}` does not exist!"
         super().__init__(message)
 
 
