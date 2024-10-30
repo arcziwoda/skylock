@@ -28,7 +28,9 @@ def send_register_request(_user: user.User) -> None:
     if response.status_code == HTTPStatus.CONFLICT:
         raise api_exceptions.UserAlreadyExistsError(_user.username)
     if response.status_code != HTTPStatus.CREATED:
-        raise api_exceptions.SkyLockAPIError("Failed to register user (Internal Server Error)")
+        raise api_exceptions.SkyLockAPIError(
+            "Failed to register user (Internal Server Error)"
+        )
 
 
 def send_login_request(_user: user.User) -> token.Token:
@@ -53,7 +55,9 @@ def send_login_request(_user: user.User) -> token.Token:
     if response.status_code == HTTPStatus.UNAUTHORIZED:
         raise api_exceptions.AuthenticationError()
     if response.status_code != HTTPStatus.OK:
-        raise api_exceptions.SkyLockAPIError("Failed to login user (Internal Server Error)")
+        raise api_exceptions.SkyLockAPIError(
+            "Failed to login user (Internal Server Error)"
+        )
 
     token_data = response.json()
     if not token_data:
