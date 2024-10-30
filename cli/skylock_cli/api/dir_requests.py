@@ -48,7 +48,7 @@ def send_rmdir_request(token: Token, path: Path) -> None:
 
     Args:
         token (Token): The token object containing authentication token.
-        path (str): The path of the directory to be deleted.
+        path (str): The path of the directory to be deleted
     """
     url = "/folders" + quote(str(path))
     auth = bearer_auth.BearerAuth(token)
