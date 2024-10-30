@@ -54,3 +54,46 @@ def create_folder(
 ):
     skylock.create_folder_for_user(path, user)
     return {"message": "Folder created"}
+
+
+@router.delete(
+    "{path:path}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete a folder",
+    description="This endpoint allows the user to delete a specified folder. The folder must be empty to be deleted. If the folder contains any files or subfolders, an error will be raised.",
+    responses={
+        204: {
+            "description": "Folder deleted successfully",
+        },
+        401: {
+            "description": "Unauthorized user",
+            "content": {
+                "application/json": {"example": {"detail": "Not authenticated"}}
+            },
+        },
+        404: {
+            "description": "Resource not found",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "Resource not found",
+                        "missing": "folder_name",
+                    }
+                }
+            },
+        },
+        409: {
+            "description": "Folder not empty",
+            "content": {
+                "application/json": {"example": {"detail": "Folder not empty"}}
+            },
+        },
+    },
+)
+def delete_folder(
+    path: str,
+    user: models.User = Depends(get_current_user),
+    skylock: SkylockFacade = Depends(get_skylock_facade),
+):
+    skylock.delete_folder(path, user)
+    return {"message": "Folder deleted"}

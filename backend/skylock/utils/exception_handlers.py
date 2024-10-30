@@ -2,6 +2,7 @@ from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 
 from skylock.utils.exceptions import (
+    FolderNotEmptyException,
     InvalidCredentialsException,
     ResourceAlreadyExistsException,
     UserAlreadyExists,
@@ -44,4 +45,11 @@ def resource_not_found_handler(_request: Request, exc: ResourceNotFoundException
     return JSONResponse(
         status_code=404,
         content={"detail": str(exc), "missing": exc.missing_resource_name},
+    )
+
+
+def folder_not_empty_handler(_request: Request, exc: FolderNotEmptyException):
+    return JSONResponse(
+        status_code=409,
+        content={"detail": str(exc)},
     )

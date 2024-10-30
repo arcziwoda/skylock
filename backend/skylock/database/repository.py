@@ -23,6 +23,10 @@ class DatabaseRepository(Generic[Model]):
     def get_by_id(self, entity_id: str) -> Optional[Model]:
         return self.session.get(self.model, entity_id)
 
+    def delete(self, entity: Model) -> None:
+        self.session.delete(entity)
+        self.session.commit()
+
     def filter(self, *expressions: ColumnElement) -> list[Model]:
         query = select(self.model)
         if expressions:

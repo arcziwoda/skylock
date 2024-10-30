@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from skylock.utils.exception_handlers import (
+    folder_not_empty_handler,
     resource_not_found_handler,
     user_already_exists_handler,
     resource_already_exists_handler,
@@ -8,6 +9,7 @@ from skylock.utils.exception_handlers import (
 
 from skylock.api import auth_routes, folder_routes
 from skylock.utils.exceptions import (
+    FolderNotEmptyException,
     InvalidCredentialsException,
     ResourceAlreadyExistsException,
     ResourceNotFoundException,
@@ -23,6 +25,7 @@ app.add_exception_handler(
     ResourceAlreadyExistsException, resource_already_exists_handler
 )
 app.add_exception_handler(ResourceNotFoundException, resource_not_found_handler)
+app.add_exception_handler(FolderNotEmptyException, folder_not_empty_handler)
 
 
 app.include_router(auth_routes.router)
