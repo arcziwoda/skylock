@@ -16,5 +16,5 @@ class SkylockFacade:
         return self._user_service.login_user(username, password)
 
     def create_folder_for_user(self, path: str, user: models.User):
-        user_path = str(user.id) + "/" + path
+        user_path = user.id + "/" + path
         self._resource_service.create_folder_for_user(user_path, user.id)

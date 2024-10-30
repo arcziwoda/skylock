@@ -15,7 +15,7 @@ FAKE_JWT_SECRET = "fake_secret_for_testing"
 
 @pytest.fixture
 def user():
-    return User(id=uuid.uuid4(), username="testuser")
+    return User(id=str(uuid.uuid4()), username="testuser")
 
 
 @pytest.fixture

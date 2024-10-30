@@ -28,7 +28,7 @@ def user_service(mock_user_repository):
 @pytest.fixture
 def user_data():
     return {
-        "id": uuid.uuid4(),
+        "id": str(uuid.uuid4()),
         "username": "testuser",
         "password": "password123",
         "hashed_password": argon2.PasswordHasher().hash("password123"),

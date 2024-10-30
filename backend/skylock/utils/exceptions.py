@@ -6,17 +6,34 @@ class UserAlreadyExists(Exception):
         super().__init__(self.message)
 
 
-class AccessDeniedException(Exception):
-    """Exception raised when trying to perform an operation with no required permissions"""
+class InvalidCredentialsException(Exception):
+    """Exception raised when trying to use invalid credentials"""
 
-    def __init__(self, message="Access denied"):
+    def __init__(self, message="Invalid credentials provided"):
         self.message = message
         super().__init__(self.message)
 
 
-class InvalidCredentialsException(Exception):
-    """Exception raised when trying to use invalid credentials"""
+class ResourceAlreadyExistsException(Exception):
+    """Exception raised when trying to create a resource when there is already one with the same name"""
 
-    def __init__(self, message="Invalid credentials"):
+    def __init__(self, message="Resource already exists"):
+        self.message = message
+        super().__init__(self.message)
+
+
+class ResourceNotFoundException(Exception):
+    """Exception raised when trying to access a non existent resource"""
+
+    def __init__(self, missing_resource_name: str, message="Resource not found"):
+        self.missing_resource_name = missing_resource_name
+        self.message = message
+        super().__init__(self.message)
+
+
+class InvalidPathException(Exception):
+    """Exception raised when trying to use invalid path format"""
+
+    def __init__(self, message="Invalid path format"):
         self.message = message
         super().__init__(self.message)
