@@ -16,12 +16,3 @@ class User(BaseModel):
 
     username: str
     password: str
-
-    @property
-    def get_username(self):
-        """Gets the username.
-
-        Returns:
-            str: The username of the user.
-        """
-        return self.username
