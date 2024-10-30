@@ -5,7 +5,7 @@ This module contains commands the user can run to interact with the SkyLock.
 import typer
 from art import text2art
 from skylock_cli.core.auth import register_user, login_user
-from skylock_cli.core.dir_operations import create_directory
+from skylock_cli.core.resource_operations import create_directory
 
 app = typer.Typer(pretty_exceptions_show_locals=False)
 
@@ -56,17 +56,23 @@ def login(username: str) -> None:
 
 
 @app.command()
-def mkdir(directory_name: str) -> None:
+def mkdir(
+    directory_name: str,
+    parent: bool = typer.Option(
+        False, "-p", "--parent", help="Create parent directories as needed"
+    ),
+) -> None:
     """
     Create a new directory in the SkyLock.
 
     Args:
         directory (str): The name of the new directory.
+        parent (bool): If True, create parent directories as needed.
 
     Returns:
         None
     """
-    dir_path = create_directory(directory_name)
+    dir_path = create_directory(directory_name, parent)
     typer.secho(
         f"Directory {str(dir_path)} created successfully", fg=typer.colors.GREEN
     )
