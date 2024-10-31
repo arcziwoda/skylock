@@ -45,3 +45,11 @@ class FolderNotEmptyException(Exception):
     def __init__(self, message="Folder not empty"):
         self.message = message
         super().__init__(self.message)
+
+
+class ForbiddenActionException(Exception):
+    """Exception raised when trying to do some forbidden action (for example deleting root folder)"""
+
+    def __init__(self, message="Action forbidden"):
+        self.message = message
+        super().__init__(self.message)

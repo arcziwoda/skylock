@@ -1,14 +1,12 @@
-import pathlib
-
-from fastapi import HTTPException
-
 from skylock.database import models as db_models
 from skylock.database.repository import FileRepository, FolderRepository
 from skylock.utils.exceptions import (
     FolderNotEmptyException,
+    ForbiddenActionException,
     ResourceAlreadyExistsException,
     ResourceNotFoundException,
 )
+from skylock.utils.path import SkylockPath
 
 
 class ResourceService:
@@ -18,19 +16,11 @@ class ResourceService:
         self._file_repository = file_repository
         self._folder_repository = folder_repository
 
-    def get_folder_by_path(self, path: str) -> db_models.FolderEntity:
-        parsed_path = self._parse_path(path)
+    def get_folder_by_path(self, path: SkylockPath) -> db_models.FolderEntity:
 
-        if not parsed_path.parts:
-            raise HTTPException(
-                403, "Forbidden operation"
-            )  # Trying to access root of folder tree
+        current_folder = self._get_root_folder_by_name(path.root_folder_name)
 
-        root_folder_name = parsed_path.parts[0]
-
-        current_folder = self._get_root_folder_by_name(root_folder_name)
-
-        for folder_name in parsed_path.relative_to(root_folder_name).parts:
+        for folder_name in path.parts:
             current_folder = self._folder_repository.get_by_name_and_parent_id(
                 folder_name, current_folder.id
             )
@@ -39,11 +29,13 @@ class ResourceService:
 
         return current_folder
 
-    def create_folder_for_user(self, path: str, user_id: str):
-        parsed_path = self._parse_path(path)
-        folder_name = parsed_path.name
-        parent_path = parsed_path.parent
-        parent = self.get_folder_by_path(str(parent_path))
+    def create_folder_for_user(self, path: SkylockPath, user_id: str):
+        if path.is_root_folder():
+            raise ForbiddenActionException("Creation of root folder is forbidden")
+
+        folder_name = path.name
+        parent_path = path.parent
+        parent = self.get_folder_by_path(parent_path)
 
         self._assert_no_children_matching_name(parent, folder_name)
 
@@ -52,37 +44,22 @@ class ResourceService:
         )
         new_folder = self._folder_repository.save(new_folder)
 
-    def delete_folder(self, path: str, is_recursively: bool = False):
-        parsed_path = self._parse_path(path)
-        folder = self.get_folder_by_path(str(parsed_path))
+    def delete_folder(self, path: SkylockPath, is_recursively: bool = False):
+        folder = self.get_folder_by_path(path)
 
         if folder.is_root():
-            raise HTTPException(
-                403, "Deleting your root folder is forbidden"
-            )  # TODO: custom error
+            raise ForbiddenActionException("Deletion of root folder is forbidden")
 
         has_folder_children = bool(folder.subfolders or folder.files)
         if not is_recursively and has_folder_children:
             raise FolderNotEmptyException
+
         self._folder_repository.delete(folder)
 
-    def create_root_folder_for_user(self, user_id: str):
-        folder_name = user_id
+    def create_root_folder_for_user(self, user_id: str, path: SkylockPath):
         self._folder_repository.save(
-            db_models.FolderEntity(name=folder_name, owner_id=user_id)
+            db_models.FolderEntity(name=path.root_folder_name, owner_id=user_id)
         )
-
-    def _parse_path(
-        self, path: str
-    ) -> (
-        pathlib.PurePosixPath
-    ):  # TODO: implement custom path class that is already parsed
-        parsed_path = pathlib.PurePosixPath(path)
-
-        if parsed_path.is_absolute():
-            parsed_path = parsed_path.relative_to("/")
-
-        return parsed_path
 
     def _get_root_folder_by_name(self, name: str) -> db_models.FolderEntity:
         folder = self._folder_repository.get_by_name_and_parent_id(name, None)
