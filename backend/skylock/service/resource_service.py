@@ -1,5 +1,4 @@
 import pathlib
-from typing import List
 
 from fastapi import HTTPException
 
@@ -7,7 +6,6 @@ from skylock.database import models as db_models
 from skylock.database.repository import FileRepository, FolderRepository
 from skylock.utils.exceptions import (
     FolderNotEmptyException,
-    InvalidPathException,
     ResourceAlreadyExistsException,
     ResourceNotFoundException,
 )
