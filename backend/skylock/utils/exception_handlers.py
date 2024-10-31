@@ -8,6 +8,7 @@ from skylock.utils.exceptions import (
     UserAlreadyExists,
     InvalidPathException,
     ResourceNotFoundException,
+    ForbiddenActionException,
 )
 
 
@@ -51,5 +52,12 @@ def resource_not_found_handler(_request: Request, exc: ResourceNotFoundException
 def folder_not_empty_handler(_request: Request, exc: FolderNotEmptyException):
     return JSONResponse(
         status_code=409,
+        content={"detail": str(exc)},
+    )
+
+
+def forbidden_action_handler(_request: Request, exc: ForbiddenActionException):
+    return JSONResponse(
+        status_code=403,
         content={"detail": str(exc)},
     )

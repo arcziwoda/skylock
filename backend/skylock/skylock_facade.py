@@ -1,6 +1,8 @@
 from skylock.service.resource_service import ResourceService
 from skylock.service.user_service import UserService
 from skylock.api import models
+from skylock.utils.exceptions import ForbiddenActionException
+from skylock.utils.path import SkylockPath
 
 
 class SkylockFacade:
@@ -10,7 +12,8 @@ class SkylockFacade:
 
     def register_user(self, username: str, password: str):
         user = self._user_service.register_user(username, password)
-        self._resource_service.create_root_folder_for_user(user.id)
+        user_path = self._create_user_path(".", models.User.model_validate(user))
+        self._resource_service.create_root_folder_for_user(user.id, user_path)
 
     def login_user(self, username: str, password: str) -> models.Token:
         return self._user_service.login_user(username, password)
@@ -36,7 +39,9 @@ class SkylockFacade:
 
     def delete_folder(self, path: str, user: models.User, is_recursively: bool = False):
         user_path = self._create_user_path(path, user)
+        if user_path.is_root_folder():
+            raise ForbiddenActionException("Deletion of root folder is forbidden")
         self._resource_service.delete_folder(user_path, is_recursively=is_recursively)
 
-    def _create_user_path(self, path: str, user: models.User) -> str:
-        return user.id + "/" + path
+    def _create_user_path(self, path: str, user: models.User) -> SkylockPath:
+        return SkylockPath(path=path, root_folder_name=user.id)
