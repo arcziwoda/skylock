@@ -50,7 +50,9 @@ def send_mkdir_request(token: Token, path: Path, parent: bool) -> None:
         raise api_exceptions.DirectoryMissingError(missing)
 
     if response.status_code != HTTPStatus.CREATED:
-        raise api_exceptions.SkyLockAPIError("Failed to create directory (Internal Server Error)")
+        raise api_exceptions.SkyLockAPIError(
+            "Failed to create directory (Internal Server Error)"
+        )
 
 
 def send_rmdir_request(token: Token, path: Path, recursive: bool) -> None:
@@ -65,15 +67,8 @@ def send_rmdir_request(token: Token, path: Path, recursive: bool) -> None:
     url = "/folders" + quote(str(path))
     auth = bearer_auth.BearerAuth(token)
     params = {"recursive": recursive}
-    # TODO: Implement the request body for the rmdir request when the API is updated.
-    print(params)
 
-    response = client.delete(
-        url=url,
-        auth=auth,
-        headers=API_HEADERS,
-        # params=params
-    )
+    response = client.delete(url=url, auth=auth, headers=API_HEADERS, params=params)
 
     if response.status_code == HTTPStatus.UNAUTHORIZED:
         raise api_exceptions.UserUnauthorizedError()
@@ -82,7 +77,15 @@ def send_rmdir_request(token: Token, path: Path, recursive: bool) -> None:
         raise api_exceptions.DirectoryNotFoundError(str(path))
 
     if response.status_code == HTTPStatus.CONFLICT:
-        raise api_exceptions.DirectoryNotEmptyError(str(path))
+        raise (
+            api_exceptions.DirectoryNotEmptyError(str(path))
+            if not recursive
+            else api_exceptions.SkyLockAPIError(
+                "Failed to delete directory (Internal Server Error)"
+            )
+        )
 
     if response.status_code != HTTPStatus.NO_CONTENT:
-        raise api_exceptions.SkyLockAPIError("Failed to delete directory (Internal Server Error)")
+        raise api_exceptions.SkyLockAPIError(
+            "Failed to delete directory (Internal Server Error)"
+        )

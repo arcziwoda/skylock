@@ -13,7 +13,8 @@ err_console = Console(stderr=True)
 class CLIExceptionHandler:
     """A context manager to handle exceptions and display them to the user using typer"""
 
-    def __enter__(self): ...
+    def __enter__(self):
+        ...
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         """
@@ -27,11 +28,16 @@ class CLIExceptionHandler:
         Returns:
             bool: False if an exception was handled, otherwise None.
         """
-        if isinstance(exc_value, (api_exceptions.SkyLockAPIError, core_exceptions.SkyLockCoreError)):
+        if isinstance(
+            exc_value,
+            (api_exceptions.SkyLockAPIError, core_exceptions.SkyLockCoreError),
+        ):
             err_console.print(f"[red]{exc_value}[/red]")
             raise typer.Exit(code=1)
         if exc_type is not None:
-            tb = Traceback.from_exception(exc_type, exc_value, exc_traceback, max_frames=5)
+            tb = Traceback.from_exception(
+                exc_type, exc_value, exc_traceback, max_frames=5
+            )
             err_console.print(tb)
             raise typer.Exit(code=1)
 
