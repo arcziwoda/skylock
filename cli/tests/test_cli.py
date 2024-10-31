@@ -274,6 +274,36 @@ class TestRMDIRCommand(unittest.TestCase):
             mock_get_context.return_value.token, Path("/test_dir"), False
         )
 
+    @patch("skylock_cli.core.dir_operations.send_rmdir_request")
+    @patch("skylock_cli.core.context_manager.ContextManager.get_context")
+    def test_rmdir_success_recursive_long(self, mock_get_context, mock_send):
+        """Test the rmdir command"""
+        mock_get_context.return_value = Mock(
+            token=Token(access_token="test_token", token_type="bearer"),
+            user_dir=Mock(path=Path("/")),
+        )
+
+        result = runner.invoke(app, ["rmdir", "test_dir/", "--recursive"])
+        self.assertEqual(result.exit_code, 0)
+        mock_send.assert_called_once_with(
+            mock_get_context.return_value.token, Path("/test_dir"), True
+        )
+
+    @patch("skylock_cli.core.dir_operations.send_rmdir_request")
+    @patch("skylock_cli.core.context_manager.ContextManager.get_context")
+    def test_rmdir_success_recursive_short(self, mock_get_context, mock_send):
+        """Test the rmdir command"""
+        mock_get_context.return_value = Mock(
+            token=Token(access_token="test_token", token_type="bearer"),
+            user_dir=Mock(path=Path("/")),
+        )
+
+        result = runner.invoke(app, ["rmdir", "test_dir/", "-r"])
+        self.assertEqual(result.exit_code, 0)
+        mock_send.assert_called_once_with(
+            mock_get_context.return_value.token, Path("/test_dir"), True
+        )
+
     def test_rmdir_not_a_directory_error(self):
         """Test the rmdir command when the path is not a directory"""
         result = runner.invoke(app, ["rmdir", "/test_file"])

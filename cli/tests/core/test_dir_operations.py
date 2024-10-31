@@ -43,12 +43,16 @@ class TestCreateDirectory(unittest.TestCase):
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
                 create_directory("test_dir", False)
-            self.assertIn("Directory `/test_dir` already exists!", mock_stderr.getvalue())
+            self.assertIn(
+                "Directory `/test_dir` already exists!", mock_stderr.getvalue()
+            )
 
     @patch("skylock_cli.api.dir_requests.client.post")
     def test_create_directory_skylock_api_error(self, mock_post):
         """Test registration with a SkyLockAPIError"""
-        mock_post.return_value = mock_response_with_status(HTTPStatus.INTERNAL_SERVER_ERROR)
+        mock_post.return_value = mock_response_with_status(
+            HTTPStatus.INTERNAL_SERVER_ERROR
+        )
 
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
@@ -61,7 +65,9 @@ class TestCreateDirectory(unittest.TestCase):
     @patch("skylock_cli.api.dir_requests.client.post")
     def test_create_directory_connection_error(self, mock_post):
         """Test registration when a ConnectionError occurs (backend is offline)"""
-        mock_post.side_effect = ConnectionError("Failed to connect to the server. Please check your network connection.")
+        mock_post.side_effect = ConnectionError(
+            "Failed to connect to the server. Please check your network connection."
+        )
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
                 create_directory("test_dir", False)
@@ -89,7 +95,10 @@ class TestCreateDirectory(unittest.TestCase):
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
                 create_directory("/test_dir1/test_dir2", False)
-            self.assertIn("Directory `test_dir2` is missing! Use the --parent flag to create parent \ndirectories.\n", mock_stderr.getvalue())
+            self.assertIn(
+                "Directory `test_dir2` is missing! Use the --parent flag to create parent \ndirectories.\n",
+                mock_stderr.getvalue(),
+            )
 
 
 class TestRemoveDirectory(unittest.TestCase):
@@ -104,6 +113,14 @@ class TestRemoveDirectory(unittest.TestCase):
         mock_delete.assert_called_once()
 
     @patch("skylock_cli.api.dir_requests.client.delete")
+    def test_remove_directory_success_recursive(self, mock_delete):
+        """Test successful directory removal"""
+        mock_delete.return_value = mock_response_with_status(HTTPStatus.NO_CONTENT)
+
+        remove_directory("test_dir/", True)
+        mock_delete.assert_called_once()
+
+    @patch("skylock_cli.api.dir_requests.client.delete")
     def test_remove_directory_not_found(self, mock_delete):
         """Test removal when the directory is not found"""
         mock_delete.return_value = mock_response_with_status(HTTPStatus.NOT_FOUND)
@@ -111,12 +128,16 @@ class TestRemoveDirectory(unittest.TestCase):
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
                 remove_directory("/test1/test2/", False)
-            self.assertIn("Directory `/test1/test2` does not exist!\n", mock_stderr.getvalue())
+            self.assertIn(
+                "Directory `/test1/test2` does not exist!\n", mock_stderr.getvalue()
+            )
 
     @patch("skylock_cli.api.dir_requests.client.delete")
     def test_remove_directory_skylock_api_error(self, mock_delete):
         """Test removal with a SkyLockAPIError"""
-        mock_delete.return_value = mock_response_with_status(HTTPStatus.INTERNAL_SERVER_ERROR)
+        mock_delete.return_value = mock_response_with_status(
+            HTTPStatus.INTERNAL_SERVER_ERROR
+        )
 
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
@@ -129,7 +150,9 @@ class TestRemoveDirectory(unittest.TestCase):
     @patch("skylock_cli.api.dir_requests.client.delete")
     def test_remove_directory_connection_error(self, mock_delete):
         """Test removal when a ConnectionError occurs (backend is offline)"""
-        mock_delete.side_effect = ConnectionError("Failed to connect to the server. Please check your network connection.")
+        mock_delete.side_effect = ConnectionError(
+            "Failed to connect to the server. Please check your network connection."
+        )
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
                 remove_directory("test_dir/", False)
@@ -159,7 +182,23 @@ class TestRemoveDirectory(unittest.TestCase):
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
                 remove_directory("test_dir/", False)
-            self.assertIn("Directory `/test_dir` is not empty! Use the --recursive flag to delete it \nrecursively.\n", mock_stderr.getvalue())
+            self.assertIn(
+                "Directory `/test_dir` is not empty! Use the --recursive flag to delete it \nrecursively.\n",
+                mock_stderr.getvalue(),
+            )
+
+    @patch("skylock_cli.api.dir_requests.client.delete")
+    def test_remove_directory_with_files_but_recursive(self, mock_delete):
+        """Test removal when the directory is not empty but recursive flag is set"""
+        mock_delete.return_value = mock_response_with_status(HTTPStatus.CONFLICT)
+
+        with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
+            with self.assertRaises(exceptions.Exit):
+                remove_directory("test_dir/", True)
+            self.assertIn(
+                "Failed to delete directory (Internal Server Error)\n",
+                mock_stderr.getvalue(),
+            )
 
     def test_remove_not_a_directory_error(self):
         """Test removal when the path is not a directory"""

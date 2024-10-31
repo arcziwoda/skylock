@@ -80,7 +80,10 @@ def mkdir(
 
 @app.command()
 def rmdir(
-    directory_path: str,
+    directory_path: str = typer.Argument(
+        ...,
+        help="Path to the directory to be removed. Must end with / as this command removes directories, not files.",
+    ),
     recursive: bool = typer.Option(
         False,
         "-r",
