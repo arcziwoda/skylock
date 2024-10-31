@@ -23,6 +23,11 @@ class ResourceService:
     def get_folder_by_path(self, path: str) -> db_models.FolderEntity:
         parsed_path = self._parse_path(path)
 
+        if not parsed_path.parts:
+            raise HTTPException(
+                403, "Forbidden operation"
+            )  # Trying to access root of folder tree
+
         root_folder_name = parsed_path.parts[0]
 
         current_folder = self._get_root_folder_by_name(root_folder_name)
@@ -56,9 +61,9 @@ class ResourceService:
         if folder.is_root():
             raise HTTPException(
                 403, "Deleting your root folder is forbidden"
-            )  # TODO: think about something smarter
+            )  # TODO: custom error
 
-        has_folder_children = bool(self.get_folder_children(folder))
+        has_folder_children = bool(folder.subfolders or folder.files)
         if not is_recursively and has_folder_children:
             raise FolderNotEmptyException
         self._folder_repository.delete(folder)
@@ -69,24 +74,15 @@ class ResourceService:
             db_models.FolderEntity(name=folder_name, owner_id=user_id)
         )
 
-    def get_folder_children(
-        self, folder: db_models.FolderEntity
-    ) -> List[db_models.FolderEntity | db_models.FileEntity]:
-        children = []
-        children += folder.subfolders
-        children += folder.files
-        return children
-
-    def _parse_path(self, path: str) -> pathlib.PurePosixPath:
+    def _parse_path(
+        self, path: str
+    ) -> (
+        pathlib.PurePosixPath
+    ):  # TODO: implement custom path class that is already parsed
         parsed_path = pathlib.PurePosixPath(path)
 
         if parsed_path.is_absolute():
             parsed_path = parsed_path.relative_to("/")
-
-        print(str(parsed_path))
-
-        if not parsed_path.parts:
-            raise InvalidPathException
 
         return parsed_path
 
@@ -100,8 +96,7 @@ class ResourceService:
     def _assert_no_children_matching_name(
         self, folder: db_models.FolderEntity, name: str
     ):
-        children_names = [
-            children.name for children in self.get_folder_children(folder)
-        ]
-        if name in children_names:
+        exists_file_of_name = name in [file.name for file in folder.files]
+        exists_folder_of_name = name in [folder.name for folder in folder.subfolders]
+        if exists_file_of_name or exists_folder_of_name:
             raise ResourceAlreadyExistsException
