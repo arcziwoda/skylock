@@ -8,6 +8,15 @@ from skylock.utils.security import get_current_user
 router = APIRouter(tags=["Resource"], prefix="/folders")
 
 
+@router.get("/{path:path}")
+def get_folder_contents(
+    path: str,
+    user: models.User = Depends(get_current_user),
+    skylock: SkylockFacade = Depends(get_skylock_facade),
+) -> models.FolderContents:
+    return skylock.get_folder_contents(path, user)
+
+
 @router.post(
     "/{path:path}",
     status_code=status.HTTP_201_CREATED,

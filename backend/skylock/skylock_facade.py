@@ -19,6 +19,21 @@ class SkylockFacade:
         user_path = self._create_user_path(path, user)
         self._resource_service.create_folder_for_user(user_path, user.id)
 
+    def get_folder_contents(
+        self, path: str, user: models.User
+    ) -> models.FolderContents:
+        user_path = self._create_user_path(path, user)
+        folder = self._resource_service.get_folder_by_path(user_path)
+        children_files = [
+            models.File(name=file.name, path=f"{path}/{file.name}")
+            for file in folder.files
+        ]
+        children_folders = [
+            models.Folder(name=folder.name, path=f"{path}/{folder.name}")
+            for folder in folder.subfolders
+        ]
+        return models.FolderContents(files=children_files, folders=children_folders)
+
     def delete_folder(self, path: str, user: models.User, is_recursively: bool = False):
         user_path = self._create_user_path(path, user)
         self._resource_service.delete_folder(user_path, is_recursively=is_recursively)
