@@ -23,6 +23,14 @@ class TestCreateDirectory(unittest.TestCase):
         mock_post.assert_called_once()
 
     @patch("skylock_cli.api.dir_requests.client.post")
+    def test_create_directory_success_parent(self, mock_post):
+        """Test successful directory creation"""
+        mock_post.return_value = mock_response_with_status(HTTPStatus.CREATED)
+
+        create_directory("test_dir", True)
+        mock_post.assert_called_once()
+
+    @patch("skylock_cli.api.dir_requests.client.post")
     def test_create_directory_already_exists(self, mock_post):
         """Test registration when the user already exists"""
         mock_post.return_value = mock_response_with_status(HTTPStatus.UNAUTHORIZED)
@@ -97,6 +105,20 @@ class TestCreateDirectory(unittest.TestCase):
                 create_directory("/test_dir1/test_dir2", False)
             self.assertIn(
                 "Directory `test_dir2` is missing! Use the --parent flag to create parent \ndirectories.\n",
+                mock_stderr.getvalue(),
+            )
+
+    @patch("skylock_cli.api.dir_requests.client.post")
+    def test_create_directory_not_found_with_parent_flag(self, mock_post):
+        """Test registration when the directory is not found (NOT_FOUND)"""
+        mock_post.return_value = mock_response_with_status(HTTPStatus.NOT_FOUND)
+        mock_post.return_value.json.return_value = {"missing": "test_dir2"}
+
+        with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
+            with self.assertRaises(exceptions.Exit):
+                create_directory("/test_dir1/test_dir2", True)
+            self.assertIn(
+                "Failed to create directory (Internal Server Error)",
                 mock_stderr.getvalue(),
             )
 

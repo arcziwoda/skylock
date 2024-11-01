@@ -17,7 +17,6 @@ class ResourceService:
         self._folder_repository = folder_repository
 
     def get_folder_by_path(self, path: SkylockPath) -> db_models.FolderEntity:
-
         current_folder = self._get_root_folder_by_name(path.root_folder_name)
 
         for folder_name in path.parts:

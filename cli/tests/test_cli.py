@@ -188,6 +188,36 @@ class TestMKDIRCommand(unittest.TestCase):
         )
 
     @patch("skylock_cli.core.dir_operations.send_mkdir_request")
+    @patch("skylock_cli.core.context_manager.ContextManager.get_context")
+    def test_mkdir_success_parent_flag_long(self, mock_get_context, mock_send):
+        """Test the mkdir command"""
+        mock_get_context.return_value = Mock(
+            token=Token(access_token="test_token", token_type="bearer"),
+            user_dir=Mock(path=Path("/")),
+        )
+
+        result = runner.invoke(app, ["mkdir", "test_dir", "--parent"])
+        self.assertEqual(result.exit_code, 0)
+        mock_send.assert_called_once_with(
+            mock_get_context.return_value.token, Path("/test_dir"), True
+        )
+
+    @patch("skylock_cli.core.dir_operations.send_mkdir_request")
+    @patch("skylock_cli.core.context_manager.ContextManager.get_context")
+    def test_mkdir_success_parent_flag_short(self, mock_get_context, mock_send):
+        """Test the mkdir command"""
+        mock_get_context.return_value = Mock(
+            token=Token(access_token="test_token", token_type="bearer"),
+            user_dir=Mock(path=Path("/")),
+        )
+
+        result = runner.invoke(app, ["mkdir", "test_dir", "-p"])
+        self.assertEqual(result.exit_code, 0)
+        mock_send.assert_called_once_with(
+            mock_get_context.return_value.token, Path("/test_dir"), True
+        )
+
+    @patch("skylock_cli.core.dir_operations.send_mkdir_request")
     def test_mdkir_token_expired(self, mock_send):
         """Test the mkdir command when the token has expired"""
         mock_send.side_effect = api_exceptions.UserUnauthorizedError()

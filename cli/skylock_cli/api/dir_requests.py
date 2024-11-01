@@ -26,15 +26,8 @@ def send_mkdir_request(token: Token, path: Path, parent: bool) -> None:
     url = "/folders" + quote(str(path))
     auth = bearer_auth.BearerAuth(token)
     params = {"parent": parent}
-    # TODO: Implement the request body for the mkdir request when the API is updated.
-    print(params)
 
-    response = client.post(
-        url=url,
-        auth=auth,
-        headers=API_HEADERS,
-        # params=params
-    )
+    response = client.post(url=url, auth=auth, headers=API_HEADERS, params=params)
 
     if response.status_code == HTTPStatus.UNAUTHORIZED:
         raise api_exceptions.UserUnauthorizedError()
@@ -46,8 +39,12 @@ def send_mkdir_request(token: Token, path: Path, parent: bool) -> None:
         raise api_exceptions.InvalidPathError(str(path))
 
     if response.status_code == HTTPStatus.NOT_FOUND:
-        missing = response.json().get("missing", str(path))
-        raise api_exceptions.DirectoryMissingError(missing)
+        if not parent:
+            missing = response.json().get("missing", str(path))
+            raise api_exceptions.DirectoryMissingError(missing)
+        raise api_exceptions.SkyLockAPIError(
+            "Failed to create directory (Internal Server Error)"
+        )
 
     if response.status_code != HTTPStatus.CREATED:
         raise api_exceptions.SkyLockAPIError(
