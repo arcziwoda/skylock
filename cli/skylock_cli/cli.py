@@ -108,15 +108,26 @@ def rmdir(
 
 
 @app.command()
-def ls(directory_path: str = typer.Argument("", help="The directory to list")):
+def ls(directory_path: str = typer.Argument("", help="The directory to list")) -> None:
     """
     List the contents of a directory.
+
+    Args:
+        directory_path (str): The path of the directory to list.
+
+    Returns:
+        None
     """
     contents = list_directory(directory_path)
+
     for item in contents:
         typer.echo(typer.style(item.name, fg=item.color), nl=False)
         typer.echo("  ", nl=False)
-    typer.echo()
+
+    if contents:
+        typer.echo()
+    else:
+        typer.secho("No contents in directory", fg=typer.colors.YELLOW)
 
 
 if __name__ == "__main__":
