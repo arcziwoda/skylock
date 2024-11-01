@@ -5,7 +5,8 @@ stages:
 
 workflow:
   rules:
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: always
 
 default:
   image: python:3.13
@@ -29,6 +30,7 @@ setup_cli:
   artifacts:
     paths:
       - cli/.venv
+    expire_in: 1 hour
 
 setup_backend:
   stage: setup
@@ -45,6 +47,7 @@ setup_backend:
   artifacts:
     paths:
       - backend/.venv
+    expire_in: 1 hour
 
 lint_cli:
   stage: lint
