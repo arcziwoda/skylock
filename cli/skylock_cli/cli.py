@@ -6,6 +6,7 @@ import typer
 from art import text2art
 from skylock_cli.core.auth import register_user, login_user
 from skylock_cli.core.dir_operations import create_directory, remove_directory
+from skylock_cli.core.nav import list_directory
 
 app = typer.Typer(pretty_exceptions_show_locals=False)
 
@@ -58,7 +59,9 @@ def login(username: str) -> None:
 @app.command()
 def mkdir(
     directory_path: str,
-    parent: bool = typer.Option(False, "-p", "--parent", help="Create parent directories as needed"),
+    parent: bool = typer.Option(
+        False, "-p", "--parent", help="Create parent directories as needed"
+    ),
 ) -> None:
     """
     Create a new directory in the SkyLock.
@@ -71,7 +74,9 @@ def mkdir(
         None
     """
     created_path = create_directory(directory_path, parent)
-    typer.secho(f"Directory {str(created_path)} created successfully", fg=typer.colors.GREEN)
+    typer.secho(
+        f"Directory {str(created_path)} created successfully", fg=typer.colors.GREEN
+    )
 
 
 @app.command()
@@ -97,7 +102,21 @@ def rmdir(
         None
     """
     removed_path = remove_directory(directory_path, recursive)
-    typer.secho(f"Directory {str(removed_path)} removed successfully", fg=typer.colors.GREEN)
+    typer.secho(
+        f"Directory {str(removed_path)} removed successfully", fg=typer.colors.GREEN
+    )
+
+
+@app.command()
+def ls(directory_path: str = typer.Argument("", help="The directory to list")):
+    """
+    List the contents of a directory.
+    """
+    contents = list_directory(directory_path)
+    for item in contents:
+        typer.echo(typer.style(item.name, fg=item.color), nl=False)
+        typer.echo("  ", nl=False)
+    typer.echo()
 
 
 if __name__ == "__main__":

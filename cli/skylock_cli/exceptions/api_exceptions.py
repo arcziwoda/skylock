@@ -109,3 +109,11 @@ class InvalidPathError(SkyLockAPIError):
     def __init__(self, path: str) -> None:
         message = f"Invalid path `{path}`!"
         super().__init__(message)
+
+
+class InvalidResponseFormatError(SkyLockAPIError):
+    """Exception raised when the response format is invalid."""
+
+    def __init__(self) -> None:
+        message = "Invalid response format! (Internal Server Error)"
+        super().__init__(message)
