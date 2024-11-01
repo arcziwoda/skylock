@@ -58,9 +58,7 @@ def login(username: str) -> None:
 @app.command()
 def mkdir(
     directory_path: str,
-    parent: bool = typer.Option(
-        False, "-p", "--parent", help="Create parent directories as needed"
-    ),
+    parent: bool = typer.Option(False, "-p", "--parent", help="Create parent directories as needed"),
 ) -> None:
     """
     Create a new directory in the SkyLock.
@@ -73,9 +71,7 @@ def mkdir(
         None
     """
     created_path = create_directory(directory_path, parent)
-    typer.secho(
-        f"Directory {str(created_path)} created successfully", fg=typer.colors.GREEN
-    )
+    typer.secho(f"Directory {str(created_path)} created successfully", fg=typer.colors.GREEN)
 
 
 @app.command()
@@ -101,9 +97,7 @@ def rmdir(
         None
     """
     removed_path = remove_directory(directory_path, recursive)
-    typer.secho(
-        f"Directory {str(removed_path)} removed successfully", fg=typer.colors.GREEN
-    )
+    typer.secho(f"Directory {str(removed_path)} removed successfully", fg=typer.colors.GREEN)
 
 
 if __name__ == "__main__":
