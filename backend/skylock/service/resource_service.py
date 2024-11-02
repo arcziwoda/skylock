@@ -16,10 +16,10 @@ class ResourceService:
         self._file_repository = file_repository
         self._folder_repository = folder_repository
 
-    def get_folder_by_path(self, path: UserPath) -> db_models.FolderEntity:
-        current_folder = self._get_root_folder_by_name(path.root_folder_name)
+    def get_folder(self, user_path: UserPath) -> db_models.FolderEntity:
+        current_folder = self._get_root_folder_by_name(user_path.root_folder_name)
 
-        for folder_name in path.parts:
+        for folder_name in user_path.parts:
             current_folder = self._folder_repository.get_by_name_and_parent_id(
                 folder_name, current_folder.id
             )
@@ -28,23 +28,23 @@ class ResourceService:
 
         return current_folder
 
-    def create_folder_for_user(self, path: UserPath, user: db_models.UserEntity):
-        if path.is_root_folder():
+    def create_folder(self, user_path: UserPath):
+        if user_path.is_root_folder():
             raise ForbiddenActionException("Creation of root folder is forbidden")
 
-        folder_name = path.name
-        parent_path = path.parent
-        parent = self.get_folder_by_path(parent_path)
+        folder_name = user_path.name
+        parent_path = user_path.parent
+        parent = self.get_folder(parent_path)
 
         self._assert_no_children_matching_name(parent, folder_name)
 
         new_folder = db_models.FolderEntity(
-            name=folder_name, parent_folder=parent, owner=user
+            name=folder_name, parent_folder=parent, owner=user_path.owner
         )
         new_folder = self._folder_repository.save(new_folder)
 
-    def delete_folder(self, path: UserPath, is_recursively: bool = False):
-        folder = self.get_folder_by_path(path)
+    def delete_folder(self, user_path: UserPath, is_recursively: bool = False):
+        folder = self.get_folder(user_path)
 
         if folder.is_root():
             raise ForbiddenActionException("Deletion of root folder is forbidden")
@@ -55,9 +55,11 @@ class ResourceService:
 
         self._folder_repository.delete(folder)
 
-    def create_root_folder_for_user(self, path: UserPath, user: db_models.UserEntity):
+    def create_root_folder(self, user_path: UserPath):
         self._folder_repository.save(
-            db_models.FolderEntity(name=path.root_folder_name, owner=user)
+            db_models.FolderEntity(
+                name=user_path.root_folder_name, owner=user_path.owner
+            )
         )
 
     def _get_root_folder_by_name(self, name: str) -> db_models.FolderEntity:
