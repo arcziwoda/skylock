@@ -2,9 +2,10 @@ from fastapi import APIRouter, Depends, status
 
 from skylock.api import models
 from skylock.api.dependencies import get_current_user, get_skylock_facade
-from skylock.api.validation import validate_path
+from skylock.api.validation import validate_path_not_empty
 from skylock.database import models as db_models
 from skylock.skylock_facade import SkylockFacade
+from skylock.utils.path import UserPath
 
 router = APIRouter(tags=["Resource"], prefix="/folders")
 
@@ -15,6 +16,7 @@ router = APIRouter(tags=["Resource"], prefix="/folders")
     description=(
         "This endpoint retrieves the contents of a specified folder. It returns "
         "a list of files and subfolders contained within the folder at the provided path. "
+        "If path is empty, contents of user's root folder will be listed."
     ),
     responses={
         200: {
@@ -54,11 +56,11 @@ router = APIRouter(tags=["Resource"], prefix="/folders")
     },
 )
 def get_folder_contents(
-    path: str = Depends(validate_path),
+    path: str,
     user: db_models.UserEntity = Depends(get_current_user),
     skylock: SkylockFacade = Depends(get_skylock_facade),
 ) -> models.FolderContents:
-    return skylock.get_folder_contents(path, user)
+    return skylock.get_folder_contents(UserPath(path=path, owner=user))
 
 
 @router.post(
@@ -104,12 +106,12 @@ def get_folder_contents(
     },
 )
 def create_folder(
-    path: str = Depends(validate_path),
+    path: str = Depends(validate_path_not_empty),
     user: db_models.UserEntity = Depends(get_current_user),
     skylock: SkylockFacade = Depends(get_skylock_facade),
 ):
     print(path)
-    skylock.create_folder_for_user(path, user)
+    skylock.create_folder_for_user(UserPath(path=path, owner=user))
     return {"message": "Folder created"}
 
 
@@ -161,10 +163,10 @@ def create_folder(
     },
 )
 def delete_folder(
-    path: str = Depends(validate_path),
+    path: str = Depends(validate_path_not_empty),
     recursive: bool = False,
     user: db_models.UserEntity = Depends(get_current_user),
     skylock: SkylockFacade = Depends(get_skylock_facade),
 ):
-    skylock.delete_folder(path=path, user=user, is_recursively=recursive)
+    skylock.delete_folder(UserPath(path=path, owner=user), is_recursively=recursive)
     return {"message": "Folder deleted"}
