@@ -6,7 +6,7 @@ from skylock.utils.exceptions import (
     ResourceAlreadyExistsException,
     ResourceNotFoundException,
 )
-from skylock.utils.path import SkylockPath
+from skylock.utils.path import UserPath
 
 
 class ResourceService:
@@ -16,7 +16,7 @@ class ResourceService:
         self._file_repository = file_repository
         self._folder_repository = folder_repository
 
-    def get_folder_by_path(self, path: SkylockPath) -> db_models.FolderEntity:
+    def get_folder_by_path(self, path: UserPath) -> db_models.FolderEntity:
         current_folder = self._get_root_folder_by_name(path.root_folder_name)
 
         for folder_name in path.parts:
@@ -28,7 +28,7 @@ class ResourceService:
 
         return current_folder
 
-    def create_folder_for_user(self, path: SkylockPath, user: db_models.UserEntity):
+    def create_folder_for_user(self, path: UserPath, user: db_models.UserEntity):
         if path.is_root_folder():
             raise ForbiddenActionException("Creation of root folder is forbidden")
 
@@ -43,7 +43,7 @@ class ResourceService:
         )
         new_folder = self._folder_repository.save(new_folder)
 
-    def delete_folder(self, path: SkylockPath, is_recursively: bool = False):
+    def delete_folder(self, path: UserPath, is_recursively: bool = False):
         folder = self.get_folder_by_path(path)
 
         if folder.is_root():
@@ -55,9 +55,7 @@ class ResourceService:
 
         self._folder_repository.delete(folder)
 
-    def create_root_folder_for_user(
-        self, path: SkylockPath, user: db_models.UserEntity
-    ):
+    def create_root_folder_for_user(self, path: UserPath, user: db_models.UserEntity):
         self._folder_repository.save(
             db_models.FolderEntity(name=path.root_folder_name, owner=user)
         )

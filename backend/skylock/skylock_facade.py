@@ -3,7 +3,7 @@ from skylock.service.user_service import UserService
 from skylock.database import models as db_models
 from skylock.api import models
 from skylock.utils.exceptions import ForbiddenActionException
-from skylock.utils.path import SkylockPath
+from skylock.utils.path import UserPath
 
 
 class SkylockFacade:
@@ -29,11 +29,11 @@ class SkylockFacade:
         user_path = self._create_user_path(path, user)
         folder = self._resource_service.get_folder_by_path(user_path)
         children_files = [
-            models.File(name=file.name, path=f"{user_path.path}/{file.name}")
+            models.File(name=file.name, path=f"/{user_path.path}/{file.name}")
             for file in folder.files
         ]
         children_folders = [
-            models.Folder(name=folder.name, path=f"{user_path.path}/{folder.name}")
+            models.Folder(name=folder.name, path=f"/{user_path.path}/{folder.name}")
             for folder in folder.subfolders
         ]
         return models.FolderContents(files=children_files, folders=children_folders)
@@ -46,5 +46,5 @@ class SkylockFacade:
             raise ForbiddenActionException("Deletion of root folder is forbidden")
         self._resource_service.delete_folder(user_path, is_recursively=is_recursively)
 
-    def _create_user_path(self, path: str, user: db_models.UserEntity) -> SkylockPath:
-        return SkylockPath(path=path, root_folder_name=user.id)
+    def _create_user_path(self, path: str, user: db_models.UserEntity) -> UserPath:
+        return UserPath(path=path, root_folder_name=user.id)

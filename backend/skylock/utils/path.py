@@ -4,7 +4,7 @@ import pathlib
 from skylock.utils.exceptions import ForbiddenActionException, InvalidPathException
 
 
-class SkylockPath:
+class UserPath:
     def __init__(self, path: str, root_folder_name: str):
         self._parsed_path = self._validate_and_parse_path(path)
         if not root_folder_name:
@@ -24,10 +24,10 @@ class SkylockPath:
         return self._parsed_path.parts
 
     @property
-    def parent(self) -> "SkylockPath":
+    def parent(self) -> "UserPath":
         if self.is_root_folder():
             raise ForbiddenActionException("You cannot access parent of root folder")
-        return SkylockPath(
+        return UserPath(
             path=str(self._parsed_path.parent), root_folder_name=self._root_folder_name
         )
 

@@ -2,15 +2,59 @@ from fastapi import APIRouter, Depends, status
 
 from skylock.api import models
 from skylock.api.dependencies import get_current_user, get_skylock_facade
+from skylock.api.validation import validate_path
 from skylock.database import models as db_models
 from skylock.skylock_facade import SkylockFacade
 
 router = APIRouter(tags=["Resource"], prefix="/folders")
 
 
-@router.get("/{path:path}")
+@router.get(
+    "/{path:path}",
+    summary="Get folder contents",
+    description=(
+        "This endpoint retrieves the contents of a specified folder. It returns "
+        "a list of files and subfolders contained within the folder at the provided path. "
+    ),
+    responses={
+        200: {
+            "description": "Successful retrieval of folder contents",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "files": [
+                            {"name": "file1.txt", "path": "/folder/file1.txt"},
+                            {"name": "file2.txt", "path": "/folder/file2.txt"},
+                        ],
+                        "folders": [
+                            {"name": "subfolder1", "path": "/folder/subfolder1"},
+                            {"name": "subfolder2", "path": "/folder/subfolder2"},
+                        ],
+                    }
+                }
+            },
+        },
+        401: {
+            "description": "Unauthorized user",
+            "content": {
+                "application/json": {"example": {"detail": "Not authenticated"}}
+            },
+        },
+        404: {
+            "description": "Folder not found",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "Resource not found",
+                        "missing": "folder_name",
+                    }
+                }
+            },
+        },
+    },
+)
 def get_folder_contents(
-    path: str,
+    path: str = Depends(validate_path),
     user: db_models.UserEntity = Depends(get_current_user),
     skylock: SkylockFacade = Depends(get_skylock_facade),
 ) -> models.FolderContents:
@@ -21,7 +65,10 @@ def get_folder_contents(
     "/{path:path}",
     status_code=status.HTTP_201_CREATED,
     summary="Create a new folder",
-    description="This endpoint allows the user to create a new folder at the specified path. If the folder already exists or the path is invalid, appropriate errors will be raised.",
+    description=(
+        "This endpoint allows the user to create a new folder at the specified path. "
+        "If the folder already exists or the path is invalid, appropriate errors will be raised."
+    ),
     responses={
         201: {
             "description": "Folder created successfully",
@@ -57,7 +104,7 @@ def get_folder_contents(
     },
 )
 def create_folder(
-    path: str,
+    path: str = Depends(validate_path),
     user: db_models.UserEntity = Depends(get_current_user),
     skylock: SkylockFacade = Depends(get_skylock_facade),
 ):
@@ -114,7 +161,7 @@ def create_folder(
     },
 )
 def delete_folder(
-    path: str,
+    path: str = Depends(validate_path),
     recursive: bool = False,
     user: db_models.UserEntity = Depends(get_current_user),
     skylock: SkylockFacade = Depends(get_skylock_facade),
