@@ -3,7 +3,13 @@ Module with Directory model class
 """
 
 from pathlib import Path
-from pydantic import BaseModel, field_validator, model_validator, Field, field_serializer
+from pydantic import (
+    BaseModel,
+    field_validator,
+    model_validator,
+    Field,
+    field_serializer,
+)
 from typer.colors import MAGENTA
 
 

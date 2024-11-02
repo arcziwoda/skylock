@@ -25,7 +25,9 @@ class TestRegisterCommand(unittest.TestCase):
         """Test the register command"""
         mock_send.return_value = None
 
-        result = runner.invoke(app, ["register", "testuser1"], input="testpass1\ntestpass1")
+        result = runner.invoke(
+            app, ["register", "testuser1"], input="testpass1\ntestpass1"
+        )
 
         self.assertEqual(result.exit_code, 0)
         self.assertIn("User registered successfully", result.output)
@@ -35,25 +37,35 @@ class TestRegisterCommand(unittest.TestCase):
         """Test the register command when the user already exists"""
         mock_send.side_effect = api_exceptions.UserAlreadyExistsError("testuser")
 
-        result = runner.invoke(app, ["register", "testuser"], input="testpass\ntestpass")
+        result = runner.invoke(
+            app, ["register", "testuser"], input="testpass\ntestpass"
+        )
         self.assertEqual(result.exit_code, 1)
         self.assertIn("User with username `testuser` already exists!", result.output)
 
     @patch("skylock_cli.core.auth.send_register_request")
     def test_register_skylock_api_error(self, mock_send):
         """Test the register command when a SkyLockAPIError occurs"""
-        mock_send.side_effect = api_exceptions.SkyLockAPIError("An unexpected API error occurred")
+        mock_send.side_effect = api_exceptions.SkyLockAPIError(
+            "An unexpected API error occurred"
+        )
 
-        result = runner.invoke(app, ["register", "testuser2"], input="testpass2\ntestpass2")
+        result = runner.invoke(
+            app, ["register", "testuser2"], input="testpass2\ntestpass2"
+        )
         self.assertEqual(result.exit_code, 1)
         self.assertIn("An unexpected API error occurred", result.output)
 
     @patch("skylock_cli.core.auth.send_register_request")
     def test_register_connection_error(self, mock_send):
         """Test the register command when a ConnectionError occurs (backend is offline)"""
-        mock_send.side_effect = ConnectionError("Failed to connect to the server. Please check your network connection.")
+        mock_send.side_effect = ConnectionError(
+            "Failed to connect to the server. Please check your network connection."
+        )
 
-        result = runner.invoke(app, ["register", "testuser3"], input="testpass3\ntestpass3")
+        result = runner.invoke(
+            app, ["register", "testuser3"], input="testpass3\ntestpass3"
+        )
         self.assertEqual(result.exit_code, 1)
         self.assertIn(
             "Failed to connect to the server. Please check your network \nconnection.",
@@ -63,7 +75,9 @@ class TestRegisterCommand(unittest.TestCase):
     @patch("skylock_cli.core.auth.send_register_request")
     def test_register_password_mismatch(self, _mock_send):
         """Test the register command when the passwords do not match"""
-        result = runner.invoke(app, ["register", "testuser4"], input="testpass4\ntestpass5")
+        result = runner.invoke(
+            app, ["register", "testuser4"], input="testpass4\ntestpass5"
+        )
         self.assertEqual(result.exit_code, 1)
         self.assertIn("Passwords do not match. Please try again.", result.output)
 
@@ -123,7 +137,9 @@ class TestLoginCommand(unittest.TestCase):
     @patch("skylock_cli.core.auth.send_login_request")
     def test_login_skylock_api_error(self, mock_send):
         """Test the login command when a SkyLockAPIError occurs"""
-        mock_send.side_effect = api_exceptions.SkyLockAPIError("An unexpected API error occurred")
+        mock_send.side_effect = api_exceptions.SkyLockAPIError(
+            "An unexpected API error occurred"
+        )
 
         result = runner.invoke(app, ["login", "testuser"], input="testpass")
         self.assertEqual(result.exit_code, 1)
@@ -141,7 +157,9 @@ class TestLoginCommand(unittest.TestCase):
     @patch("skylock_cli.core.auth.send_login_request")
     def test_login_connection_error(self, mock_send):
         """Test the login command when a ConnectionError occurs (backend is offline)"""
-        mock_send.side_effect = ConnectionError("Failed to connect to the server. Please check your network connection.")
+        mock_send.side_effect = ConnectionError(
+            "Failed to connect to the server. Please check your network connection."
+        )
 
         result = runner.invoke(app, ["login", "testuser"], input="testpass")
         self.assertEqual(result.exit_code, 1)
@@ -165,7 +183,9 @@ class TestMKDIRCommand(unittest.TestCase):
 
         result = runner.invoke(app, ["mkdir", "test_dir"])
         self.assertEqual(result.exit_code, 0)
-        mock_send.assert_called_once_with(mock_get_context.return_value.token, Path("/test_dir"), False)
+        mock_send.assert_called_once_with(
+            mock_get_context.return_value.token, Path("/test_dir"), False
+        )
 
     @patch("skylock_cli.core.dir_operations.send_mkdir_request")
     @patch("skylock_cli.core.context_manager.ContextManager.get_context")
@@ -178,7 +198,9 @@ class TestMKDIRCommand(unittest.TestCase):
 
         result = runner.invoke(app, ["mkdir", "test_dir", "--parent"])
         self.assertEqual(result.exit_code, 0)
-        mock_send.assert_called_once_with(mock_get_context.return_value.token, Path("/test_dir"), True)
+        mock_send.assert_called_once_with(
+            mock_get_context.return_value.token, Path("/test_dir"), True
+        )
 
     @patch("skylock_cli.core.dir_operations.send_mkdir_request")
     @patch("skylock_cli.core.context_manager.ContextManager.get_context")
@@ -191,7 +213,9 @@ class TestMKDIRCommand(unittest.TestCase):
 
         result = runner.invoke(app, ["mkdir", "test_dir", "-p"])
         self.assertEqual(result.exit_code, 0)
-        mock_send.assert_called_once_with(mock_get_context.return_value.token, Path("/test_dir"), True)
+        mock_send.assert_called_once_with(
+            mock_get_context.return_value.token, Path("/test_dir"), True
+        )
 
     @patch("skylock_cli.core.dir_operations.send_mkdir_request")
     def test_mdkir_token_expired(self, mock_send):
@@ -200,7 +224,9 @@ class TestMKDIRCommand(unittest.TestCase):
 
         result = runner.invoke(app, ["mkdir", "test_dir"])
         self.assertEqual(result.exit_code, 1)
-        self.assertIn("User is unauthorized. Please login to use this command.", result.output)
+        self.assertIn(
+            "User is unauthorized. Please login to use this command.", result.output
+        )
 
     @patch("skylock_cli.core.dir_operations.send_mkdir_request")
     def test_mkdir_directory_already_exists(self, mock_send):
@@ -214,16 +240,22 @@ class TestMKDIRCommand(unittest.TestCase):
     @patch("skylock_cli.core.dir_operations.send_mkdir_request")
     def test_mkdir_skylock_api_error(self, mock_send):
         """Test the mkdir command when a SkyLockAPIError occurs"""
-        mock_send.side_effect = api_exceptions.SkyLockAPIError("Failed to create directory (Internal Server Error)")
+        mock_send.side_effect = api_exceptions.SkyLockAPIError(
+            "Failed to create directory (Internal Server Error)"
+        )
 
         result = runner.invoke(app, ["mkdir", "test_dir"])
         self.assertEqual(result.exit_code, 1)
-        self.assertIn("Failed to create directory (Internal Server Error)", result.output)
+        self.assertIn(
+            "Failed to create directory (Internal Server Error)", result.output
+        )
 
     @patch("skylock_cli.core.dir_operations.send_mkdir_request")
     def test_mkdir_connection_error(self, mock_send):
         """Test the mkdir command when a ConnectionError occurs (backend is offline)"""
-        mock_send.side_effect = ConnectionError("Failed to connect to the server. Please check your network connection.")
+        mock_send.side_effect = ConnectionError(
+            "Failed to connect to the server. Please check your network connection."
+        )
 
         result = runner.invoke(app, ["mkdir", "test_dir"])
         self.assertEqual(result.exit_code, 1)
@@ -268,7 +300,9 @@ class TestRMDIRCommand(unittest.TestCase):
 
         result = runner.invoke(app, ["rmdir", "test_dir/"])
         self.assertEqual(result.exit_code, 0)
-        mock_send.assert_called_once_with(mock_get_context.return_value.token, Path("/test_dir"), False)
+        mock_send.assert_called_once_with(
+            mock_get_context.return_value.token, Path("/test_dir"), False
+        )
 
     @patch("skylock_cli.core.dir_operations.send_rmdir_request")
     @patch("skylock_cli.core.context_manager.ContextManager.get_context")
@@ -281,7 +315,9 @@ class TestRMDIRCommand(unittest.TestCase):
 
         result = runner.invoke(app, ["rmdir", "test_dir/", "--recursive"])
         self.assertEqual(result.exit_code, 0)
-        mock_send.assert_called_once_with(mock_get_context.return_value.token, Path("/test_dir"), True)
+        mock_send.assert_called_once_with(
+            mock_get_context.return_value.token, Path("/test_dir"), True
+        )
 
     @patch("skylock_cli.core.dir_operations.send_rmdir_request")
     @patch("skylock_cli.core.context_manager.ContextManager.get_context")
@@ -294,7 +330,9 @@ class TestRMDIRCommand(unittest.TestCase):
 
         result = runner.invoke(app, ["rmdir", "test_dir/", "-r"])
         self.assertEqual(result.exit_code, 0)
-        mock_send.assert_called_once_with(mock_get_context.return_value.token, Path("/test_dir"), True)
+        mock_send.assert_called_once_with(
+            mock_get_context.return_value.token, Path("/test_dir"), True
+        )
 
     def test_rmdir_not_a_directory_error(self):
         """Test the rmdir command when the path is not a directory"""
@@ -309,7 +347,9 @@ class TestRMDIRCommand(unittest.TestCase):
 
         result = runner.invoke(app, ["rmdir", "test_dir/"])
         self.assertEqual(result.exit_code, 1)
-        self.assertIn("User is unauthorized. Please login to use this command.", result.output)
+        self.assertIn(
+            "User is unauthorized. Please login to use this command.", result.output
+        )
 
     @patch("skylock_cli.core.dir_operations.send_rmdir_request")
     def test_rmdir_directory_not_found_error(self, mock_send):
@@ -335,16 +375,22 @@ class TestRMDIRCommand(unittest.TestCase):
     @patch("skylock_cli.core.dir_operations.send_rmdir_request")
     def test_rmdir_skylock_api_error(self, mock_send):
         """Test the rmdir command when a SkyLockAPIError occurs"""
-        mock_send.side_effect = api_exceptions.SkyLockAPIError("Failed to delete directory (Internal Server Error)")
+        mock_send.side_effect = api_exceptions.SkyLockAPIError(
+            "Failed to delete directory (Internal Server Error)"
+        )
 
         result = runner.invoke(app, ["rmdir", "/test_dir/"])
         self.assertEqual(result.exit_code, 1)
-        self.assertIn("Failed to delete directory (Internal Server Error)", result.output)
+        self.assertIn(
+            "Failed to delete directory (Internal Server Error)", result.output
+        )
 
     @patch("skylock_cli.core.dir_operations.send_rmdir_request")
     def test_rmdir_connection_error(self, mock_send):
         """Test the rmdir command when a ConnectionError occurs (backend is offline)"""
-        mock_send.side_effect = ConnectionError("Failed to connect to the server. Please check your network connection.")
+        mock_send.side_effect = ConnectionError(
+            "Failed to connect to the server. Please check your network connection."
+        )
 
         result = runner.invoke(app, ["rmdir", "/test_dir/"])
         self.assertEqual(result.exit_code, 1)
@@ -445,12 +491,16 @@ class TestLSCommand(unittest.TestCase):
 
         result = runner.invoke(app, ["ls"])
         self.assertEqual(result.exit_code, 1)
-        self.assertIn("User is unauthorized. Please login to use this command.", result.output)
+        self.assertIn(
+            "User is unauthorized. Please login to use this command.", result.output
+        )
 
     @patch("skylock_cli.core.nav.send_ls_request")
     def test_ls_skylock_api_error(self, mock_send):
         """Test the ls command when a SkyLockAPIError occurs"""
-        mock_send.side_effect = api_exceptions.SkyLockAPIError("An unexpected API error occurred")
+        mock_send.side_effect = api_exceptions.SkyLockAPIError(
+            "An unexpected API error occurred"
+        )
 
         result = runner.invoke(app, ["ls"])
         self.assertEqual(result.exit_code, 1)
@@ -459,7 +509,9 @@ class TestLSCommand(unittest.TestCase):
     @patch("skylock_cli.core.nav.send_ls_request")
     def test_ls_connection_error(self, mock_send):
         """Test the ls command when a ConnectionError occurs (backend is offline)"""
-        mock_send.side_effect = ConnectionError("Failed to connect to the server. Please check your network connection.")
+        mock_send.side_effect = ConnectionError(
+            "Failed to connect to the server. Please check your network connection."
+        )
 
         result = runner.invoke(app, ["ls"])
         self.assertEqual(result.exit_code, 1)
@@ -506,7 +558,9 @@ class TestCDCommand(unittest.TestCase):
 
         result = runner.invoke(app, ["cd", "test_dir"])
         self.assertEqual(result.exit_code, 0)
-        mock_send.assert_called_once_with(mock_get_context.return_value.token, Path("/test_dir"))
+        mock_send.assert_called_once_with(
+            mock_get_context.return_value.token, Path("/test_dir")
+        )
 
     @patch("skylock_cli.core.nav.send_cd_request")
     def test_cd_token_expired(self, mock_send):
@@ -515,7 +569,9 @@ class TestCDCommand(unittest.TestCase):
 
         result = runner.invoke(app, ["cd", "test_dir/"])
         self.assertEqual(result.exit_code, 1)
-        self.assertIn("User is unauthorized. Please login to use this command.", result.output)
+        self.assertIn(
+            "User is unauthorized. Please login to use this command.", result.output
+        )
 
     @patch("skylock_cli.core.nav.send_cd_request")
     def test_cd_directory_not_found_error(self, mock_send):
@@ -529,16 +585,22 @@ class TestCDCommand(unittest.TestCase):
     @patch("skylock_cli.core.nav.send_cd_request")
     def test_cd_skylock_api_error(self, mock_send):
         """Test the cd command when a SkyLockAPIError occurs"""
-        mock_send.side_effect = api_exceptions.SkyLockAPIError("Failed to change directory (Internal Server Error)")
+        mock_send.side_effect = api_exceptions.SkyLockAPIError(
+            "Failed to change directory (Internal Server Error)"
+        )
 
         result = runner.invoke(app, ["cd", "test_dir/"])
         self.assertEqual(result.exit_code, 1)
-        self.assertIn("Failed to change directory (Internal Server Error)", result.output)
+        self.assertIn(
+            "Failed to change directory (Internal Server Error)", result.output
+        )
 
     @patch("skylock_cli.core.nav.send_cd_request")
     def test_cd_connection_error(self, mock_send):
         """Test the cd command when a ConnectionError occurs (backend is offline)"""
-        mock_send.side_effect = ConnectionError("Failed to connect to the server. Please check your network connection.")
+        mock_send.side_effect = ConnectionError(
+            "Failed to connect to the server. Please check your network connection."
+        )
 
         result = runner.invoke(app, ["cd", "test_dir/"])
         self.assertEqual(result.exit_code, 1)
