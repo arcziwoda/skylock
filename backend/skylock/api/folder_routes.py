@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, status
 
 from skylock.api import models
-from skylock.api.dependencies import get_skylock_facade
+from skylock.api.dependencies import get_current_user, get_skylock_facade
+from skylock.database import models as db_models
 from skylock.skylock_facade import SkylockFacade
-from skylock.utils.security import get_current_user
 
 router = APIRouter(tags=["Resource"], prefix="/folders")
 
@@ -11,7 +11,7 @@ router = APIRouter(tags=["Resource"], prefix="/folders")
 @router.get("/{path:path}")
 def get_folder_contents(
     path: str,
-    user: models.User = Depends(get_current_user),
+    user: db_models.UserEntity = Depends(get_current_user),
     skylock: SkylockFacade = Depends(get_skylock_facade),
 ) -> models.FolderContents:
     return skylock.get_folder_contents(path, user)
@@ -58,7 +58,7 @@ def get_folder_contents(
 )
 def create_folder(
     path: str,
-    user: models.User = Depends(get_current_user),
+    user: db_models.UserEntity = Depends(get_current_user),
     skylock: SkylockFacade = Depends(get_skylock_facade),
 ):
     print(path)
@@ -116,7 +116,7 @@ def create_folder(
 def delete_folder(
     path: str,
     recursive: bool = False,
-    user: models.User = Depends(get_current_user),
+    user: db_models.UserEntity = Depends(get_current_user),
     skylock: SkylockFacade = Depends(get_skylock_facade),
 ):
     skylock.delete_folder(path=path, user=user, is_recursively=recursive)
