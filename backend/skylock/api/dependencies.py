@@ -1,10 +1,12 @@
 from fastapi import Depends
 
+from skylock.database.models import UserEntity
 from skylock.database.repository import FileRepository, FolderRepository, UserRepository
 from skylock.database.session import get_db_session
 from skylock.service.resource_service import ResourceService
 from skylock.service.user_service import UserService
 from skylock.skylock_facade import SkylockFacade
+from skylock.utils.security import get_user_from_jwt, oauth2_scheme
 
 
 def get_user_repository(db=Depends(get_db_session)) -> UserRepository:
@@ -37,3 +39,9 @@ def get_skylock_facade(
     resource_service: ResourceService = Depends(get_resource_service),
 ) -> SkylockFacade:
     return SkylockFacade(user_service=user_service, resource_service=resource_service)
+
+
+def get_current_user(
+    token: str = Depends(oauth2_scheme), user_repository=Depends(get_user_repository)
+) -> UserEntity:
+    return get_user_from_jwt(token=token, user_repository=user_repository)

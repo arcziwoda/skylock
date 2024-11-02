@@ -1,62 +1,76 @@
-from datetime import datetime, timedelta, timezone
-from unittest.mock import patch
 import pytest
+from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException
 from jose import jwt
-import uuid
+from unittest.mock import Mock
 
-from skylock.utils.security import get_current_user
-from skylock.api.models import User
-
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-FAKE_JWT_SECRET = "fake_secret_for_testing"
-
-
-@pytest.fixture
-def user():
-    return User(id=str(uuid.uuid4()), username="testuser")
+from skylock.utils.security import (
+    get_user_from_jwt,
+    create_jwt_for_user,
+    decode_jwt,
+    ALGORITHM,
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+)
+from skylock.config import JWT_SECRET
+from skylock.database import models as db_models
 
 
-@pytest.fixture
-def valid_token(user):
-    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode = {"id": str(user.id), "sub": user.username, "exp": expire}
-    return jwt.encode(to_encode, FAKE_JWT_SECRET, algorithm=ALGORITHM)
+def test_create_jwt_for_user():
+    user = db_models.UserEntity(id=1, username="testuser")
+    token = create_jwt_for_user(user)
+    decoded_token = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
+
+    assert decoded_token["id"] == user.id
+    assert decoded_token["sub"] == user.username
+    assert "exp" in decoded_token
 
 
-@pytest.fixture
-def expired_token(user):
-    expire = datetime.now(timezone.utc) - timedelta(minutes=1)
-    to_encode = {"id": str(user.id), "sub": user.username, "exp": expire}
-    return jwt.encode(to_encode, FAKE_JWT_SECRET, algorithm=ALGORITHM)
+def test_decode_jwt():
+    payload = {
+        "id": 1,
+        "sub": "testuser",
+        "exp": datetime.now(timezone.utc)
+        + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+    }
+    token = jwt.encode(payload, JWT_SECRET, algorithm=ALGORITHM)
+    decoded_token = decode_jwt(token)
+
+    assert decoded_token["id"] == payload["id"]
+    assert decoded_token["sub"] == payload["sub"]
+    assert decoded_token["exp"] == payload["exp"]
 
 
-@pytest.fixture
-def invalid_token():
-    return "invalid_token"
+def test_get_user_from_jwt_valid_token():
+    user = db_models.UserEntity(id=1, username="testuser")
+    user_repository = Mock()
+    user_repository.get_by_id.return_value = user
+
+    token = create_jwt_for_user(user)
+    retrieved_user = get_user_from_jwt(token, user_repository)
+
+    assert retrieved_user == user
 
 
-def test_get_current_user_valid_token(valid_token, user):
-    with patch("skylock.utils.security.JWT_SECRET", FAKE_JWT_SECRET):
-        result = get_current_user(token=valid_token)
+def test_get_user_from_jwt_invalid_token():
+    user_repository = Mock()
+    invalid_token = "invalid.token.here"
 
-    assert result == user
+    with pytest.raises(HTTPException) as excinfo:
+        get_user_from_jwt(invalid_token, user_repository)
 
-
-def test_get_current_user_invalid_token(invalid_token):
-    with patch("skylock.utils.security.JWT_SECRET", FAKE_JWT_SECRET):
-        with pytest.raises(HTTPException) as exc_info:
-            get_current_user(token=invalid_token)
-
-    assert exc_info.value.status_code == 401
-    assert exc_info.value.detail == "Invalid token"
+    assert excinfo.value.status_code == 401
+    assert excinfo.value.detail == "Invalid token"
 
 
-def test_get_current_user_expired_token(expired_token):
-    with patch("skylock.utils.security.JWT_SECRET", FAKE_JWT_SECRET):
-        with pytest.raises(HTTPException) as exc_info:
-            get_current_user(token=expired_token)
+def test_get_user_from_jwt_user_not_found():
+    user_repository = Mock()
+    user_repository.get_by_id.return_value = None
 
-    assert exc_info.value.status_code == 401
-    assert exc_info.value.detail == "Invalid token"
+    user = db_models.UserEntity(id=1, username="testuser")
+    token = create_jwt_for_user(user)
+
+    with pytest.raises(HTTPException) as excinfo:
+        get_user_from_jwt(token, user_repository)
+
+    assert excinfo.value.status_code == 401
+    assert excinfo.value.detail == "Invalid token"

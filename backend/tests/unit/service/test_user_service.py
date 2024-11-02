@@ -10,7 +10,7 @@ from skylock.utils.exceptions import (
 )
 from skylock.database.models import UserEntity
 from skylock.database.repository import UserRepository
-from skylock.api.models import User, Token
+from skylock.api.models import Token
 
 from skylock.service.user_service import UserService
 
@@ -74,15 +74,13 @@ def test_login_user_successful(
     with patch(
         "skylock.service.user_service.create_jwt_for_user",
         return_value="fake_jwt_token",
-    ) as save_jwt_for_user_mock:
+    ) as create_jwt_for_user_mock:
         result = user_service.login_user(user_data["username"], user_data["password"])
 
     assert isinstance(result, Token)
     assert result.access_token == "fake_jwt_token"
     assert result.token_type == "bearer"
-    save_jwt_for_user_mock.assert_called_once_with(
-        User(id=user_data["id"], username=user_data["username"])
-    )
+    create_jwt_for_user_mock.assert_called_once_with(user_entity)
     mock_user_repository.get_by_username.assert_called_once_with(user_data["username"])
 
 

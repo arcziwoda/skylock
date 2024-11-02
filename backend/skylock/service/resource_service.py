@@ -28,7 +28,7 @@ class ResourceService:
 
         return current_folder
 
-    def create_folder_for_user(self, path: SkylockPath, user_id: str):
+    def create_folder_for_user(self, path: SkylockPath, user: db_models.UserEntity):
         if path.is_root_folder():
             raise ForbiddenActionException("Creation of root folder is forbidden")
 
@@ -39,7 +39,7 @@ class ResourceService:
         self._assert_no_children_matching_name(parent, folder_name)
 
         new_folder = db_models.FolderEntity(
-            name=folder_name, parent_folder=parent, owner_id=user_id
+            name=folder_name, parent_folder=parent, owner=user
         )
         new_folder = self._folder_repository.save(new_folder)
 
@@ -55,9 +55,11 @@ class ResourceService:
 
         self._folder_repository.delete(folder)
 
-    def create_root_folder_for_user(self, user_id: str, path: SkylockPath):
+    def create_root_folder_for_user(
+        self, path: SkylockPath, user: db_models.UserEntity
+    ):
         self._folder_repository.save(
-            db_models.FolderEntity(name=path.root_folder_name, owner_id=user_id)
+            db_models.FolderEntity(name=path.root_folder_name, owner=user)
         )
 
     def _get_root_folder_by_name(self, name: str) -> db_models.FolderEntity:
