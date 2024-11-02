@@ -10,7 +10,7 @@ from typer.testing import CliRunner
 from art import text2art
 from skylock_cli.model.token import Token
 from skylock_cli.model.context import Context
-from skylock_cli.model.user_dir import UserDir
+from skylock_cli.model.directory import Directory
 from skylock_cli.cli import app
 from skylock_cli.exceptions import api_exceptions
 
@@ -99,8 +99,8 @@ class TestLoginCommand(unittest.TestCase):
         config_file_path = config_dir_path / "test_skylock_config.json"
 
         old_token = Token(access_token="old_token", token_type="bearer")
-        old_cwd = UserDir(path=Path("/old_cwd"))
-        old_context = Context(token=old_token, user_dir=old_cwd)
+        old_cwd = Directory(path=Path("/old_cwd"), name="old_cwd/")
+        old_context = Context(token=old_token, cwd=old_cwd)
         with open(config_file_path, "w", encoding="utf-8") as file:
             json.dump({"context": old_context.model_dump()}, file, indent=4)
 
@@ -113,12 +113,12 @@ class TestLoginCommand(unittest.TestCase):
         self.assertIn("Hello, testuser", result.output)
         self.assertIn("Welcome to our file hosting service", result.output)
         self.assertIn(text2art("SkyLock"), result.output)
-        self.assertIn("Your current working directory is: /old_cwd", result.output)
+        self.assertIn("Your current working directory is: /", result.output)
 
         with open(config_file_path, "r", encoding="utf-8") as file:
             data = json.load(file)
             new_context = Context(**data.get("context", {}))
-            self.assertEqual(new_context.user_dir.path, Path("/old_cwd"))
+            self.assertEqual(new_context.cwd.path, Path("/"))
             self.assertEqual(new_context.token.access_token, "new_token")
 
         # Clean up: delete the created file and directory
@@ -178,7 +178,7 @@ class TestMKDIRCommand(unittest.TestCase):
         """Test the mkdir command"""
         mock_get_context.return_value = Mock(
             token=Token(access_token="test_token", token_type="bearer"),
-            user_dir=Mock(path=Path("/")),
+            cwd=Mock(path=Path("/"), name="/"),
         )
 
         result = runner.invoke(app, ["mkdir", "test_dir"])
@@ -193,7 +193,7 @@ class TestMKDIRCommand(unittest.TestCase):
         """Test the mkdir command"""
         mock_get_context.return_value = Mock(
             token=Token(access_token="test_token", token_type="bearer"),
-            user_dir=Mock(path=Path("/")),
+            cwd=Mock(path=Path("/"), name="/"),
         )
 
         result = runner.invoke(app, ["mkdir", "test_dir", "--parent"])
@@ -208,7 +208,7 @@ class TestMKDIRCommand(unittest.TestCase):
         """Test the mkdir command"""
         mock_get_context.return_value = Mock(
             token=Token(access_token="test_token", token_type="bearer"),
-            user_dir=Mock(path=Path("/")),
+            cwd=Mock(path=Path("/"), name="/"),
         )
 
         result = runner.invoke(app, ["mkdir", "test_dir", "-p"])
@@ -295,7 +295,7 @@ class TestRMDIRCommand(unittest.TestCase):
         """Test the rmdir command"""
         mock_get_context.return_value = Mock(
             token=Token(access_token="test_token", token_type="bearer"),
-            user_dir=Mock(path=Path("/")),
+            cwd=Mock(path=Path("/"), name="/"),
         )
 
         result = runner.invoke(app, ["rmdir", "test_dir/"])
@@ -310,7 +310,7 @@ class TestRMDIRCommand(unittest.TestCase):
         """Test the rmdir command"""
         mock_get_context.return_value = Mock(
             token=Token(access_token="test_token", token_type="bearer"),
-            user_dir=Mock(path=Path("/")),
+            cwd=Mock(path=Path("/"), name="/"),
         )
 
         result = runner.invoke(app, ["rmdir", "test_dir/", "--recursive"])
@@ -325,7 +325,7 @@ class TestRMDIRCommand(unittest.TestCase):
         """Test the rmdir command"""
         mock_get_context.return_value = Mock(
             token=Token(access_token="test_token", token_type="bearer"),
-            user_dir=Mock(path=Path("/")),
+            cwd=Mock(path=Path("/"), name="/"),
         )
 
         result = runner.invoke(app, ["rmdir", "test_dir/", "-r"])
@@ -409,7 +409,7 @@ class TestLSCommand(unittest.TestCase):
         """Test the ls command"""
         mock_get_context.return_value = Mock(
             token=Token(access_token="test_token", token_type="bearer"),
-            user_dir=Mock(path=Path("/")),
+            cwd=Mock(path=Path("/"), name="/"),
         )
 
         mock_files = [
@@ -433,7 +433,7 @@ class TestLSCommand(unittest.TestCase):
         """Test the ls command"""
         mock_get_context.return_value = Mock(
             token=Token(access_token="test_token", token_type="bearer"),
-            user_dir=Mock(path=Path("/")),
+            cwd=Mock(path=Path("/"), name="/"),
         )
 
         mock_send.return_value = {"files": [], "folders": []}
@@ -448,7 +448,7 @@ class TestLSCommand(unittest.TestCase):
         """Test the ls command"""
         mock_get_context.return_value = Mock(
             token=Token(access_token="test_token", token_type="bearer"),
-            user_dir=Mock(path=Path("/")),
+            cwd=Mock(path=Path("/"), name="/"),
         )
 
         mock_files = [
@@ -469,7 +469,7 @@ class TestLSCommand(unittest.TestCase):
         """Test the ls command"""
         mock_get_context.return_value = Mock(
             token=Token(access_token="test_token", token_type="bearer"),
-            user_dir=Mock(path=Path("/")),
+            cwd=Mock(path=Path("/"), name="/"),
         )
 
         mock_files = []
@@ -537,6 +537,77 @@ class TestLSCommand(unittest.TestCase):
         result = runner.invoke(app, ["ls"])
         self.assertEqual(result.exit_code, 1)
         self.assertIn("Invalid response format! (Internal Server Error)", result.output)
+
+
+class TestCDCommand(unittest.TestCase):
+    """Test cases for the cd command"""
+
+    @patch("skylock_cli.core.nav.send_cd_request")
+    @patch("skylock_cli.core.context_manager.ContextManager.get_context")
+    @patch("skylock_cli.core.context_manager.ContextManager.save_context")
+    def test_cd_success(self, mock_save_context, mock_get_context, mock_send):
+        """Test the cd command"""
+        mock_get_context.return_value = Mock(
+            token=Token(access_token="test_token", token_type="bearer"),
+            cwd=Mock(path=Path("/"), name="/"),
+        )
+
+        mock_save_context.return_value = None
+
+        mock_send.return_value = None
+
+        result = runner.invoke(app, ["cd", "test_dir"])
+        self.assertEqual(result.exit_code, 0)
+        mock_send.assert_called_once_with(
+            mock_get_context.return_value.token, Path("/test_dir")
+        )
+
+    @patch("skylock_cli.core.nav.send_cd_request")
+    def test_cd_token_expired(self, mock_send):
+        """Test the cd command when the token has expired"""
+        mock_send.side_effect = api_exceptions.UserUnauthorizedError()
+
+        result = runner.invoke(app, ["cd", "test_dir/"])
+        self.assertEqual(result.exit_code, 1)
+        self.assertIn(
+            "User is unauthorized. Please login to use this command.", result.output
+        )
+
+    @patch("skylock_cli.core.nav.send_cd_request")
+    def test_cd_directory_not_found_error(self, mock_send):
+        """Test the cd command when a DirectoryNotFoundError occurs"""
+        mock_send.side_effect = api_exceptions.DirectoryNotFoundError("/test_dir")
+
+        result = runner.invoke(app, ["cd", "test_dir/"])
+        self.assertEqual(result.exit_code, 1)
+        self.assertIn("Directory `/test_dir` does not exist!", result.output)
+
+    @patch("skylock_cli.core.nav.send_cd_request")
+    def test_cd_skylock_api_error(self, mock_send):
+        """Test the cd command when a SkyLockAPIError occurs"""
+        mock_send.side_effect = api_exceptions.SkyLockAPIError(
+            "Failed to change directory (Internal Server Error)"
+        )
+
+        result = runner.invoke(app, ["cd", "test_dir/"])
+        self.assertEqual(result.exit_code, 1)
+        self.assertIn(
+            "Failed to change directory (Internal Server Error)", result.output
+        )
+
+    @patch("skylock_cli.core.nav.send_cd_request")
+    def test_cd_connection_error(self, mock_send):
+        """Test the cd command when a ConnectionError occurs (backend is offline)"""
+        mock_send.side_effect = ConnectionError(
+            "Failed to connect to the server. Please check your network connection."
+        )
+
+        result = runner.invoke(app, ["cd", "test_dir/"])
+        self.assertEqual(result.exit_code, 1)
+        self.assertIn(
+            "Failed to connect to the server. Please check your network \nconnection.",
+            result.output,
+        )
 
 
 if __name__ == "__main__":

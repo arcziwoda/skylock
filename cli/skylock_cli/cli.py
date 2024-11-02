@@ -6,7 +6,7 @@ import typer
 from art import text2art
 from skylock_cli.core.auth import register_user, login_user
 from skylock_cli.core.dir_operations import create_directory, remove_directory
-from skylock_cli.core.nav import list_directory
+from skylock_cli.core.nav import list_directory, change_directory
 
 app = typer.Typer(pretty_exceptions_show_locals=False)
 
@@ -51,7 +51,7 @@ def login(username: str) -> None:
     typer.secho("Welcome to our file hosting service", fg=typer.colors.BLUE, bold=True)
     typer.secho(text2art("SkyLock"), fg=typer.colors.BLUE)
     typer.secho(
-        f"Your current working directory is: {str(context.user_dir)}",
+        f"Your current working directory is: {str(context.cwd.path)}",
         fg=typer.colors.BLUE,
     )
 
@@ -128,6 +128,23 @@ def ls(directory_path: str = typer.Argument("", help="The directory to list")) -
         typer.echo()
     else:
         typer.secho("No contents in directory", fg=typer.colors.YELLOW)
+
+
+@app.command()
+def cd(
+    directory_path: str = typer.Argument("", help="The directory to change to")
+) -> None:
+    """
+    Change the current working directory.
+
+    Args:
+        directory_path (str): The path of the directory to change to.
+
+    Returns:
+        None
+    """
+    new_cwd = change_directory(directory_path)
+    typer.secho(f"Changed directory to {str(new_cwd)}", fg=typer.colors.GREEN)
 
 
 if __name__ == "__main__":

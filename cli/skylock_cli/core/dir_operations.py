@@ -14,7 +14,7 @@ def create_directory(directory_path: str, parent: bool) -> Path:
     current_context = context_manager.ContextManager.get_context()
     with CLIExceptionHandler():
         joind_path = path_parser.parse_path(
-            current_context.user_dir.path, Path(directory_path)
+            current_context.cwd.path, Path(directory_path)
         )
         send_mkdir_request(current_context.token, joind_path, parent)
     return joind_path
@@ -28,7 +28,7 @@ def remove_directory(directory_path: str, recursive: bool) -> Path:
             raise NotADirectoryError(directory_path)
 
         joind_path = path_parser.parse_path(
-            current_context.user_dir.path, Path(directory_path)
+            current_context.cwd.path, Path(directory_path)
         )
         send_rmdir_request(current_context.token, joind_path, recursive)
     return joind_path

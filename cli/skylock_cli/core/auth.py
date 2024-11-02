@@ -2,10 +2,11 @@
 Module that contains logic for the cli commands related to authentication
 """
 
+from pathlib import Path
 from skylock_cli.api.auth_requests import send_login_request, send_register_request
 from skylock_cli.utils.cli_exception_handler import CLIExceptionHandler
 from skylock_cli.core.context_manager import ContextManager
-from skylock_cli.model import user, user_dir, context
+from skylock_cli.model import user, context, directory
 
 
 def register_user(login: str, password: str) -> None:
@@ -39,6 +40,9 @@ def login_user(login: str, password: str) -> context.Context:
     with CLIExceptionHandler():
         token = send_login_request(_user)
 
-    new_context = context.Context(token=token, user_dir=user_dir.UserDir())
-    ContextManager.update_context(new_context)
-    return ContextManager.get_context()
+    new_context = context.Context(
+        token=token,
+        cwd=directory.Directory(path=Path("/")),
+    )
+    ContextManager.save_context(new_context)
+    return new_context
