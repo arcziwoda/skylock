@@ -77,7 +77,7 @@ def get_folder_contents(
             "content": {"application/json": {"example": {"message": "Folder created"}}},
         },
         400: {
-            "description": "Invalid path provided",
+            "description": "Invalid path provided, most likely empty",
             "content": {"application/json": {"example": {"detail": "Invalid path"}}},
         },
         401: {
@@ -110,7 +110,6 @@ def create_folder(
     user: db_models.UserEntity = Depends(get_current_user),
     skylock: SkylockFacade = Depends(get_skylock_facade),
 ):
-    print(path)
     skylock.create_folder_for_user(UserPath(path=path, owner=user))
     return {"message": "Folder created"}
 
@@ -128,6 +127,10 @@ def create_folder(
     responses={
         204: {
             "description": "Folder deleted successfully",
+        },
+        400: {
+            "description": "Invalid path provided, most likely empty",
+            "content": {"application/json": {"example": {"detail": "Invalid path"}}},
         },
         401: {
             "description": "Unauthorized user",
