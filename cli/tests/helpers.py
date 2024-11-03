@@ -1,6 +1,8 @@
 """Helper functions for tests."""
 
+from pathlib import Path
 from unittest.mock import Mock
+from skylock_cli.model.token import Token
 
 
 def mock_response_with_status(status_code, json_data=None):
@@ -9,3 +11,20 @@ def mock_response_with_status(status_code, json_data=None):
     mock_response.status_code = status_code
     mock_response.json.return_value = json_data
     return mock_response
+
+
+def assert_connection_error(result):
+    """Connection error assert"""
+    assert result.exit_code == 1
+    assert (
+        "Failed to connect to the server. Please check your network \nconnection."
+        in result.output
+    )
+
+
+def mock_test_context():
+    """Mock the test context"""
+    return Mock(
+        token=Token(access_token="test_token", token_type="bearer"),
+        cwd=Mock(path=Path("/"), name="/"),
+    )
