@@ -9,6 +9,10 @@ from skylock_cli.core import context_manager, path_parser
 from skylock_cli.utils.cli_exception_handler import CLIExceptionHandler
 from skylock_cli.api.nav_requests import send_ls_request, send_cd_request
 from skylock_cli.model import directory, file
+from skylock_cli.exceptions.core_exceptions import (
+    UserTokenExpiredError,
+    InvalidUserTokenError,
+)
 
 
 def list_directory(
@@ -43,3 +47,16 @@ def change_directory(directory_path: str) -> None:
     current_context.cwd = directory.Directory(path=joind_path, name=joind_path.name)
     context_manager.ContextManager.save_context(current_context)
     return joind_path
+
+
+def get_working_directory() -> directory.Directory:
+    """
+    Get the current working directory.
+    """
+    current_context = context_manager.ContextManager.get_context()
+    with CLIExceptionHandler():
+        if not current_context.token.is_valid():
+            raise InvalidUserTokenError()
+        if current_context.token.is_expired():
+            raise UserTokenExpiredError()
+    return current_context.cwd

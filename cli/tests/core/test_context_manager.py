@@ -10,6 +10,7 @@ from skylock_cli.core.context_manager import ContextManager
 from skylock_cli.model.context import Context
 from skylock_cli.model.token import Token
 from skylock_cli.model.directory import Directory
+from skylock_cli.config import ROOT_PATH
 
 
 class TestContextManager(unittest.TestCase):
@@ -45,7 +46,7 @@ class TestContextManager(unittest.TestCase):
         self.assertIsInstance(context.cwd, Directory)
         self.assertEqual(context.token.access_token, "test_token")
         self.assertEqual(context.token.token_type, "bearer")
-        self.assertEqual(context.cwd.path, Path("/"))
+        self.assertEqual(context.cwd.path, ROOT_PATH)
         self.assertEqual(context.cwd.name, "/")
 
         mock_ensure_context_file_exists.assert_called_once()

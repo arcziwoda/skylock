@@ -13,7 +13,9 @@ from skylock_cli.model.context import Context
 from skylock_cli.model.directory import Directory
 from skylock_cli.cli import app
 from skylock_cli.exceptions import api_exceptions
+from skylock_cli.config import ROOT_PATH
 from tests.helpers import assert_connection_error
+
 
 runner = CliRunner()
 
@@ -54,7 +56,7 @@ class TestLoginCommand(unittest.TestCase):
         with open(config_file_path, "r", encoding="utf-8") as file:
             data = json.load(file)
             new_context = Context(**data.get("context", {}))
-            self.assertEqual(new_context.cwd.path, Path("/"))
+            self.assertEqual(new_context.cwd.path, ROOT_PATH)
             self.assertEqual(new_context.token.access_token, "new_token")
 
         # Clean up: delete the created file and directory
@@ -73,7 +75,9 @@ class TestLoginCommand(unittest.TestCase):
     @patch("skylock_cli.core.auth.send_login_request")
     def test_login_skylock_api_error(self, mock_send):
         """Test the login command when a SkyLockAPIError occurs"""
-        mock_send.side_effect = api_exceptions.SkyLockAPIError("An unexpected API error occurred")
+        mock_send.side_effect = api_exceptions.SkyLockAPIError(
+            "An unexpected API error occurred"
+        )
 
         result = runner.invoke(app, ["login", "testuser"], input="testpass")
         self.assertEqual(result.exit_code, 1)
@@ -91,7 +95,9 @@ class TestLoginCommand(unittest.TestCase):
     @patch("skylock_cli.core.auth.send_login_request")
     def test_login_connection_error(self, mock_send):
         """Test the login command when a ConnectionError occurs (backend is offline)"""
-        mock_send.side_effect = ConnectionError("Failed to connect to the server. Please check your network connection.")
+        mock_send.side_effect = ConnectionError(
+            "Failed to connect to the server. Please check your network connection."
+        )
 
         result = runner.invoke(app, ["login", "testuser"], input="testpass")
         assert_connection_error(result)
