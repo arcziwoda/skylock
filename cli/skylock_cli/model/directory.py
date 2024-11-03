@@ -11,12 +11,13 @@ from pydantic import (
     field_serializer,
 )
 from typer.colors import MAGENTA
+from skylock_cli.config import ROOT_PATH
 
 
 class Directory(BaseModel):
     """Stores directory metadata"""
 
-    path: Path = Field(default=Path("/"))
+    path: Path = Field(default=ROOT_PATH)
     name: str = Field(default=None)
     color: str = MAGENTA
 
@@ -36,6 +37,6 @@ class Directory(BaseModel):
     def set_name_from_path(cls, values):
         """Set the name from the path if name is not provided"""
         if "name" not in values or values["name"] is None:
-            path = values.get("path", Path("/"))
+            path = values.get("path", ROOT_PATH)
             values["name"] = path.name
         return values

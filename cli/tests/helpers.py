@@ -1,8 +1,8 @@
 """Helper functions for tests."""
 
-from pathlib import Path
 from unittest.mock import Mock
 from skylock_cli.model.token import Token
+from skylock_cli.config import ROOT_PATH
 
 
 def mock_response_with_status(status_code, json_data=None):
@@ -23,8 +23,8 @@ def assert_connection_error(result):
 
 
 def mock_test_context():
-    """Mock the test context"""
+    """Mock the test context with customized validity and expiration settings."""
     return Mock(
         token=Token(access_token="test_token", token_type="bearer"),
-        cwd=Mock(path=Path("/"), name="/"),
+        cwd=Mock(path=ROOT_PATH, name="/"),
     )

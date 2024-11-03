@@ -25,3 +25,27 @@ class NotADirectoryError(SkyLockCoreError):
     def __init__(self, path: str) -> None:
         message = f"{path} is not a directory"
         super().__init__(message)
+
+
+class RootDirectoryError(SkyLockCoreError):
+    """Exception raised when attempting to delete the root directory."""
+
+    def __init__(self) -> None:
+        message = "Cannot delete the root directory"
+        super().__init__(message)
+
+
+class UserTokenExpiredError(SkyLockCoreError):
+    """Exception raised when the user token has expired."""
+
+    def __init__(self) -> None:
+        message = "User token has expired. Login again to continue."
+        super().__init__(message)
+
+
+class InvalidUserTokenError(SkyLockCoreError):
+    """Exception raised when the user token is invalid."""
+
+    def __init__(self) -> None:
+        message = "User token is invalid. Login again to continue."
+        super().__init__(message)

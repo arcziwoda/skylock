@@ -3,6 +3,7 @@
 import unittest
 from pathlib import Path
 from skylock_cli.core.path_parser import parse_path, is_directory
+from skylock_cli.config import ROOT_PATH
 
 
 class TestParsePath(unittest.TestCase):
@@ -45,7 +46,7 @@ class TestParsePath(unittest.TestCase):
 
     def test_user_wants_to_go_back_beyond_root(self):
         """Test the case where the user wants to go back beyond the root directory"""
-        cwd = Path("/")
+        cwd = ROOT_PATH
         user_input_path = Path("../../etc/config")
         result = parse_path(cwd, user_input_path)
         self.assertEqual(result, Path("/etc/config"))

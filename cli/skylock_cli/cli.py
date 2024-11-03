@@ -6,7 +6,7 @@ import typer
 from art import text2art
 from skylock_cli.core.auth import register_user, login_user
 from skylock_cli.core.dir_operations import create_directory, remove_directory
-from skylock_cli.core.nav import list_directory, change_directory
+from skylock_cli.core.nav import list_directory, change_directory, get_working_directory
 
 app = typer.Typer(pretty_exceptions_show_locals=False)
 
@@ -74,6 +74,10 @@ def mkdir(
         None
     """
     created_path = create_directory(directory_path, parent)
+
+    cwd = get_working_directory()
+    typer.secho(f"Current working directory: {str(cwd.path)}", fg=typer.colors.BLUE)
+
     typer.secho(
         f"Directory {str(created_path)} created successfully", fg=typer.colors.GREEN
     )
@@ -102,6 +106,10 @@ def rmdir(
         None
     """
     removed_path = remove_directory(directory_path, recursive)
+
+    cwd = get_working_directory()
+    typer.secho(f"Current working directory: {str(cwd.path)}", fg=typer.colors.BLUE)
+
     typer.secho(
         f"Directory {str(removed_path)} removed successfully", fg=typer.colors.GREEN
     )
@@ -119,6 +127,9 @@ def ls(directory_path: str = typer.Argument("", help="The directory to list")) -
         None
     """
     contents = list_directory(directory_path)
+
+    cwd = get_working_directory()
+    typer.secho(f"Contents of {str(cwd.path)}", fg=typer.colors.BLUE)
 
     for item in contents:
         typer.echo(typer.style(item.name, fg=item.color), nl=False)
@@ -145,6 +156,18 @@ def cd(
     """
     new_cwd = change_directory(directory_path)
     typer.secho(f"Changed directory to {str(new_cwd)}", fg=typer.colors.GREEN)
+
+
+@app.command()
+def pwd() -> None:
+    """
+    Print the current working directory.
+
+    Returns:
+        None
+    """
+    cwd = get_working_directory()
+    typer.secho(f"Current working directory: {str(cwd.path)}", fg=typer.colors.BLUE)
 
 
 if __name__ == "__main__":
