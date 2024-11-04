@@ -5,6 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from skylock.app import app
 from skylock.database.models import Base, UserEntity
 from skylock.database.repository import FileRepository, FolderRepository, UserRepository
+from skylock.database.session import get_db_session
 from skylock.service.resource_service import ResourceService
 from skylock.service.user_service import UserService
 from skylock.api.dependencies import get_current_user, get_skylock_facade
@@ -46,7 +47,7 @@ def user_service(user_repository):
 
 @pytest.fixture
 def user(user_service):
-    return user_service.register_user(username="testuser", password="testpasswd")
+    return user_service.register_user(username="mockuser", password="mockpasswd")
 
 
 @pytest.fixture
@@ -72,13 +73,19 @@ def skylock(user_service, resource_service):
 
 
 @pytest.fixture
-def test_app(skylock, user):
+def test_app(skylock):
     app.dependency_overrides[get_skylock_facade] = lambda: skylock
-    app.dependency_overrides[get_current_user] = lambda: user
     return app
 
 
 @pytest.fixture
 def client(test_app):
+    with TestClient(test_app) as c:
+        yield c
+
+
+@pytest.fixture
+def client_with_user(test_app, user):
+    test_app.dependency_overrides[get_current_user] = lambda: user
     with TestClient(test_app) as c:
         yield c
