@@ -5,6 +5,7 @@ from skylock.utils.exceptions import (
     ForbiddenActionException,
     ResourceAlreadyExistsException,
     ResourceNotFoundException,
+    RootFolderAlreadyExistsException,
 )
 from skylock.utils.path import UserPath
 
@@ -56,6 +57,12 @@ class ResourceService:
         self._folder_repository.delete(folder)
 
     def create_root_folder(self, user_path: UserPath):
+        if not user_path.is_root_folder():
+            raise ValueError("Given path is not a proper root folder path")
+        if self._folder_repository.get_by_name_and_parent_id(
+            user_path.root_folder_name, None
+        ):
+            raise RootFolderAlreadyExistsException("This root folder already exists")
         self._folder_repository.save(
             db_models.FolderEntity(
                 name=user_path.root_folder_name, owner=user_path.owner
