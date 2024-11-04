@@ -17,7 +17,9 @@ class TestPWDCommand(unittest.TestCase):
     @patch("skylock_cli.model.token.Token.is_expired", return_value=True)
     @patch("skylock_cli.model.token.Token.is_valid", return_value=False)
     @patch("skylock_cli.core.context_manager.ContextManager.get_context")
-    def test_pwd_token_invalid(self, mock_get_context, _mock_is_valid, _mock_is_expired):
+    def test_pwd_token_invalid(
+        self, mock_get_context, _mock_is_valid, _mock_is_expired
+    ):
         """Test the pwd command"""
         mock_get_context.return_value = mock_test_context()
 
@@ -28,7 +30,9 @@ class TestPWDCommand(unittest.TestCase):
     @patch("skylock_cli.model.token.Token.is_expired", return_value=True)
     @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
     @patch("skylock_cli.core.context_manager.ContextManager.get_context")
-    def test_pwd_token_expired(self, mock_get_context, _mock_is_valid, _mock_is_expired):
+    def test_pwd_token_expired(
+        self, mock_get_context, _mock_is_valid, _mock_is_expired
+    ):
         """Test the pwd command with an expired token"""
         mock_get_context.return_value = mock_test_context()
 

@@ -16,7 +16,10 @@ def mock_response_with_status(status_code, json_data=None):
 def assert_connection_error(result):
     """Connection error assert"""
     assert result.exit_code == 1
-    assert "Failed to connect to the server. Please check your network \nconnection." in result.output
+    assert (
+        "Failed to connect to the server. Please check your network \nconnection."
+        in result.output
+    )
 
 
 def mock_test_context(path=ROOT_PATH):

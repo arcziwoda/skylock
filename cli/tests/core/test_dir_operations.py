@@ -52,12 +52,16 @@ class TestCreateDirectory(unittest.TestCase):
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
                 create_directory("test_dir", False)
-            self.assertIn("Directory `/test_dir` already exists!", mock_stderr.getvalue())
+            self.assertIn(
+                "Directory `/test_dir` already exists!", mock_stderr.getvalue()
+            )
 
     @patch("skylock_cli.api.dir_requests.client.post")
     def test_create_directory_skylock_api_error(self, mock_post):
         """Test registration with a SkyLockAPIError"""
-        mock_post.return_value = mock_response_with_status(HTTPStatus.INTERNAL_SERVER_ERROR)
+        mock_post.return_value = mock_response_with_status(
+            HTTPStatus.INTERNAL_SERVER_ERROR
+        )
 
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
@@ -70,7 +74,9 @@ class TestCreateDirectory(unittest.TestCase):
     @patch("skylock_cli.api.dir_requests.client.post")
     def test_create_directory_connection_error(self, mock_post):
         """Test registration when a ConnectionError occurs (backend is offline)"""
-        mock_post.side_effect = ConnectionError("Failed to connect to the server. Please check your network connection.")
+        mock_post.side_effect = ConnectionError(
+            "Failed to connect to the server. Please check your network connection."
+        )
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
                 create_directory("test_dir", False)
@@ -145,12 +151,16 @@ class TestRemoveDirectory(unittest.TestCase):
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
                 remove_directory("/test1/test2/", False)
-            self.assertIn("Directory `/test1/test2` does not exist!\n", mock_stderr.getvalue())
+            self.assertIn(
+                "Directory `/test1/test2` does not exist!\n", mock_stderr.getvalue()
+            )
 
     @patch("skylock_cli.api.dir_requests.client.delete")
     def test_remove_directory_skylock_api_error(self, mock_delete):
         """Test removal with a SkyLockAPIError"""
-        mock_delete.return_value = mock_response_with_status(HTTPStatus.INTERNAL_SERVER_ERROR)
+        mock_delete.return_value = mock_response_with_status(
+            HTTPStatus.INTERNAL_SERVER_ERROR
+        )
 
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
@@ -163,7 +173,9 @@ class TestRemoveDirectory(unittest.TestCase):
     @patch("skylock_cli.api.dir_requests.client.delete")
     def test_remove_directory_connection_error(self, mock_delete):
         """Test removal when a ConnectionError occurs (backend is offline)"""
-        mock_delete.side_effect = ConnectionError("Failed to connect to the server. Please check your network connection.")
+        mock_delete.side_effect = ConnectionError(
+            "Failed to connect to the server. Please check your network connection."
+        )
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
                 remove_directory("test_dir/", False)
@@ -229,17 +241,30 @@ class TestRemoveDirectory(unittest.TestCase):
 
     @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
     @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
-    @patch("skylock_cli.core.context_manager.ContextManager.save_context", return_value=None)
+    @patch(
+        "skylock_cli.core.context_manager.ContextManager.save_context",
+        return_value=None,
+    )
     @patch("skylock_cli.core.context_manager.ContextManager.get_context")
     @patch("skylock_cli.api.nav_requests.client.get")
     @patch("skylock_cli.api.dir_requests.client.delete")
-    def test_remove_directory_change_cwd(self, mock_delete, mock_change_dir, mock_context, _mock_save_context, _mock_is_valid, _mock_is_expired):
+    def test_remove_directory_change_cwd(
+        self,
+        mock_delete,
+        mock_change_dir,
+        mock_context,
+        _mock_save_context,
+        _mock_is_valid,
+        _mock_is_expired,
+    ):
         """Test removal when the directory is the current working directory"""
         mock_delete.return_value = mock_response_with_status(HTTPStatus.NO_CONTENT)
         mock_change_dir.return_value = mock_response_with_status(HTTPStatus.OK)
         mock_context.return_value = mock_test_context(path=Path("/test/"))
 
-        with patch("skylock_cli.core.dir_operations.change_directory") as mock_change_directory:
+        with patch(
+            "skylock_cli.core.dir_operations.change_directory"
+        ) as mock_change_directory:
             remove_directory("/test/", True)
             mock_delete.assert_called_once()
             mock_change_directory.assert_called_once_with("/")
