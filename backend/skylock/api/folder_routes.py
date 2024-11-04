@@ -14,9 +14,11 @@ router = APIRouter(tags=["Resource"], prefix="/folders")
     "/{path:path}",
     summary="Get folder contents",
     description=(
-        "This endpoint retrieves the contents of a specified folder. It returns "
-        "a list of files and subfolders contained within the folder at the provided path. "
-        "If path is empty, contents of user's root folder will be listed."
+        """
+        This endpoint retrieves the contents of a specified folder. 
+        It returns a list of files and subfolders contained within the folder at the provided path.
+        If path is empty, contents of user's root folder will be listed.
+        """
     ),
     responses={
         200: {

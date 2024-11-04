@@ -3,11 +3,11 @@ from fastapi.testclient import TestClient
 from sqlalchemy import StaticPool, create_engine
 from sqlalchemy.orm import sessionmaker
 from skylock.app import app
-from skylock.database.models import Base
+from skylock.database.models import Base, UserEntity
 from skylock.database.repository import FileRepository, FolderRepository, UserRepository
 from skylock.service.resource_service import ResourceService
 from skylock.service.user_service import UserService
-from skylock.api.dependencies import get_skylock_facade
+from skylock.api.dependencies import get_current_user, get_skylock_facade
 from skylock.skylock_facade import SkylockFacade
 
 TEST_DATABASE_URL = "sqlite:///:memory:"
@@ -45,6 +45,11 @@ def user_service(user_repository):
 
 
 @pytest.fixture
+def user(user_service):
+    return user_service.register_user(username="testuser", password="testpasswd")
+
+
+@pytest.fixture
 def folder_repository(db_session):
     return FolderRepository(db_session)
 
@@ -67,8 +72,9 @@ def skylock(user_service, resource_service):
 
 
 @pytest.fixture
-def test_app(skylock):
+def test_app(skylock, user):
     app.dependency_overrides[get_skylock_facade] = lambda: skylock
+    app.dependency_overrides[get_current_user] = lambda: user
     return app
 
 
