@@ -17,7 +17,7 @@ from skylock_cli.exceptions.core_exceptions import (
 
 def list_directory(
     directory_path: str,
-) -> Tuple[List[file.File], List[directory.Directory]]:
+) -> Tuple[List, Path]:
     """
     List the contents of a directory.
     """
@@ -31,7 +31,7 @@ def list_directory(
         directories = TypeAdapter(List[directory.Directory]).validate_python(
             response["folders"]
         )
-    return sorted(files + directories, key=lambda x: x.name)
+    return (sorted(files + directories, key=lambda x: x.name), joind_path)
 
 
 def change_directory(directory_path: str) -> None:

@@ -22,9 +22,9 @@ def assert_connection_error(result):
     )
 
 
-def mock_test_context():
+def mock_test_context(path=ROOT_PATH):
     """Mock the test context with customized validity and expiration settings."""
     return Mock(
         token=Token(access_token="test_token", token_type="bearer"),
-        cwd=Mock(path=ROOT_PATH, name="/"),
+        cwd=Mock(path=path, name="/"),
     )

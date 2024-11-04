@@ -126,10 +126,9 @@ def ls(directory_path: str = typer.Argument("", help="The directory to list")) -
     Returns:
         None
     """
-    contents = list_directory(directory_path)
+    contents, path = list_directory(directory_path)
 
-    cwd = get_working_directory()
-    typer.secho(f"Contents of {str(cwd.path)}", fg=typer.colors.BLUE)
+    typer.secho(f"Contents of {str(path)}", fg=typer.colors.BLUE)
 
     for item in contents:
         typer.echo(typer.style(item.name, fg=item.color), nl=False)

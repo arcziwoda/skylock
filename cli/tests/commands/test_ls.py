@@ -69,16 +69,16 @@ class TestLSCommand(unittest.TestCase):
         mock_get_context.return_value = mock_test_context()
 
         mock_files = [
-            {"name": "file1.txt", "path": "/file1.txt"},
-            {"name": "file2.txt", "path": "/file2.txt"},
+            {"name": "file1.txt", "path": "/test/file1.txt"},
+            {"name": "file2.txt", "path": "/test/file2.txt"},
         ]
         mock_folders = []
 
         mock_send.return_value = {"files": mock_files, "folders": mock_folders}
 
-        result = runner.invoke(app, ["ls"])
+        result = runner.invoke(app, ["ls", "/test"])
         self.assertEqual(result.exit_code, 0)
-        self.assertIn("Contents of /", result.output)
+        self.assertIn("Contents of /test", result.output)
         self.assertIn("file1.txt  file2.txt", result.output)
 
     @patch("skylock_cli.model.token.Token.is_expired", return_value=False)

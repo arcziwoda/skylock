@@ -31,6 +31,38 @@ class TestRMDIRCommand(unittest.TestCase):
         mock_send.assert_called_once_with(
             mock_get_context.return_value.token, Path("/test_dir"), False
         )
+        self.assertIn("Directory /test_dir removed successfully", result.output)
+        self.assertIn("Current working directory: /", result.output)
+
+    @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
+    @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
+    @patch(
+        "skylock_cli.core.context_manager.ContextManager.save_context",
+        return_value=None,
+    )
+    @patch("skylock_cli.core.nav.send_cd_request")
+    @patch("skylock_cli.core.dir_operations.send_rmdir_request")
+    @patch("skylock_cli.core.context_manager.ContextManager.get_context")
+    def test_rmdir_success_chnage_dir(
+        self,
+        mock_get_context,
+        mock_send_rmdir,
+        mock_send_cd,
+        _mock_save_context,
+        _mock_is_valid,
+        _mock_is_expired,
+    ):
+        """Test the rmdir command"""
+        mock_get_context.return_value = mock_test_context(path=Path("/test_dir"))
+        mock_send_cd.return_value = None
+
+        result = runner.invoke(app, ["rmdir", "/test_dir/"])
+        self.assertEqual(result.exit_code, 0)
+        mock_send_rmdir.assert_called_once_with(
+            mock_get_context.return_value.token, Path("/test_dir"), False
+        )
+        self.assertIn("Current working directory: /", result.output)
+        self.assertIn("Directory /test_dir removed successfully", result.output)
 
     @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
     @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
@@ -47,6 +79,8 @@ class TestRMDIRCommand(unittest.TestCase):
         mock_send.assert_called_once_with(
             mock_get_context.return_value.token, Path("/test_dir"), True
         )
+        self.assertIn("Directory /test_dir removed successfully", result.output)
+        self.assertIn("Current working directory: /", result.output)
 
     @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
     @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
@@ -63,12 +97,20 @@ class TestRMDIRCommand(unittest.TestCase):
         mock_send.assert_called_once_with(
             mock_get_context.return_value.token, Path("/test_dir"), True
         )
+        self.assertIn("Directory /test_dir removed successfully", result.output)
+        self.assertIn("Current working directory: /", result.output)
 
     def test_rmdir_not_a_directory_error(self):
         """Test the rmdir command when the path is not a directory"""
         result = runner.invoke(app, ["rmdir", "/test_file"])
         self.assertEqual(result.exit_code, 1)
         self.assertIn("/test_file is not a directory", result.output)
+
+    def test_rmdir_root_dir(self):
+        """Test the rmdir command when the path is the root directory"""
+        result = runner.invoke(app, ["rmdir", "/"])
+        self.assertEqual(result.exit_code, 1)
+        self.assertIn("Cannot delete the root directory", result.output)
 
     @patch("skylock_cli.core.dir_operations.send_rmdir_request")
     def test_rmdir_token_expired(self, mock_send):

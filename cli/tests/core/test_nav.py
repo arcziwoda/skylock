@@ -34,7 +34,7 @@ class TestListDirectory(unittest.TestCase):
             "folders": mock_folders,
         }
 
-        result = list_directory("/test")
+        result, path = list_directory("/test")
 
         expected_result = [
             File(name="file1.txt", path="/test/file1.txt"),
@@ -44,6 +44,7 @@ class TestListDirectory(unittest.TestCase):
         ]
 
         self.assertEqual(result, expected_result)
+        self.assertEqual(path, Path("/test"))
 
     @patch("skylock_cli.core.nav.send_ls_request")
     def test_list_directory_success_only_files(self, mock_send_ls_request):
@@ -59,7 +60,7 @@ class TestListDirectory(unittest.TestCase):
             "folders": mock_folders,
         }
 
-        result = list_directory("/test")
+        result, path = list_directory("/test")
 
         expected_result = [
             File(name="file1.txt", path="/test/file1.txt"),
@@ -67,6 +68,7 @@ class TestListDirectory(unittest.TestCase):
         ]
 
         self.assertEqual(result, expected_result)
+        self.assertEqual(path, Path("/test"))
 
     @patch("skylock_cli.core.nav.send_ls_request")
     def test_list_directory_success_only_folders(self, mock_send_ls_request):
@@ -82,7 +84,7 @@ class TestListDirectory(unittest.TestCase):
             "folders": mock_folders,
         }
 
-        result = list_directory("/test")
+        result, path = list_directory("/test")
 
         expected_result = [
             Directory(name="folder1/", path="/test/folder1/"),
@@ -90,15 +92,17 @@ class TestListDirectory(unittest.TestCase):
         ]
 
         self.assertEqual(result, expected_result)
+        self.assertEqual(path, Path("/test"))
 
     @patch("skylock_cli.core.nav.send_ls_request")
     def test_list_directory_success_empty_response(self, mock_send_ls_request):
         """Test successful directory listing"""
         mock_send_ls_request.return_value = {"files": [], "folders": []}
 
-        result = list_directory("/test")
+        result, path = list_directory("/test")
 
         self.assertEqual(result, [])
+        self.assertEqual(path, Path("/test"))
 
     @patch("skylock_cli.api.nav_requests.client.get")
     def test_list_directory_user_unathorized(self, mock_get):
