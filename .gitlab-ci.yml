@@ -26,7 +26,7 @@ setup_cli:
     - poetry install
   rules:
     - changes:
-        - cli/**
+        - cli/**/*
   artifacts:
     paths:
       - cli/.venv
@@ -43,7 +43,7 @@ setup_backend:
     - poetry install
   rules:
     - changes:
-        - backend/**
+        - backend/**/*
   artifacts:
     paths:
       - backend/.venv
@@ -59,7 +59,7 @@ lint_cli:
     - setup_cli
   rules:
     - changes:
-        - cli/**
+        - cli/**/*
 
 test_cli:
   stage: test
@@ -71,7 +71,7 @@ test_cli:
     - setup_cli
   rules:
     - changes:
-        - cli/**
+        - cli/**/*
 
 lint_backend:
   stage: lint
@@ -83,7 +83,7 @@ lint_backend:
     - setup_backend
   rules:
     - changes:
-        - backend/**
+        - backend/**/*
 
 test_backend:
   stage: test
@@ -95,4 +95,4 @@ test_backend:
     - setup_backend
   rules:
     - changes:
-        - backend/**
+        - backend/**/*
