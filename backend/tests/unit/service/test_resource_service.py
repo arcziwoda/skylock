@@ -1,0 +1,205 @@
+import pytest
+from unittest.mock import MagicMock
+from skylock.utils.exceptions import (
+    FolderNotEmptyException,
+    ForbiddenActionException,
+    ResourceAlreadyExistsException,
+    ResourceNotFoundException,
+    RootFolderAlreadyExistsException,
+)
+from skylock.database.models import FolderEntity, UserEntity
+from skylock.service.resource_service import ResourceService
+from skylock.utils.path import UserPath
+
+
+@pytest.fixture
+def mock_file_repository():
+    return MagicMock()
+
+
+@pytest.fixture
+def mock_folder_repository():
+    return MagicMock()
+
+
+@pytest.fixture
+def resource_service(mock_file_repository, mock_folder_repository):
+    return ResourceService(
+        file_repository=mock_file_repository,
+        folder_repository=mock_folder_repository,
+    )
+
+
+def test_get_root_folder_success(resource_service, mock_folder_repository):
+    user = UserEntity(id="user-123", username="testuser")
+    user_path = UserPath.root_folder_of(user)
+    root_folder = FolderEntity(
+        id="folder-456", name=user_path.root_folder_name, owner=user
+    )
+
+    mock_folder_repository.get_by_name_and_parent_id.side_effect = [root_folder]
+
+    result = resource_service.get_folder(user_path)
+    assert result == root_folder
+    mock_folder_repository.get_by_name_and_parent_id.assert_called_once_with(
+        root_folder.name, None
+    )
+
+
+def test_get_subfolder_success(resource_service, mock_folder_repository):
+    user = UserEntity(id="user-123", username="testuser")
+    user_path = UserPath(path="test_folder", owner=user)
+    root_folder = FolderEntity(
+        id="folder-456", name=user_path.root_folder_name, owner=user
+    )
+    subfolder = FolderEntity(id="folder-789", name="test_folder", owner=user)
+
+    mock_folder_repository.get_by_name_and_parent_id.side_effect = [
+        root_folder,
+        subfolder,
+    ]
+
+    result = resource_service.get_folder(user_path)
+    assert result == subfolder
+    mock_folder_repository.get_by_name_and_parent_id.assert_called()
+
+
+def test_get_root_folder_nonexistent(resource_service, mock_folder_repository):
+    user = UserEntity(id="user-123", username="testuser")
+    user_path = UserPath.root_folder_of(user)
+
+    mock_folder_repository.get_by_name_and_parent_id.side_effect = [None]
+
+    with pytest.raises(LookupError):
+        resource_service.get_folder(user_path)
+
+
+def test_get_subfolder_nonexistent(resource_service, mock_folder_repository):
+    user = UserEntity(id="user-123", username="testuser")
+    user_path = UserPath(path="non-existent", owner=user)
+    root_folder = FolderEntity(
+        id="folder-456", name=user_path.root_folder_name, owner=user
+    )
+
+    mock_folder_repository.get_by_name_and_parent_id.side_effect = [root_folder, None]
+
+    with pytest.raises(ResourceNotFoundException):
+        resource_service.get_folder(user_path)
+
+
+def test_create_folder_success(resource_service, mock_folder_repository):
+    user = UserEntity(id="user-123", username="testuser")
+    user_path = UserPath("subfolder", user)
+    root_folder = FolderEntity(
+        id="folder-root", name=user_path.root_folder_name, owner=user
+    )
+
+    mock_folder_repository.get_by_name_and_parent_id.side_effect = [root_folder]
+
+    resource_service.create_folder(user_path)
+    mock_folder_repository.save.assert_called_once()
+
+
+def test_create_folder_root_forbidden(resource_service):
+    user = UserEntity(id="user-123", username="testuser")
+    user_path = UserPath.root_folder_of(user)
+
+    with pytest.raises(ForbiddenActionException):
+        resource_service.create_folder(user_path)
+
+
+def test_create_folder_duplicate_name(resource_service, mock_folder_repository):
+    user = UserEntity(id="user-123", username="testuser")
+    user_path = UserPath("subfolder", user)
+    root_folder = FolderEntity(
+        id="folder-root", name=user_path.root_folder_name, owner=user
+    )
+    existing_folder = FolderEntity(
+        id="folder-456", name="subfolder", parent_folder=root_folder
+    )
+
+    mock_folder_repository.get_by_name_and_parent_id.side_effect = [root_folder]
+
+    with pytest.raises(ResourceAlreadyExistsException):
+        resource_service.create_folder(user_path)
+
+
+def test_delete_folder_success(resource_service, mock_folder_repository):
+    user = UserEntity(id="user-123", username="testuser")
+    user_path = UserPath("subfolder", user)
+    root_folder = FolderEntity(
+        id="folder-root", name=user_path.root_folder_name, owner=user
+    )
+    subfolder = FolderEntity(
+        id="folder-456", name="subfolder", parent_folder_id=root_folder.id
+    )
+
+    mock_folder_repository.get_by_name_and_parent_id.side_effect = [
+        root_folder,
+        subfolder,
+    ]
+
+    resource_service.delete_folder(user_path)
+    mock_folder_repository.delete.assert_called_once_with(subfolder)
+
+
+def test_delete_folder_not_empty(resource_service, mock_folder_repository):
+    user = UserEntity(id="user-123", username="testuser")
+    user_path = UserPath("subfolder", user)
+    root_folder = FolderEntity(
+        id="folder-root", name=user_path.root_folder_name, owner=user
+    )
+    subfolder = FolderEntity(
+        id="folder-456", name="subfolder", parent_folder_id=root_folder.id
+    )
+    sub_subfolder = FolderEntity(
+        id="folder-789", name="sub_subfolder", parent_folder_id=subfolder.id
+    )
+    subfolder.subfolders.append(sub_subfolder)
+
+    mock_folder_repository.get_by_name_and_parent_id.side_effect = [
+        root_folder,
+        subfolder,
+    ]
+
+    with pytest.raises(FolderNotEmptyException):
+        resource_service.delete_folder(user_path, is_recursively=False)
+
+
+def test_delete_folder_forbidden_root(resource_service):
+    user = UserEntity(id="user-123", username="testuser")
+    user_path = UserPath.root_folder_of(user)
+
+    with pytest.raises(ForbiddenActionException):
+        resource_service.delete_folder(user_path)
+
+
+def test_create_root_folder_success(resource_service, mock_folder_repository):
+    user = UserEntity(id="user-123", username="testuser")
+    user_path = UserPath.root_folder_of(user)
+
+    mock_folder_repository.get_by_name_and_parent_id.side_effect = [None]
+
+    resource_service.create_root_folder(user_path)
+    mock_folder_repository.save.assert_called_once()
+
+
+def test_create_root_folder_not_root(resource_service, mock_folder_repository):
+    user = UserEntity(id="user-123", username="testuser")
+    user_path = UserPath(path="subfolder", owner=user)
+
+    mock_folder_repository.get_by_name_and_parent_id.side_effect = [None]
+
+    with pytest.raises(ValueError):
+        resource_service.create_root_folder(user_path)
+
+
+def test_create_root_folder_duplicate(resource_service, mock_folder_repository):
+    user = UserEntity(id="user-123", username="testuser")
+    user_path = UserPath.root_folder_of(user)
+    existing_root_folder = FolderEntity(name=user.id, owner=user)
+
+    mock_folder_repository.get_by_name_and_parent_id.return_value = existing_root_folder
+
+    with pytest.raises(RootFolderAlreadyExistsException):
+        resource_service.create_root_folder(user_path)

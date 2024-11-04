@@ -53,3 +53,11 @@ class ForbiddenActionException(Exception):
     def __init__(self, message="Action forbidden"):
         self.message = message
         super().__init__(self.message)
+
+
+class RootFolderAlreadyExistsException(Exception):
+    """Exception raised when trying to create an already existing root folder"""
+
+    def __init__(self, message="Root folder already exists"):
+        self.message = message
+        super().__init__(self.message)
