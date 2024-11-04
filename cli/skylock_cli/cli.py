@@ -59,9 +59,7 @@ def login(username: str) -> None:
 @app.command()
 def mkdir(
     directory_path: str,
-    parent: bool = typer.Option(
-        False, "-p", "--parent", help="Create parent directories as needed"
-    ),
+    parent: bool = typer.Option(False, "-p", "--parent", help="Create parent directories as needed"),
 ) -> None:
     """
     Create a new directory in the SkyLock.
@@ -78,9 +76,7 @@ def mkdir(
     cwd = get_working_directory()
     typer.secho(f"Current working directory: {str(cwd.path)}", fg=typer.colors.BLUE)
 
-    typer.secho(
-        f"Directory {str(created_path)} created successfully", fg=typer.colors.GREEN
-    )
+    typer.secho(f"Directory {str(created_path)} created successfully", fg=typer.colors.GREEN)
 
 
 @app.command()
@@ -110,9 +106,7 @@ def rmdir(
     cwd = get_working_directory()
     typer.secho(f"Current working directory: {str(cwd.path)}", fg=typer.colors.BLUE)
 
-    typer.secho(
-        f"Directory {str(removed_path)} removed successfully", fg=typer.colors.GREEN
-    )
+    typer.secho(f"Directory {str(removed_path)} removed successfully", fg=typer.colors.GREEN)
 
 
 @app.command()
@@ -126,10 +120,9 @@ def ls(directory_path: str = typer.Argument("", help="The directory to list")) -
     Returns:
         None
     """
-    contents = list_directory(directory_path)
+    contents, path = list_directory(directory_path)
 
-    cwd = get_working_directory()
-    typer.secho(f"Contents of {str(cwd.path)}", fg=typer.colors.BLUE)
+    typer.secho(f"Contents of {str(path)}", fg=typer.colors.BLUE)
 
     for item in contents:
         typer.echo(typer.style(item.name, fg=item.color), nl=False)
@@ -142,9 +135,7 @@ def ls(directory_path: str = typer.Argument("", help="The directory to list")) -
 
 
 @app.command()
-def cd(
-    directory_path: str = typer.Argument("", help="The directory to change to")
-) -> None:
+def cd(directory_path: str = typer.Argument("", help="The directory to change to")) -> None:
     """
     Change the current working directory.
 

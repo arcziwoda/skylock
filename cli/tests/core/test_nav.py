@@ -34,7 +34,7 @@ class TestListDirectory(unittest.TestCase):
             "folders": mock_folders,
         }
 
-        result = list_directory("/test")
+        result, path = list_directory("/test")
 
         expected_result = [
             File(name="file1.txt", path="/test/file1.txt"),
@@ -44,6 +44,7 @@ class TestListDirectory(unittest.TestCase):
         ]
 
         self.assertEqual(result, expected_result)
+        self.assertEqual(path, Path("/test"))
 
     @patch("skylock_cli.core.nav.send_ls_request")
     def test_list_directory_success_only_files(self, mock_send_ls_request):
@@ -59,7 +60,7 @@ class TestListDirectory(unittest.TestCase):
             "folders": mock_folders,
         }
 
-        result = list_directory("/test")
+        result, path = list_directory("/test")
 
         expected_result = [
             File(name="file1.txt", path="/test/file1.txt"),
@@ -67,6 +68,7 @@ class TestListDirectory(unittest.TestCase):
         ]
 
         self.assertEqual(result, expected_result)
+        self.assertEqual(path, Path("/test"))
 
     @patch("skylock_cli.core.nav.send_ls_request")
     def test_list_directory_success_only_folders(self, mock_send_ls_request):
@@ -82,7 +84,7 @@ class TestListDirectory(unittest.TestCase):
             "folders": mock_folders,
         }
 
-        result = list_directory("/test")
+        result, path = list_directory("/test")
 
         expected_result = [
             Directory(name="folder1/", path="/test/folder1/"),
@@ -90,15 +92,17 @@ class TestListDirectory(unittest.TestCase):
         ]
 
         self.assertEqual(result, expected_result)
+        self.assertEqual(path, Path("/test"))
 
     @patch("skylock_cli.core.nav.send_ls_request")
     def test_list_directory_success_empty_response(self, mock_send_ls_request):
         """Test successful directory listing"""
         mock_send_ls_request.return_value = {"files": [], "folders": []}
 
-        result = list_directory("/test")
+        result, path = list_directory("/test")
 
         self.assertEqual(result, [])
+        self.assertEqual(path, Path("/test"))
 
     @patch("skylock_cli.api.nav_requests.client.get")
     def test_list_directory_user_unathorized(self, mock_get):
@@ -129,9 +133,7 @@ class TestListDirectory(unittest.TestCase):
     @patch("skylock_cli.api.nav_requests.client.get")
     def test_list_directory_invalid_response_format(self, mock_get):
         """Test successful directory listing"""
-        mock_get.return_value = mock_response_with_status(
-            HTTPStatus.OK, {"folders": []}
-        )
+        mock_get.return_value = mock_response_with_status(HTTPStatus.OK, {"folders": []})
 
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
@@ -144,9 +146,7 @@ class TestListDirectory(unittest.TestCase):
     @patch("skylock_cli.api.nav_requests.client.get")
     def test_list_directory_internal_server_error(self, mock_get):
         """Test successful directory listing"""
-        mock_get.return_value = mock_response_with_status(
-            HTTPStatus.INTERNAL_SERVER_ERROR
-        )
+        mock_get.return_value = mock_response_with_status(HTTPStatus.INTERNAL_SERVER_ERROR)
 
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
@@ -165,9 +165,7 @@ class TestChangeDirectory(unittest.TestCase):
         """Test successful directory change"""
         mock_send_cd_request.return_value = None
 
-        with patch(
-            "skylock_cli.core.nav.context_manager.ContextManager.save_context"
-        ) as mock_save_context:
+        with patch("skylock_cli.core.nav.context_manager.ContextManager.save_context") as mock_save_context:
             result = change_directory("/test")
 
             self.assertEqual(result, Path("/test"))
@@ -202,9 +200,7 @@ class TestChangeDirectory(unittest.TestCase):
     @patch("skylock_cli.api.nav_requests.client.get")
     def test_change_directory_internal_server_error(self, mock_get):
         """Test successful directory change"""
-        mock_get.return_value = mock_response_with_status(
-            HTTPStatus.INTERNAL_SERVER_ERROR
-        )
+        mock_get.return_value = mock_response_with_status(HTTPStatus.INTERNAL_SERVER_ERROR)
 
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):

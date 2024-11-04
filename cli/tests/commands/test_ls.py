@@ -19,9 +19,7 @@ class TestLSCommand(unittest.TestCase):
     @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
     @patch("skylock_cli.core.nav.send_ls_request")
     @patch("skylock_cli.core.context_manager.ContextManager.get_context")
-    def test_ls_success(
-        self, mock_get_context, mock_send, _mock_is_valid, _mock_is_expired
-    ):
+    def test_ls_success(self, mock_get_context, mock_send, _mock_is_valid, _mock_is_expired):
         """Test the ls command"""
         mock_get_context.return_value = mock_test_context()
 
@@ -45,9 +43,7 @@ class TestLSCommand(unittest.TestCase):
     @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
     @patch("skylock_cli.core.nav.send_ls_request")
     @patch("skylock_cli.core.context_manager.ContextManager.get_context")
-    def test_ls_success_empty(
-        self, mock_get_context, mock_send, _mock_is_valid, _mock_is_expired
-    ):
+    def test_ls_success_empty(self, mock_get_context, mock_send, _mock_is_valid, _mock_is_expired):
         """Test the ls command"""
         mock_get_context.return_value = mock_test_context()
 
@@ -62,32 +58,28 @@ class TestLSCommand(unittest.TestCase):
     @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
     @patch("skylock_cli.core.nav.send_ls_request")
     @patch("skylock_cli.core.context_manager.ContextManager.get_context")
-    def test_ls_success_only_files(
-        self, mock_get_context, mock_send, _mock_is_valid, _mock_is_expired
-    ):
+    def test_ls_success_only_files(self, mock_get_context, mock_send, _mock_is_valid, _mock_is_expired):
         """Test the ls command"""
         mock_get_context.return_value = mock_test_context()
 
         mock_files = [
-            {"name": "file1.txt", "path": "/file1.txt"},
-            {"name": "file2.txt", "path": "/file2.txt"},
+            {"name": "file1.txt", "path": "/test/file1.txt"},
+            {"name": "file2.txt", "path": "/test/file2.txt"},
         ]
         mock_folders = []
 
         mock_send.return_value = {"files": mock_files, "folders": mock_folders}
 
-        result = runner.invoke(app, ["ls"])
+        result = runner.invoke(app, ["ls", "/test"])
         self.assertEqual(result.exit_code, 0)
-        self.assertIn("Contents of /", result.output)
+        self.assertIn("Contents of /test", result.output)
         self.assertIn("file1.txt  file2.txt", result.output)
 
     @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
     @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
     @patch("skylock_cli.core.nav.send_ls_request")
     @patch("skylock_cli.core.context_manager.ContextManager.get_context")
-    def test_ls_success_only_folders(
-        self, mock_get_context, mock_send, _mock_is_valid, _mock_is_expired
-    ):
+    def test_ls_success_only_folders(self, mock_get_context, mock_send, _mock_is_valid, _mock_is_expired):
         """Test the ls command"""
         mock_get_context.return_value = mock_test_context()
 
@@ -111,16 +103,12 @@ class TestLSCommand(unittest.TestCase):
 
         result = runner.invoke(app, ["ls"])
         self.assertEqual(result.exit_code, 1)
-        self.assertIn(
-            "User is unauthorized. Please login to use this command.", result.output
-        )
+        self.assertIn("User is unauthorized. Please login to use this command.", result.output)
 
     @patch("skylock_cli.core.nav.send_ls_request")
     def test_ls_skylock_api_error(self, mock_send):
         """Test the ls command when a SkyLockAPIError occurs"""
-        mock_send.side_effect = api_exceptions.SkyLockAPIError(
-            "An unexpected API error occurred"
-        )
+        mock_send.side_effect = api_exceptions.SkyLockAPIError("An unexpected API error occurred")
 
         result = runner.invoke(app, ["ls"])
         self.assertEqual(result.exit_code, 1)
@@ -129,9 +117,7 @@ class TestLSCommand(unittest.TestCase):
     @patch("skylock_cli.core.nav.send_ls_request")
     def test_ls_connection_error(self, mock_send):
         """Test the ls command when a ConnectionError occurs (backend is offline)"""
-        mock_send.side_effect = ConnectionError(
-            "Failed to connect to the server. Please check your network connection."
-        )
+        mock_send.side_effect = ConnectionError("Failed to connect to the server. Please check your network connection.")
 
         result = runner.invoke(app, ["ls"])
         assert_connection_error(result)
