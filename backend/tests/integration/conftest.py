@@ -11,7 +11,11 @@ from skylock.service.user_service import UserService
 from skylock.api.dependencies import get_current_user, get_skylock_facade
 from skylock.skylock_facade import SkylockFacade
 
-TEST_DATABASE_URL = "sqlite:///:memory:"
+
+TEST_DATABASE_URL = "sqlite://"
+
+MOCK_USERNAME = "mockuser"
+MOCK_PASSWORD = "mockpasswd"
 
 
 @pytest.fixture
@@ -22,7 +26,7 @@ def db_session():
         poolclass=StaticPool,
     )
 
-    Base.metadata.drop_all(bind=engine)
+    # Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
 
     factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -43,11 +47,6 @@ def user_repository(db_session):
 @pytest.fixture
 def user_service(user_repository):
     return UserService(user_repository)
-
-
-@pytest.fixture
-def user(user_service):
-    return user_service.register_user(username="mockuser", password="mockpasswd")
 
 
 @pytest.fixture
@@ -73,8 +72,9 @@ def skylock(user_service, resource_service):
 
 
 @pytest.fixture
-def test_app(skylock):
+def test_app(skylock, db_session):
     app.dependency_overrides[get_skylock_facade] = lambda: skylock
+    app.dependency_overrides[get_db_session] = lambda: db_session
     return app
 
 
@@ -85,7 +85,6 @@ def client(test_app):
 
 
 @pytest.fixture
-def client_with_user(test_app, user):
-    test_app.dependency_overrides[get_current_user] = lambda: user
-    with TestClient(test_app) as c:
-        yield c
+def token(skylock):
+    skylock.register_user(MOCK_USERNAME, MOCK_PASSWORD)
+    return skylock.login_user(MOCK_USERNAME, MOCK_PASSWORD).access_token
