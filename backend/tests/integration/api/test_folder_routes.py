@@ -46,3 +46,8 @@ def test_create_folder_at_root_success(client):
 def test_create_folder_with_existing_name(client, preconfigured_folders):
     response = client.post("/folders/folder1/")
     assert response.status_code == 409
+
+
+def test_create_subfolder_in_nonexistent_folder(client):
+    response = client.post("/folders/folder1/subfolder1")
+    assert response.status_code == 404
