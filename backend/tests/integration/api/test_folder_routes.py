@@ -61,3 +61,19 @@ def test_create_nested_folder(client, preconfigured_folders):
 def test_create_folder_empty_path(client, preconfigured_folders):
     response = client.post("/folders")
     assert response.status_code == 400
+
+
+# delete methods
+def test_delete_folder(client, preconfigured_folders):
+    response = client.delete("/folders/folder2")
+    assert response.status_code == 204
+
+
+def test_delete_folder_not_empty(client, preconfigured_folders):
+    response = client.delete("/folders/folder1")
+    assert response.status_code == 409
+
+
+def test_delete_not_found(client):
+    response = client.delete("/folders/invalid_folder")
+    assert response.status_code == 404
