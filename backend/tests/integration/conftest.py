@@ -97,9 +97,3 @@ def test_app(skylock, db_session, mock_user):
 def client(test_app):
     with TestClient(test_app) as c:
         yield c
-
-
-@pytest.fixture
-def token(skylock):
-    skylock.register_user(MOCK_USERNAME, MOCK_PASSWORD)
-    return skylock.login_user(MOCK_USERNAME, MOCK_PASSWORD).access_token
