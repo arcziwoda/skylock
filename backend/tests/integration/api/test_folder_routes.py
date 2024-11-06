@@ -56,3 +56,8 @@ def test_create_subfolder_in_nonexistent_folder(client):
 def test_create_nested_folder(client, preconfigured_folders):
     response = client.post("/folders/folder1/subfolder1/test_folder")
     assert response.status_code == 201
+
+
+def test_create_folder_empty_path(client, preconfigured_folders):
+    response = client.post("/folders")
+    assert response.status_code == 400
