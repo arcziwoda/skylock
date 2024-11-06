@@ -2,6 +2,7 @@
 This module contains commands the user can run to interact with the SkyLock.
 """
 
+from pathlib import Path
 import typer
 from art import text2art
 from skylock_cli.core.auth import register_user, login_user
@@ -51,23 +52,21 @@ def login(username: str) -> None:
     typer.secho("Welcome to our file hosting service", fg=typer.colors.BLUE, bold=True)
     typer.secho(text2art("SkyLock"), fg=typer.colors.BLUE)
     typer.secho(
-        f"Your current working directory is: {str(context.cwd.path)}",
+        f"Your current working directory is: {context.cwd.path}",
         fg=typer.colors.BLUE,
     )
 
 
 @app.command()
 def mkdir(
-    directory_path: str,
-    parent: bool = typer.Option(
-        False, "-p", "--parent", help="Create parent directories as needed"
-    ),
+    directory_path: Path,
+    parent: bool = typer.Option(False, "-p", "--parent", help="Create parent directories as needed"),
 ) -> None:
     """
     Create a new directory in the SkyLock.
 
     Args:
-        directory_path (str): The path of the new directory.
+        directory_path (Path): The path of the new directory.
         parent (bool): If True, create parent directories as needed.
 
     Returns:
@@ -76,11 +75,9 @@ def mkdir(
     created_path = create_directory(directory_path, parent)
 
     cwd = get_working_directory()
-    typer.secho(f"Current working directory: {str(cwd.path)}", fg=typer.colors.BLUE)
+    typer.secho(f"Current working directory: {cwd.path}", fg=typer.colors.BLUE)
 
-    typer.secho(
-        f"Directory {str(created_path)} created successfully", fg=typer.colors.GREEN
-    )
+    typer.secho(f"Directory {created_path} created successfully", fg=typer.colors.GREEN)
 
 
 @app.command()
@@ -108,27 +105,25 @@ def rmdir(
     removed_path = remove_directory(directory_path, recursive)
 
     cwd = get_working_directory()
-    typer.secho(f"Current working directory: {str(cwd.path)}", fg=typer.colors.BLUE)
+    typer.secho(f"Current working directory: {cwd.path}", fg=typer.colors.BLUE)
 
-    typer.secho(
-        f"Directory {str(removed_path)} removed successfully", fg=typer.colors.GREEN
-    )
+    typer.secho(f"Directory {removed_path} removed successfully", fg=typer.colors.GREEN)
 
 
 @app.command()
-def ls(directory_path: str = typer.Argument("", help="The directory to list")) -> None:
+def ls(directory_path: Path = typer.Argument(Path("."), help="The directory to list")) -> None:
     """
     List the contents of a directory.
 
     Args:
-        directory_path (str): The path of the directory to list.
+        directory_path (Path): The path of the directory to list.
 
     Returns:
         None
     """
     contents, path = list_directory(directory_path)
 
-    typer.secho(f"Contents of {str(path)}", fg=typer.colors.BLUE)
+    typer.secho(f"Contents of {path}", fg=typer.colors.BLUE)
 
     for item in contents:
         typer.echo(typer.style(item.name, fg=item.color), nl=False)
@@ -141,20 +136,18 @@ def ls(directory_path: str = typer.Argument("", help="The directory to list")) -
 
 
 @app.command()
-def cd(
-    directory_path: str = typer.Argument("", help="The directory to change to")
-) -> None:
+def cd(directory_path: Path = typer.Argument(..., help="The directory to change to")) -> None:
     """
     Change the current working directory.
 
     Args:
-        directory_path (str): The path of the directory to change to.
+        directory_path (Path): The path of the directory to change to.
 
     Returns:
         None
     """
     new_cwd = change_directory(directory_path)
-    typer.secho(f"Changed directory to {str(new_cwd)}", fg=typer.colors.GREEN)
+    typer.secho(f"Changed directory to {new_cwd}", fg=typer.colors.GREEN)
 
 
 @app.command()
@@ -166,7 +159,30 @@ def pwd() -> None:
         None
     """
     cwd = get_working_directory()
-    typer.secho(f"Current working directory: {str(cwd.path)}", fg=typer.colors.BLUE)
+    typer.secho(f"Current working directory: {cwd.path}", fg=typer.colors.BLUE)
+
+
+@app.command()
+def upload(file_path: Path) -> None:
+    """
+    Upload a file to the SkyLock.
+
+    Args:
+        file_path (Path): The path of the file to upload.
+
+    Returns:
+        None
+    """
+
+    if not file_path.exists():
+        typer.secho(f"File {file_path} does not exist.", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+
+    if not file_path.is_file():
+        typer.secho(f"{file_path} is not a file.", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+
+    typer.secho(f"Uploading file: {file_path}", fg=typer.colors.GREEN)
 
 
 if __name__ == "__main__":

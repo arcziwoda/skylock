@@ -33,23 +33,19 @@ def send_mkdir_request(token: Token, path: Path, parent: bool) -> None:
         raise api_exceptions.UserUnauthorizedError()
 
     if response.status_code == HTTPStatus.CONFLICT:
-        raise api_exceptions.DirectoryAlreadyExistsError(str(path))
+        raise api_exceptions.DirectoryAlreadyExistsError(path)
 
     if response.status_code == HTTPStatus.BAD_REQUEST:
-        raise api_exceptions.InvalidPathError(str(path))
+        raise api_exceptions.InvalidPathError(path)
 
     if response.status_code == HTTPStatus.NOT_FOUND:
         if not parent:
             missing = response.json().get("missing", str(path))
             raise api_exceptions.DirectoryMissingError(missing)
-        raise api_exceptions.SkyLockAPIError(
-            "Failed to create directory (Internal Server Error)"
-        )
+        raise api_exceptions.SkyLockAPIError("Failed to create directory (Internal Server Error)")
 
     if response.status_code != HTTPStatus.CREATED:
-        raise api_exceptions.SkyLockAPIError(
-            "Failed to create directory (Internal Server Error)"
-        )
+        raise api_exceptions.SkyLockAPIError("Failed to create directory (Internal Server Error)")
 
 
 def send_rmdir_request(token: Token, path: Path, recursive: bool) -> None:
@@ -71,18 +67,14 @@ def send_rmdir_request(token: Token, path: Path, recursive: bool) -> None:
         raise api_exceptions.UserUnauthorizedError()
 
     if response.status_code == HTTPStatus.NOT_FOUND:
-        raise api_exceptions.DirectoryNotFoundError(str(path))
+        raise api_exceptions.DirectoryNotFoundError(path)
 
     if response.status_code == HTTPStatus.CONFLICT:
         raise (
-            api_exceptions.DirectoryNotEmptyError(str(path))
+            api_exceptions.DirectoryNotEmptyError(path)
             if not recursive
-            else api_exceptions.SkyLockAPIError(
-                "Failed to delete directory (Internal Server Error)"
-            )
+            else api_exceptions.SkyLockAPIError("Failed to delete directory (Internal Server Error)")
         )
 
     if response.status_code != HTTPStatus.NO_CONTENT:
-        raise api_exceptions.SkyLockAPIError(
-            "Failed to delete directory (Internal Server Error)"
-        )
+        raise api_exceptions.SkyLockAPIError("Failed to delete directory (Internal Server Error)")

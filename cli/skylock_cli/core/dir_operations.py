@@ -14,13 +14,11 @@ from skylock_cli.exceptions.core_exceptions import (
 from skylock_cli.config import ROOT_PATH
 
 
-def create_directory(directory_path: str, parent: bool) -> Path:
+def create_directory(directory_path: Path, parent: bool) -> Path:
     """Create a directory in the user's cwd"""
     current_context = context_manager.ContextManager.get_context()
     with CLIExceptionHandler():
-        joind_path = path_parser.parse_path(
-            current_context.cwd.path, Path(directory_path)
-        )
+        joind_path = path_parser.parse_path(current_context.cwd.path, directory_path)
         send_mkdir_request(current_context.token, joind_path, parent)
     return joind_path
 
@@ -32,17 +30,13 @@ def remove_directory(directory_path: str, recursive: bool) -> Path:
         if not path_parser.is_directory(directory_path):
             raise NotADirectoryError(directory_path)
 
-        joind_path = path_parser.parse_path(
-            current_context.cwd.path, Path(directory_path)
-        )
+        joind_path = path_parser.parse_path(current_context.cwd.path, Path(directory_path))
 
-        # TODO: To be tested
         if joind_path == ROOT_PATH:
             raise RootDirectoryError()
 
         send_rmdir_request(current_context.token, joind_path, recursive)
 
-        # TODO: To be tested
         if current_context.cwd.path.is_relative_to(joind_path):
             change_directory(str(joind_path.parent))
 
