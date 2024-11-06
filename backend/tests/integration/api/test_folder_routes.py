@@ -25,3 +25,13 @@ def test_get_root_folder(client):
 def test_get_folder_not_found(client):
     response = client.get("/folders/missing_folder")
     assert response.status_code == 404
+
+
+def test_get_nested_folder(client, preconfigured_folders):
+    response = client.get("/folders/folder1")
+    assert response.status_code == 200
+    assert len(response.json()["folders"]) == 2
+    assert response.json()["folders"][0]["name"] == "subfolder1"
+    assert response.json()["folders"][0]["path"] == "/folder1/subfolder1"
+    assert response.json()["folders"][1]["name"] == "subfolder2"
+    assert response.json()["folders"][1]["path"] == "/folder1/subfolder2"
