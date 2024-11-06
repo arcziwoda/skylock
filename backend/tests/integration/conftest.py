@@ -8,8 +8,10 @@ from skylock.database.repository import FileRepository, FolderRepository, UserRe
 from skylock.database.session import get_db_session
 from skylock.service.resource_service import ResourceService
 from skylock.service.user_service import UserService
-from skylock.api.dependencies import get_skylock_facade
+from skylock.api.dependencies import get_current_user, get_skylock_facade
 from skylock.skylock_facade import SkylockFacade
+from skylock.database.models import UserEntity
+from skylock.utils.path import UserPath
 
 
 TEST_DATABASE_URL = "sqlite://"
@@ -71,9 +73,23 @@ def skylock(user_service, resource_service):
 
 
 @pytest.fixture
-def test_app(skylock, db_session):
+def mock_user(db_session, resource_service):
+    user = UserEntity(
+        username=MOCK_USERNAME,
+        password=MOCK_PASSWORD,
+    )
+    db_session.add(user)
+    db_session.commit()
+
+    resource_service.create_root_folder(UserPath.root_folder_of(user))
+    return user
+
+
+@pytest.fixture
+def test_app(skylock, db_session, mock_user):
     app.dependency_overrides[get_skylock_facade] = lambda: skylock
     app.dependency_overrides[get_db_session] = lambda: db_session
+    app.dependency_overrides[get_current_user] = lambda: mock_user
     return app
 
 
