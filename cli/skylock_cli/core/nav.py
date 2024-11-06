@@ -16,33 +16,27 @@ from skylock_cli.exceptions.core_exceptions import (
 
 
 def list_directory(
-    directory_path: str,
+    directory_path: Path,
 ) -> Tuple[List, Path]:
     """
     List the contents of a directory.
     """
     current_context = context_manager.ContextManager.get_context()
     with CLIExceptionHandler():
-        joind_path = path_parser.parse_path(
-            current_context.cwd.path, Path(directory_path)
-        )
+        joind_path = path_parser.parse_path(current_context.cwd.path, directory_path)
         response = send_ls_request(current_context.token, joind_path)
         files = TypeAdapter(List[file.File]).validate_python(response["files"])
-        directories = TypeAdapter(List[directory.Directory]).validate_python(
-            response["folders"]
-        )
+        directories = TypeAdapter(List[directory.Directory]).validate_python(response["folders"])
     return (sorted(files + directories, key=lambda x: x.name), joind_path)
 
 
-def change_directory(directory_path: str) -> None:
+def change_directory(directory_path: Path) -> Path:
     """
     Change the current working directory.
     """
     current_context = context_manager.ContextManager.get_context()
     with CLIExceptionHandler():
-        joind_path = path_parser.parse_path(
-            current_context.cwd.path, Path(directory_path)
-        )
+        joind_path = path_parser.parse_path(current_context.cwd.path, directory_path)
         send_cd_request(current_context.token, joind_path)
     current_context.cwd = directory.Directory(path=joind_path, name=joind_path.name)
     context_manager.ContextManager.save_context(current_context)
