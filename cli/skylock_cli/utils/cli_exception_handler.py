@@ -13,8 +13,7 @@ err_console = Console(stderr=True)
 class CLIExceptionHandler:
     """A context manager to handle exceptions and display them to the user using typer"""
 
-    def __enter__(self):
-        ...
+    def __enter__(self): ...
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         """
