@@ -22,3 +22,6 @@ def test_get_root_folder(client):
     assert response.status_code == 200
 
 
+def test_get_folder_not_found(client):
+    response = client.get("/folders/missing_folder")
+    assert response.status_code == 404
