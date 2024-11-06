@@ -41,3 +41,8 @@ def test_get_nested_folder(client, preconfigured_folders):
 def test_create_folder_at_root_success(client):
     response = client.post("/folders/folder1/")
     assert response.status_code == 201
+
+
+def test_create_folder_with_existing_name(client, preconfigured_folders):
+    response = client.post("/folders/folder1/")
+    assert response.status_code == 409
