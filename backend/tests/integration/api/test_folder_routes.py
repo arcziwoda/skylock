@@ -35,3 +35,9 @@ def test_get_nested_folder(client, preconfigured_folders):
     assert response.json()["folders"][0]["path"] == "/folder1/subfolder1"
     assert response.json()["folders"][1]["name"] == "subfolder2"
     assert response.json()["folders"][1]["path"] == "/folder1/subfolder2"
+
+
+# post methods
+def test_create_folder_at_root_success(client):
+    response = client.post("/folders/folder1/")
+    assert response.status_code == 201
