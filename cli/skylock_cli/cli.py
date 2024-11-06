@@ -7,6 +7,7 @@ import typer
 from art import text2art
 from skylock_cli.core.auth import register_user, login_user
 from skylock_cli.core.dir_operations import create_directory, remove_directory
+from skylock_cli.core.file_operations import upload_file
 from skylock_cli.core.nav import list_directory, change_directory, get_working_directory
 
 app = typer.Typer(pretty_exceptions_show_locals=False)
@@ -163,12 +164,16 @@ def pwd() -> None:
 
 
 @app.command()
-def upload(file_path: Path) -> None:
+def upload(
+    file_path: Path,
+    destination_path: Path = typer.Argument(Path("."), help="The destination path to upload the file to. Defaults to the current directory."),
+) -> None:
     """
     Upload a file to the SkyLock.
 
     Args:
         file_path (Path): The path of the file to upload.
+        destination_path (Path): The destination path to upload the file to. Defaults to the current directory.
 
     Returns:
         None
@@ -182,7 +187,12 @@ def upload(file_path: Path) -> None:
         typer.secho(f"{file_path} is not a file.", fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
-    typer.secho(f"Uploading file: {file_path}", fg=typer.colors.GREEN)
+    path = upload_file(file_path, destination_path)
+
+    cwd = get_working_directory()
+    typer.secho(f"Current working directory: {cwd.path}", fg=typer.colors.BLUE)
+
+    typer.secho(f"File {file_path} uploaded to {path} successfully", fg=typer.colors.GREEN)
 
 
 if __name__ == "__main__":
