@@ -11,7 +11,12 @@ router = APIRouter(tags=["Auth"], prefix="/auth")
     "/register",
     status_code=status.HTTP_201_CREATED,
     summary="Register a new user",
-    description="This endpoint allows a new user to register with a unique username and password. If the username already exists, a 409 Conflict error will be raised.",
+    description=(
+        """
+    This endpoint allows a new user to register with a unique username and password.
+    If the username already exists, a 409 Conflict error will be raised.
+    """
+    ),
     responses={
         201: {
             "description": "User successfully registered",
@@ -45,7 +50,12 @@ def register_user(
     "/login",
     response_model=models.Token,
     summary="Authenticate user and get JWT token",
-    description="This endpoint allows an existing user to authenticate using their username and password. A JWT token is returned if the credentials are valid.",
+    description=(
+        """
+        "This endpoint allows an existing user to authenticate using their username and password.
+        A JWT token is returned if the credentials are valid.
+        """
+    ),
     responses={
         200: {
             "description": "Successful login, JWT token returned",

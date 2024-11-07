@@ -1,3 +1,5 @@
+from typing import Optional
+
 from skylock.database import models as db_models
 from skylock.database.repository import FileRepository, FolderRepository
 from skylock.utils.exceptions import (
@@ -20,6 +22,11 @@ class ResourceService:
     def get_folder(self, user_path: UserPath) -> db_models.FolderEntity:
         current_folder = self._get_root_folder_by_name(user_path.root_folder_name)
 
+        if current_folder is None:
+            raise LookupError(
+                f"Root folder: {user_path.root_folder_name} does not exist"
+            )
+
         for folder_name in user_path.parts:
             current_folder = self._folder_repository.get_by_name_and_parent_id(
                 folder_name, current_folder.id
@@ -29,7 +36,7 @@ class ResourceService:
 
         return current_folder
 
-    def create_folder(self, user_path: UserPath):
+    def create_folder(self, user_path: UserPath) -> db_models.FolderEntity:
         if user_path.is_root_folder():
             raise ForbiddenActionException("Creation of root folder is forbidden")
 
@@ -42,7 +49,7 @@ class ResourceService:
         new_folder = db_models.FolderEntity(
             name=folder_name, parent_folder=parent, owner=user_path.owner
         )
-        new_folder = self._folder_repository.save(new_folder)
+        return self._folder_repository.save(new_folder)
 
     def delete_folder(self, user_path: UserPath, is_recursively: bool = False):
         folder = self.get_folder(user_path)
@@ -56,12 +63,26 @@ class ResourceService:
 
         self._folder_repository.delete(folder)
 
+    def create_file(self, user_path: UserPath) -> db_models.FileEntity:
+        if user_path.is_root_folder():
+            raise ForbiddenActionException("Creation of file with no name is forbidden")
+
+        file_name = user_path.name
+        parent_path = user_path.parent
+        parent = self.get_folder(parent_path)
+
+        self._assert_no_children_matching_name(parent, file_name)
+
+        new_file = db_models.FileEntity(
+            name=file_name, folder=parent, owner=user_path.owner
+        )
+
+        return self._file_repository.save(new_file)
+
     def create_root_folder(self, user_path: UserPath):
         if not user_path.is_root_folder():
             raise ValueError("Given path is not a proper root folder path")
-        if self._folder_repository.get_by_name_and_parent_id(
-            user_path.root_folder_name, None
-        ):
+        if self._get_root_folder_by_name(user_path.root_folder_name):
             raise RootFolderAlreadyExistsException("This root folder already exists")
         self._folder_repository.save(
             db_models.FolderEntity(
@@ -69,12 +90,8 @@ class ResourceService:
             )
         )
 
-    def _get_root_folder_by_name(self, name: str) -> db_models.FolderEntity:
-        folder = self._folder_repository.get_by_name_and_parent_id(name, None)
-        if folder:
-            return folder
-
-        raise LookupError(f"This root folder doesn't exist: {name}")
+    def _get_root_folder_by_name(self, name: str) -> Optional[db_models.FolderEntity]:
+        return self._folder_repository.get_by_name_and_parent_id(name, None)
 
     def _assert_no_children_matching_name(
         self, folder: db_models.FolderEntity, name: str
