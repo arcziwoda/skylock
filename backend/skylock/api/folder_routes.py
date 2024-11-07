@@ -70,8 +70,10 @@ def get_folder_contents(
     status_code=status.HTTP_201_CREATED,
     summary="Create a new folder",
     description=(
-        "This endpoint allows the user to create a new folder at the specified path. "
-        "If the folder already exists or the path is invalid, appropriate errors will be raised."
+        """
+        This endpoint allows the user to create a new folder at the specified path.
+        If the folder already exists or the path is invalid, appropriate errors will be raised.
+        """
     ),
     responses={
         201: {
@@ -121,10 +123,12 @@ def create_folder(
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete a folder",
     description=(
-        "This endpoint allows the user to delete a specified folder. The folder must "
-        "be empty to be deleted unless the 'recursive' parameter is set to True, "
-        "which allows for recursive deletion. If the folder contains any files or "
-        "subfolders and 'recursive' is not set, an error will be raised."
+        """
+        This endpoint allows the user to delete a specified folder. The folder must
+        be empty to be deleted unless the 'recursive' parameter is set to True,
+        which allows for recursive deletion. If the folder contains any files or
+        subfolders and 'recursive' is not set, an error will be raised.
+        """
     ),
     responses={
         204: {
