@@ -26,7 +26,9 @@ def list_directory(
         joind_path = path_parser.parse_path(current_context.cwd.path, directory_path)
         response = send_ls_request(current_context.token, joind_path)
         files = TypeAdapter(List[file.File]).validate_python(response["files"])
-        directories = TypeAdapter(List[directory.Directory]).validate_python(response["folders"])
+        directories = TypeAdapter(List[directory.Directory]).validate_python(
+            response["folders"]
+        )
     return (sorted(files + directories, key=lambda x: x.name), joind_path)
 
 

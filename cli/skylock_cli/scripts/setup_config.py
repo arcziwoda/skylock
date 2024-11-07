@@ -4,7 +4,12 @@ Script to create the config file.
 
 from pathlib import Path
 import json
-from skylock_cli.config import CONFIG_DIR, CONFIG_FILE_NAME, EMPTY_CONTEXT
+from skylock_cli.config import (
+    CONFIG_DIR,
+    CONFIG_FILE_NAME,
+    EMPTY_CONTEXT,
+    DOWNLOADS_DIR,
+)
 
 
 def create_config_file() -> None:
@@ -17,3 +22,9 @@ def create_config_file() -> None:
 
     with config_file_path.open("w", encoding="utf-8") as f:
         json.dump({"context": EMPTY_CONTEXT}, f, indent=4)
+
+
+def create_downloads_dir() -> None:
+    """Creates the downloads directory."""
+    if not DOWNLOADS_DIR.exists():
+        DOWNLOADS_DIR.mkdir(parents=True)

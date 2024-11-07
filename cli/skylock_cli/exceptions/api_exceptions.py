@@ -2,6 +2,8 @@
 Module for exceptions raised by the SkyLock API.
 """
 
+from pathlib import Path
+
 
 class SkyLockAPIError(Exception):
     """Base exception for SkyLock API errors.
@@ -24,6 +26,14 @@ class UserAlreadyExistsError(SkyLockAPIError):
 
     def __init__(self, username: str) -> None:
         message = f"User with username `{username}` already exists!"
+        super().__init__(message)
+
+
+class UserUnauthorizedError(SkyLockAPIError):
+    """Exception raised when the user is unauthorized to perform an operation."""
+
+    def __init__(self) -> None:
+        message = "User is unauthorized. Please login to use this command."
         super().__init__(message)
 
 
@@ -50,7 +60,7 @@ class DirectoryAlreadyExistsError(SkyLockAPIError):
         directory_path (str): The path of the directory that already exists.
     """
 
-    def __init__(self, directory_path: str) -> None:
+    def __init__(self, directory_path: Path) -> None:
         message = f"Directory `{directory_path}` already exists!"
         super().__init__(message)
 
@@ -62,7 +72,7 @@ class DirectoryNotFoundError(SkyLockAPIError):
         directory_path (str): The path of the directory that does not exist.
     """
 
-    def __init__(self, directory_path: str) -> None:
+    def __init__(self, directory_path: Path) -> None:
         message = f"Directory `{directory_path}` does not exist!"
         super().__init__(message)
 
@@ -86,16 +96,8 @@ class DirectoryNotEmptyError(SkyLockAPIError):
         directory_path (str): The path of the non-empty directory.
     """
 
-    def __init__(self, directory_path: str) -> None:
+    def __init__(self, directory_path: Path) -> None:
         message = f"Directory `{directory_path}` is not empty! Use the --recursive flag to delete it recursively."
-        super().__init__(message)
-
-
-class UserUnauthorizedError(SkyLockAPIError):
-    """Exception raised when the user is unauthorized to perform an operation."""
-
-    def __init__(self) -> None:
-        message = "User is unauthorized. Please login to use this command."
         super().__init__(message)
 
 
@@ -106,7 +108,7 @@ class InvalidPathError(SkyLockAPIError):
         path (str): The path that is invalid.
     """
 
-    def __init__(self, path: str) -> None:
+    def __init__(self, path: Path) -> None:
         message = f"Invalid path `{path}`!"
         super().__init__(message)
 
@@ -116,4 +118,28 @@ class InvalidResponseFormatError(SkyLockAPIError):
 
     def __init__(self) -> None:
         message = "Invalid response format! (Internal Server Error)"
+        super().__init__(message)
+
+
+class FileAlreadyExistsError(SkyLockAPIError):
+    """Exception raised when attempting to upload a file that already exists.
+
+    Args:
+        file_path (str): The path of the file that already exists.
+    """
+
+    def __init__(self, file_path: Path) -> None:
+        message = f"File `{file_path}` already exists!"
+        super().__init__(message)
+
+
+class FileNotFoundError(SkyLockAPIError):
+    """Exception raised when a file is not found in Skylock.
+
+    Args:
+        file_path (str): The path of the missing file.
+    """
+
+    def __init__(self, file_path: Path) -> None:
+        message = f"File `{file_path}` not found!"
         super().__init__(message)
