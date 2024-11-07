@@ -62,7 +62,6 @@ class FileEntity(Base):
     name: orm.Mapped[str] = orm.mapped_column(nullable=False)
     folder_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("folders.id"))
     owner_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("users.id"))
-    disk_filepath: orm.Mapped[str] = orm.mapped_column(nullable=False)
 
     folder: orm.Mapped[FolderEntity] = orm.relationship(
         "FolderEntity", back_populates="files"
