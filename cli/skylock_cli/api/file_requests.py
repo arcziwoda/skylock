@@ -14,7 +14,7 @@ from skylock_cli.exceptions import api_exceptions
 client = Client(base_url=API_URL)
 
 
-def send_upload_request(token: Token, virtual_path: Path, file_metadata: dict) -> None:
+def send_upload_request(token: Token, virtual_path: Path, files: dict) -> None:
     """
     Send an upload request to the SkyLock backend API.
 
@@ -26,7 +26,7 @@ def send_upload_request(token: Token, virtual_path: Path, file_metadata: dict) -
     url = "/files/upload" + quote(str(virtual_path))
     auth = bearer_auth.BearerAuth(token)
 
-    response = client.post(url=url, auth=auth, files=file_metadata)
+    response = client.post(url=url, auth=auth, files=files)
 
     if response.status_code == HTTPStatus.UNAUTHORIZED:
         raise api_exceptions.UserUnauthorizedError()

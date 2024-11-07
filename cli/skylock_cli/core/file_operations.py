@@ -16,15 +16,14 @@ def upload_file(real_file_path: Path, destination_path: Path) -> Path:
     """Upload a file"""
     current_context = context_manager.ContextManager.get_context()
     with CLIExceptionHandler():
-        joind_path = path_parser.parse_path(current_context.cwd.path, destination_path)
+        joind_path = (
+            path_parser.parse_path(current_context.cwd.path, destination_path)
+            / real_file_path.name
+        )
 
         with open(real_file_path, "rb") as file:
-            file_metadata = {
-                "file_content": file,
-                "file_name": real_file_path.name,
-            }
-
-            send_upload_request(current_context.token, joind_path, file_metadata)
+            files = {"file": (real_file_path.name, file)}
+            send_upload_request(current_context.token, joind_path, files)
 
     return joind_path
 
