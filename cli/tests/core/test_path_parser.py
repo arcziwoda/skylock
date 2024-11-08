@@ -28,7 +28,7 @@ class TestParsePath(unittest.TestCase):
         cwd = Path("/home/user")
         user_input_path = Path("")
         result = parse_path(cwd, user_input_path)
-        self.assertEqual(result, Path("/home/user"))
+        self.assertEqual(result, cwd.resolve())
 
     def test_parse_path_special_characters(self):
         """Test the case where the user input path contains special characters"""

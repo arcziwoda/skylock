@@ -39,7 +39,7 @@ def send_upload_request(token: Token, virtual_path: Path, files: dict) -> None:
 
     if response.status_code != HTTPStatus.CREATED:
         raise api_exceptions.SkyLockAPIError(
-            "Failed to upload file (Internal Server Error)"
+            f"Failed to upload file (Error Code: {response.status_code})"
         )
 
 
@@ -67,7 +67,7 @@ def send_download_request(token: Token, virtual_path: Path) -> dict:
 
     if response.status_code != HTTPStatus.OK:
         raise api_exceptions.SkyLockAPIError(
-            "Failed to download file (Internal Server Error)"
+            f"Failed to download file (Error Code: {response.status_code})"
         )
 
     response_json = response.json()

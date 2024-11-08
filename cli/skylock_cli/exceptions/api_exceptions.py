@@ -117,7 +117,7 @@ class InvalidResponseFormatError(SkyLockAPIError):
     """Exception raised when the response format is invalid."""
 
     def __init__(self) -> None:
-        message = "Invalid response format! (Internal Server Error)"
+        message = "Invalid response format!"
         super().__init__(message)
 
 

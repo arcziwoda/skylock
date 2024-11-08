@@ -69,7 +69,7 @@ class TestCreateDirectory(unittest.TestCase):
             with self.assertRaises(exceptions.Exit):
                 create_directory("test_dir", False)
             self.assertIn(
-                "Failed to create directory (Internal Server Error)",
+                "Failed to create directory (Error Code: 500)",
                 mock_stderr.getvalue(),
             )
 
@@ -121,7 +121,7 @@ class TestCreateDirectory(unittest.TestCase):
             with self.assertRaises(exceptions.Exit):
                 create_directory("/test_dir1/test_dir2", True)
             self.assertIn(
-                "Failed to create directory (Internal Server Error)",
+                "Failed to create directory (Error Code: 404)",
                 mock_stderr.getvalue(),
             )
 
@@ -168,7 +168,7 @@ class TestRemoveDirectory(unittest.TestCase):
             with self.assertRaises(exceptions.Exit):
                 remove_directory("test_dir/", False)
             self.assertIn(
-                "Failed to delete directory (Internal Server Error)\n",
+                "Failed to delete directory (Error Code: 500)",
                 mock_stderr.getvalue(),
             )
 
@@ -223,7 +223,7 @@ class TestRemoveDirectory(unittest.TestCase):
             with self.assertRaises(exceptions.Exit):
                 remove_directory("test_dir/", True)
             self.assertIn(
-                "Failed to delete directory (Internal Server Error)\n",
+                "Failed to delete directory (Error Code: 409)",
                 mock_stderr.getvalue(),
             )
 

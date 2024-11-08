@@ -141,7 +141,7 @@ class TestListDirectory(unittest.TestCase):
             with self.assertRaises(exceptions.Exit):
                 list_directory("/test")
             self.assertIn(
-                "Invalid response format! (Internal Server Error)",
+                "Invalid response format!",
                 mock_stderr.getvalue(),
             )
 
@@ -156,7 +156,7 @@ class TestListDirectory(unittest.TestCase):
             with self.assertRaises(exceptions.Exit):
                 list_directory("/test")
             self.assertIn(
-                "Failed to list directory (Internal Server Error)",
+                "Failed to list directory (Error Code: 500)",
                 mock_stderr.getvalue(),
             )
 
@@ -214,7 +214,7 @@ class TestChangeDirectory(unittest.TestCase):
             with self.assertRaises(exceptions.Exit):
                 change_directory("/test")
             self.assertIn(
-                "Failed to change directory (Internal Server Error)",
+                "Failed to change directory (Error Code: 500)",
                 mock_stderr.getvalue(),
             )
 

@@ -29,7 +29,7 @@ def send_ls_request(token: Token, path: Path):
 
     if response.status_code != HTTPStatus.OK:
         raise api_exceptions.SkyLockAPIError(
-            "Failed to list directory (Internal Server Error)"
+            f"Failed to list directory (Error Code: {response.status_code})"
         )
 
     if (
@@ -57,5 +57,5 @@ def send_cd_request(token: Token, path: Path) -> None:
 
     if response.status_code != HTTPStatus.OK:
         raise api_exceptions.SkyLockAPIError(
-            "Failed to change directory (Internal Server Error)"
+            f"Failed to change directory (Error Code: {response.status_code})"
         )
