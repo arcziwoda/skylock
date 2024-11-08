@@ -64,3 +64,10 @@ class FolderRepository(DatabaseRepository[models.FolderEntity]):
 class FileRepository(DatabaseRepository[models.FileEntity]):
     def __init__(self, session: Session):
         super().__init__(models.FileEntity, session)
+
+    def get_by_name_and_parent(
+        self, name: str, parent: models.FolderEntity
+    ) -> Optional[models.FileEntity]:
+        return self.filter_one_or_none(
+            models.FileEntity.name == name, models.FileEntity.folder == parent
+        )

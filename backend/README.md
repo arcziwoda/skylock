@@ -30,7 +30,7 @@ Make sure to replace the `JWT_SECRET` with your own secure secret key and config
 **Build and start the containers**:
 
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
 
 ### Option 2: Running with Poetry

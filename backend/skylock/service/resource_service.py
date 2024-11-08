@@ -53,7 +53,11 @@ class ResourceService:
 
     def delete_folder(self, user_path: UserPath, is_recursively: bool = False):
         folder = self.get_folder(user_path)
+        self._delete_folder(folder, is_recursively=is_recursively)
 
+    def _delete_folder(
+        self, folder: db_models.FolderEntity, is_recursively: bool = False
+    ):
         if folder.is_root():
             raise ForbiddenActionException("Deletion of root folder is forbidden")
 
@@ -61,7 +65,24 @@ class ResourceService:
         if not is_recursively and has_folder_children:
             raise FolderNotEmptyException
 
+        for file in folder.files:
+            self._file_repository.delete(file)
+
+        for subfolder in folder.subfolders:
+            self._delete_folder(subfolder, is_recursively=True)
+
         self._folder_repository.delete(folder)
+
+    def get_file(self, user_path: UserPath) -> db_models.FileEntity:
+        parent_folder = self.get_folder(user_path.parent)
+        file = self._file_repository.get_by_name_and_parent(
+            name=user_path.name, parent=parent_folder
+        )
+
+        if file is None:
+            raise ResourceNotFoundException(missing_resource_name=user_path.name)
+
+        return file
 
     def create_file(self, user_path: UserPath) -> db_models.FileEntity:
         if user_path.is_root_folder():
