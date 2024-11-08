@@ -1,6 +1,7 @@
 import pathlib
 import shutil
 from typing import IO
+from io import BytesIO
 
 
 FILES_FOLDER_DISK_PATH = "./data/files"
@@ -16,6 +17,17 @@ def save_file_data(file: IO[bytes], filename: str):
 
     with path.open("wb") as buffer:
         shutil.copyfileobj(file, buffer)
+
+
+def load_file_data(filename: str) -> IO[bytes]:
+    folder = create_files_folder_if_non_existent()
+
+    path = folder / filename
+
+    if not path.exists():
+        raise ValueError(f"File of given path: {path} does not exist")
+
+    return BytesIO(path.read_bytes())
 
 
 def create_files_folder_if_non_existent() -> pathlib.Path:
