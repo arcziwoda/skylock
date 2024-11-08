@@ -14,7 +14,7 @@ router = APIRouter(tags=["Resource"], prefix="/files")
     summary="Upload a file",
     description=(
         """
-        This endpoint allows users to upload a file to a specified path. 
+        This endpoint allows users to upload a file to a specified path.
         If the file already exists, an appropriate error will be raised.
         """
     ),

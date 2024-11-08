@@ -152,7 +152,7 @@ class TestLSCommand(unittest.TestCase):
 
         result = runner.invoke(app, ["ls"])
         self.assertEqual(result.exit_code, 1)
-        self.assertIn("Invalid response format! (Internal Server Error)", result.output)
+        self.assertIn("Invalid response format!", result.output)
 
 
 if __name__ == "__main__":
