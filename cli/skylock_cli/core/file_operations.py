@@ -16,10 +16,7 @@ def upload_file(real_file_path: Path, destination_path: Path) -> Path:
     """Upload a file"""
     current_context = context_manager.ContextManager.get_context()
     with CLIExceptionHandler():
-        joind_path = (
-            path_parser.parse_path(current_context.cwd.path, destination_path)
-            / real_file_path.name
-        )
+        joind_path = path_parser.parse_path(current_context.cwd.path, destination_path) / real_file_path.name
 
         with open(real_file_path, "rb") as file:
             files = {"file": (real_file_path.name, file)}
@@ -34,26 +31,24 @@ def download_file(virtual_file_path: Path) -> Path:
     with CLIExceptionHandler():
         joind_path = path_parser.parse_path(current_context.cwd.path, virtual_file_path)
 
-        file_metadata = send_download_request(current_context.token, joind_path)
-        file_name = file_metadata["file_name"]
-        file_content = file_metadata["file_content"]
+        file_content = send_download_request(current_context.token, joind_path)
 
         if not DOWNLOADS_DIR.exists():
             create_downloads_dir()
 
-        unique_file_path = _generate_unique_file_path(DOWNLOADS_DIR, file_name)
+        target_file_path = DOWNLOADS_DIR / joind_path.name
+        if target_file_path.exists():
+            target_file_path = _generate_unique_file_path(DOWNLOADS_DIR, joind_path.name)
 
-        with open(unique_file_path, "wb") as file:
+        with open(target_file_path, "wb") as file:
             file.write(file_content)
 
-    return unique_file_path
+    return joind_path
 
 
 def _generate_unique_file_path(directory: Path, file_name: str) -> Path:
     """Generate a unique file path using tempfile.NamedTemporaryFile"""
     base_name, extension = os.path.splitext(file_name)
-    with tempfile.NamedTemporaryFile(
-        dir=directory, prefix=base_name, suffix=extension, delete=False
-    ) as temp_file:
+    with tempfile.NamedTemporaryFile(dir=directory, prefix=base_name, suffix=extension, delete=False) as temp_file:
         unique_file_path = Path(temp_file.name)
     return unique_file_path
