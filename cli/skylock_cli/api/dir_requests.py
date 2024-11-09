@@ -42,14 +42,10 @@ def send_mkdir_request(token: Token, path: Path, parent: bool) -> None:
         if not parent:
             missing = response.json().get("missing", str(path))
             raise api_exceptions.DirectoryMissingError(missing)
-        raise api_exceptions.SkyLockAPIError(
-            f"Failed to create directory (Error Code: {response.status_code})"
-        )
+        raise api_exceptions.SkyLockAPIError(f"Failed to create directory (Error Code: {response.status_code})")
 
     if response.status_code != HTTPStatus.CREATED:
-        raise api_exceptions.SkyLockAPIError(
-            f"Failed to create directory (Error Code: {response.status_code})"
-        )
+        raise api_exceptions.SkyLockAPIError(f"Failed to create directory (Error Code: {response.status_code})")
 
 
 def send_rmdir_request(token: Token, path: Path, recursive: bool) -> None:
@@ -77,12 +73,8 @@ def send_rmdir_request(token: Token, path: Path, recursive: bool) -> None:
         raise (
             api_exceptions.DirectoryNotEmptyError(path)
             if not recursive
-            else api_exceptions.SkyLockAPIError(
-                f"Failed to delete directory (Error Code: {response.status_code})"
-            )
+            else api_exceptions.SkyLockAPIError(f"Failed to delete directory (Error Code: {response.status_code})")
         )
 
     if response.status_code != HTTPStatus.NO_CONTENT:
-        raise api_exceptions.SkyLockAPIError(
-            f"Failed to delete directory (Error Code: {response.status_code})"
-        )
+        raise api_exceptions.SkyLockAPIError(f"Failed to delete directory (Error Code: {response.status_code})")
