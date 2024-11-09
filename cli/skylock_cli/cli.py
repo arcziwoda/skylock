@@ -9,7 +9,6 @@ from skylock_cli.core.auth import register_user, login_user
 from skylock_cli.core.dir_operations import create_directory, remove_directory
 from skylock_cli.core.file_operations import upload_file, download_file
 from skylock_cli.core.nav import list_directory, change_directory, get_working_directory
-from skylock_cli.config import DOWNLOADS_DIR
 
 app = typer.Typer(pretty_exceptions_show_locals=False)
 
@@ -62,9 +61,7 @@ def login(username: str) -> None:
 @app.command()
 def mkdir(
     directory_path: Path,
-    parent: bool = typer.Option(
-        False, "-p", "--parent", help="Create parent directories as needed"
-    ),
+    parent: bool = typer.Option(False, "-p", "--parent", help="Create parent directories as needed"),
 ) -> None:
     """
     Create a new directory in the SkyLock.
@@ -113,9 +110,7 @@ def rmdir(
 
 
 @app.command()
-def ls(
-    directory_path: Path = typer.Argument(Path("."), help="The directory to list")
-) -> None:
+def ls(directory_path: Path = typer.Argument(Path("."), help="The directory to list")) -> None:
     """
     List the contents of a directory.
 
@@ -140,9 +135,7 @@ def ls(
 
 
 @app.command()
-def cd(
-    directory_path: Path = typer.Argument(..., help="The directory to change to")
-) -> None:
+def cd(directory_path: Path = typer.Argument(..., help="The directory to change to")) -> None:
     """
     Change the current working directory.
 
@@ -199,9 +192,7 @@ def upload(
     cwd = get_working_directory()
 
     typer.secho(f"Current working directory: {cwd.path}", fg=typer.colors.BLUE)
-    typer.secho(
-        f"File {file_path} uploaded to {path} successfully", fg=typer.colors.GREEN
-    )
+    typer.secho(f"File {file_path} uploaded to {path} successfully", fg=typer.colors.GREEN)
 
 
 @app.command()
@@ -215,12 +206,12 @@ def download(file_path: Path) -> None:
     Returns:
         None
     """
-    joined_path = download_file(file_path)
+    file_path = download_file(file_path)
     cwd = get_working_directory()
 
     typer.secho(f"Current working directory: {cwd.path}", fg=typer.colors.BLUE)
     typer.secho(
-        f"File {joined_path.name} downloaded successfully to {typer.style(DOWNLOADS_DIR, fg=typer.colors.CYAN, underline=True)}",
+        f"File {file_path.name} downloaded successfully to {typer.style(file_path.parent, fg=typer.colors.CYAN, underline=True)}",
         fg=typer.colors.GREEN,
     )
 
