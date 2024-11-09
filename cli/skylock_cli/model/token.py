@@ -46,14 +46,8 @@ class Token(BaseModel):
         if not self.access_token:
             return False
         try:
-            decoded_token = jwt.decode(
-                self.access_token, key="", options={"verify_signature": False}
-            )
+            decoded_token = jwt.decode(self.access_token, key="", options={"verify_signature": False})
             exp = decoded_token.get("exp")
-            return (
-                datetime.fromtimestamp(exp, timezone.utc) < datetime.now(timezone.utc)
-                if exp
-                else False
-            )
+            return datetime.fromtimestamp(exp, timezone.utc) < datetime.now(timezone.utc) if exp else False
         except JWTError:
             return False

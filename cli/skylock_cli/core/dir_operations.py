@@ -30,9 +30,7 @@ def remove_directory(directory_path: str, recursive: bool) -> Path:
         if not path_parser.is_directory(directory_path):
             raise NotADirectoryError(directory_path)
 
-        joind_path = path_parser.parse_path(
-            current_context.cwd.path, Path(directory_path)
-        )
+        joind_path = path_parser.parse_path(current_context.cwd.path, Path(directory_path))
 
         if joind_path == ROOT_PATH:
             raise RootDirectoryError()

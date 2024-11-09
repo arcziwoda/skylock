@@ -43,7 +43,7 @@ def download_file(virtual_file_path: Path) -> Path:
         with open(target_file_path, "wb") as file:
             file.write(file_content)
 
-    return joind_path
+    return target_file_path
 
 
 def _generate_unique_file_path(directory: Path, file_name: str) -> Path:
