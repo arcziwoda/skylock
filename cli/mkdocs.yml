@@ -26,7 +26,7 @@ nav:
   - CLI Commands: cli.md
   - API:
       - Endpoints: api_endpoints.md
-      - Exceptions: api_exceptions.md
+      - Exceptions: custom_exceptions.md
 
 plugins:
   - search
