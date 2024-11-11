@@ -3,10 +3,9 @@ Module that contains the token model.
 """
 
 from typing import Optional
-from datetime import datetime, timezone
 from pydantic import BaseModel, Field
 from jose import jwt
-from jose.exceptions import JWTError
+from jose.exceptions import ExpiredSignatureError, JWTError
 
 
 class Token(BaseModel):
@@ -46,8 +45,7 @@ class Token(BaseModel):
         if not self.access_token:
             return False
         try:
-            decoded_token = jwt.decode(self.access_token, key="", options={"verify_signature": False})
-            exp = decoded_token.get("exp")
-            return datetime.fromtimestamp(exp, timezone.utc) < datetime.now(timezone.utc) if exp else False
-        except JWTError:
+            jwt.decode(self.access_token, key="", options={"verify_signature": False})
             return False
+        except ExpiredSignatureError:
+            return True

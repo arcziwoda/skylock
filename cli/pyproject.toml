@@ -45,4 +45,5 @@ disable = [
   "E1101", # Instance of '...' has no '...' member -> Pydantic models for pytests
   "W0622", # Redefining built-in 'id' -> For custom errors
   "E0213", # Method should have "self" as first argument -> For field validators
+  "W0621", # Redefining name from outer scope -> For pytest fixtures
 ]

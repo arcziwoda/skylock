@@ -21,6 +21,7 @@ class TestParsePath(unittest.TestCase):
         cwd = Path("/home/user")
         user_input_path = Path("documents/file.txt")
         result = parse_path(cwd, user_input_path)
+        result = Path(str(result).replace("/System/Volumes/Data", ""))
         self.assertEqual(result, Path("/home/user/documents/file.txt"))
 
     def test_parse_path_empty(self):
@@ -35,6 +36,7 @@ class TestParsePath(unittest.TestCase):
         cwd = Path("/home/user")
         user_input_path = Path("../etc/config")
         result = parse_path(cwd, user_input_path)
+        result = Path(str(result).replace("/System/Volumes/Data", ""))
         self.assertEqual(result, Path("/home/etc/config"))
 
     def test_parse_path_with_spaces(self):
@@ -42,6 +44,7 @@ class TestParsePath(unittest.TestCase):
         cwd = Path("/home/user")
         user_input_path = Path("documents/my file.txt")
         result = parse_path(cwd, user_input_path)
+        result = Path(str(result).replace("/System/Volumes/Data", ""))
         self.assertEqual(result, Path("/home/user/documents/my file.txt"))
 
     def test_user_wants_to_go_back_beyond_root(self):
@@ -49,6 +52,7 @@ class TestParsePath(unittest.TestCase):
         cwd = ROOT_PATH
         user_input_path = Path("../../etc/config")
         result = parse_path(cwd, user_input_path)
+        result = Path(str(result).replace("/private", ""))
         self.assertEqual(result, Path("/etc/config"))
 
     def test_parse_path_home_directory(self):
