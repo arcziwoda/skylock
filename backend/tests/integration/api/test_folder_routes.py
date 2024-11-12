@@ -1,6 +1,5 @@
 import pytest
 from skylock.utils.path import UserPath
-import pdb
 
 
 @pytest.fixture
