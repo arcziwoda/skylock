@@ -5,7 +5,6 @@ from skylock.service.user_service import UserService
 from skylock.api import models
 from skylock.utils.exceptions import ForbiddenActionException
 from skylock.utils.path import UserPath
-from skylock.utils.storage import load_file_data, save_file_data
 
 
 class SkylockFacade:
@@ -42,9 +41,7 @@ class SkylockFacade:
         self._resource_service.delete_folder(user_path, is_recursively=is_recursively)
 
     def upload_file(self, user_path: UserPath, file_data: IO[bytes]):
-        file_entity = self._resource_service.create_file(user_path)
-        save_file_data(file=file_data, filename=file_entity.id)
+        self._resource_service.create_file(user_path, file_data)
 
     def download_file(self, user_path: UserPath) -> IO[bytes]:
-        file_entity = self._resource_service.get_file(user_path)
-        return load_file_data(filename=file_entity.id)
+        return self._resource_service.get_file_data(user_path)

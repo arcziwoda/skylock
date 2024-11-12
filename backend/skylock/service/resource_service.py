@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import IO, Optional
 
 from skylock.database import models as db_models
 from skylock.database.repository import FileRepository, FolderRepository
@@ -10,6 +10,7 @@ from skylock.utils.exceptions import (
     RootFolderAlreadyExistsException,
 )
 from skylock.utils.path import UserPath
+from skylock.utils.storage import delete_file_data, get_file_data, save_file_data
 
 
 class ResourceService:
@@ -66,7 +67,7 @@ class ResourceService:
             raise FolderNotEmptyException
 
         for file in folder.files:
-            self._file_repository.delete(file)
+            self._delete_file(file)
 
         for subfolder in folder.subfolders:
             self._delete_folder(subfolder, is_recursively=True)
@@ -84,7 +85,7 @@ class ResourceService:
 
         return file
 
-    def create_file(self, user_path: UserPath) -> db_models.FileEntity:
+    def create_file(self, user_path: UserPath, data: IO[bytes]) -> db_models.FileEntity:
         if user_path.is_root_folder():
             raise ForbiddenActionException("Creation of file with no name is forbidden")
 
@@ -94,11 +95,34 @@ class ResourceService:
 
         self._assert_no_children_matching_name(parent, file_name)
 
-        new_file = db_models.FileEntity(
-            name=file_name, folder=parent, owner=user_path.owner
+        new_file = self._file_repository.save(
+            db_models.FileEntity(name=file_name, folder=parent, owner=user_path.owner)
         )
 
-        return self._file_repository.save(new_file)
+        self._save_file_data(file=new_file, data=data)
+
+        return new_file
+
+    def delete_file(self, user_path: UserPath):
+        file = self.get_file(user_path)
+        self._delete_file(file)
+
+    def _delete_file(self, file: db_models.FileEntity):
+        self._file_repository.delete(file)
+        self._delete_file_data(file)
+
+    def get_file_data(self, user_path: UserPath) -> IO[bytes]:
+        file = self.get_file(user_path)
+        return self._get_file_data(file)
+
+    def _save_file_data(self, file: db_models.FileEntity, data: IO[bytes]):
+        save_file_data(data=data, filename=file.id)
+
+    def _get_file_data(self, file: db_models.FileEntity) -> IO[bytes]:
+        return get_file_data(filename=file.id)
+
+    def _delete_file_data(self, file: db_models.FileEntity):
+        return delete_file_data(file.id)
 
     def create_root_folder(self, user_path: UserPath):
         if not user_path.is_root_folder():
