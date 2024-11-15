@@ -2,12 +2,14 @@
 Test cases for the functions from core.dir_operations
 """
 
+import re
 import unittest
 from http import HTTPStatus
 from unittest.mock import patch
 from pathlib import Path
 from io import StringIO
 from click import exceptions
+from httpx import ConnectError
 from skylock_cli.core.dir_operations import create_directory, remove_directory
 from tests.helpers import mock_response_with_status, mock_test_context
 
@@ -75,15 +77,13 @@ class TestCreateDirectory(unittest.TestCase):
 
     @patch("skylock_cli.api.dir_requests.client.post")
     def test_create_directory_connection_error(self, mock_post):
-        """Test registration when a ConnectionError occurs (backend is offline)"""
-        mock_post.side_effect = ConnectionError(
-            "Failed to connect to the server. Please check your network connection."
-        )
+        """Test registration when a ConnectError occurs (backend is offline)"""
+        mock_post.side_effect = ConnectError("Failed to connect to the server")
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
                 create_directory("test_dir", False)
             self.assertIn(
-                "ConnectionError: Failed to connect to the server. Please check your network \nconnection.",
+                "The server is not reachable at the moment. Please try again later.",
                 mock_stderr.getvalue(),
             )
 
@@ -106,9 +106,12 @@ class TestCreateDirectory(unittest.TestCase):
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
                 create_directory("/test_dir1/test_dir2", False)
-            self.assertIn(
-                "Directory `test_dir2` is missing! Use the --parent flag to create parent \ndirectories.\n",
+            self.assertRegex(
                 mock_stderr.getvalue(),
+                re.compile(
+                    r"Directory `test_dir2` is missing! Use the --parent flag to create parent\s+directories\.\n",
+                    re.MULTILINE,
+                ),
             )
 
     @patch("skylock_cli.api.dir_requests.client.post")
@@ -174,15 +177,13 @@ class TestRemoveDirectory(unittest.TestCase):
 
     @patch("skylock_cli.api.dir_requests.client.delete")
     def test_remove_directory_connection_error(self, mock_delete):
-        """Test removal when a ConnectionError occurs (backend is offline)"""
-        mock_delete.side_effect = ConnectionError(
-            "Failed to connect to the server. Please check your network connection."
-        )
+        """Test removal when a ConnectError occurs (backend is offline)"""
+        mock_delete.side_effect = ConnectError("Failed to connect to the server")
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
                 remove_directory("test_dir/", False)
             self.assertIn(
-                "ConnectionError: Failed to connect to the server. Please check your network \nconnection.",
+                "The server is not reachable at the moment. Please try again later.",
                 mock_stderr.getvalue(),
             )
 
@@ -209,9 +210,12 @@ class TestRemoveDirectory(unittest.TestCase):
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
                 remove_directory("test_dir/", False)
-            self.assertIn(
-                "Directory `/test_dir` is not empty! Use the --recursive flag to delete it \nrecursively.\n",
+            self.assertRegex(
                 mock_stderr.getvalue(),
+                re.compile(
+                    r"Directory `/test_dir` is not empty! Use the --recursive flag to delete it\s+recursively\.\n",
+                    re.MULTILINE,
+                ),
             )
 
     @patch("skylock_cli.api.dir_requests.client.delete")

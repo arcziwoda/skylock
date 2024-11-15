@@ -8,9 +8,10 @@ import os
 from unittest.mock import patch
 from pathlib import Path
 from typer.testing import CliRunner
+from httpx import ConnectError
 from skylock_cli.cli import app
 from skylock_cli.exceptions import api_exceptions
-from tests.helpers import mock_test_context, assert_connection_error
+from tests.helpers import mock_test_context, assert_connect_error
 
 
 class TestUploadCommand(unittest.TestCase):
@@ -44,9 +45,14 @@ class TestUploadCommand(unittest.TestCase):
 
     @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
     @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
-    @patch("skylock_cli.core.context_manager.ContextManager.get_context", return_value=mock_test_context())
+    @patch(
+        "skylock_cli.core.context_manager.ContextManager.get_context",
+        return_value=mock_test_context(),
+    )
     @patch("skylock_cli.core.file_operations.send_upload_request", return_value=None)
-    def test_upload_success(self, _mock_send, _mock_get_context, _mock_is_valid, _mock_is_expired):
+    def test_upload_success(
+        self, _mock_send, _mock_get_context, _mock_is_valid, _mock_is_expired
+    ):
         """Test successful file upload"""
         with tempfile.NamedTemporaryFile() as temp_file:
             temp_file_path = temp_file.name
@@ -55,13 +61,21 @@ class TestUploadCommand(unittest.TestCase):
 
             self.assertEqual(result.exit_code, 0)
             self.assertIn("Current working directory: /", result.output)
-            self.assertIn(f"File {temp_file_path} uploaded to /{temp_file_name} successfully", result.output)
+            self.assertIn(
+                f"File {temp_file_path} uploaded to /{temp_file_name} successfully",
+                result.output,
+            )
 
     @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
     @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
-    @patch("skylock_cli.core.context_manager.ContextManager.get_context", return_value=mock_test_context(Path("/test")))
+    @patch(
+        "skylock_cli.core.context_manager.ContextManager.get_context",
+        return_value=mock_test_context(Path("/test")),
+    )
     @patch("skylock_cli.core.file_operations.send_upload_request", return_value=None)
-    def test_upload_success_not_to_root(self, _mock_send, _mock_get_context, _mock_is_valid, _mock_is_expired):
+    def test_upload_success_not_to_root(
+        self, _mock_send, _mock_get_context, _mock_is_valid, _mock_is_expired
+    ):
         """Test successful file upload"""
         with tempfile.NamedTemporaryFile() as temp_file:
             temp_file_path = temp_file.name
@@ -70,7 +84,10 @@ class TestUploadCommand(unittest.TestCase):
 
             self.assertEqual(result.exit_code, 0)
             self.assertIn("Current working directory: /test", result.output)
-            self.assertIn(f"File {temp_file_path} uploaded to /test/{temp_file_name} successfully", result.output)
+            self.assertIn(
+                f"File {temp_file_path} uploaded to /test/{temp_file_name} successfully",
+                result.output,
+            )
 
     @patch("skylock_cli.core.file_operations.send_upload_request")
     def test_upload_token_expired(self, mock_send):
@@ -82,7 +99,9 @@ class TestUploadCommand(unittest.TestCase):
             result = self.runner.invoke(app, ["upload", temp_file_path])
 
             self.assertEqual(result.exit_code, 1)
-            self.assertIn("User is unauthorized. Please login to use this command.", result.output)
+            self.assertIn(
+                "User is unauthorized. Please login to use this command.", result.output
+            )
 
     @patch("skylock_cli.core.file_operations.send_upload_request")
     def test_upload_file_already_exists(self, mock_send):
@@ -122,13 +141,13 @@ class TestUploadCommand(unittest.TestCase):
 
     @patch("skylock_cli.core.file_operations.send_upload_request")
     def test_upload_connection_error(self, mock_send):
-        """Test the upload command when a ConnectionError occurs"""
-        mock_send.side_effect = ConnectionError("Failed to connect to the server. Please check your network connection.")
+        """Test the upload command when a ConnectError occurs"""
+        mock_send.side_effect = ConnectError("Failed to connect to the server")
 
         with tempfile.NamedTemporaryFile() as temp_file:
             temp_file_path = temp_file.name
             result = self.runner.invoke(app, ["upload", temp_file_path])
-            assert_connection_error(result)
+            assert_connect_error(result)
 
 
 if __name__ == "__main__":

@@ -5,9 +5,10 @@ Tests for the register command
 import unittest
 from unittest.mock import patch
 from typer.testing import CliRunner
+from httpx import ConnectError
 from skylock_cli.cli import app
 from skylock_cli.exceptions import api_exceptions
-from tests.helpers import assert_connection_error
+from tests.helpers import assert_connect_error
 
 runner = CliRunner()
 
@@ -53,15 +54,12 @@ class TestRegisterCommand(unittest.TestCase):
 
     @patch("skylock_cli.core.auth.send_register_request")
     def test_register_connection_error(self, mock_send):
-        """Test the register command when a ConnectionError occurs (backend is offline)"""
-        mock_send.side_effect = ConnectionError(
-            "Failed to connect to the server. Please check your network connection."
-        )
-
+        """Test the register command when a ConnectError occurs (backend is offline)"""
+        mock_send.side_effect = ConnectError("Failed to connect to the server")
         result = runner.invoke(
             app, ["register", "testuser3"], input="testpass3\ntestpass3"
         )
-        assert_connection_error(result)
+        assert_connect_error(result)
 
     @patch("skylock_cli.core.auth.send_register_request")
     def test_register_password_mismatch(self, _mock_send):

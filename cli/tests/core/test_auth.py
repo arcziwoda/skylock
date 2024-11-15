@@ -7,6 +7,7 @@ from unittest.mock import patch, Mock
 from io import StringIO
 from http import HTTPStatus
 from click import exceptions
+from httpx import ConnectError
 from skylock_cli.core.auth import register_user, login_user
 from skylock_cli.model.context import Context
 from skylock_cli.model.token import Token
@@ -50,16 +51,14 @@ class TestRegisterUser(unittest.TestCase):
 
     @patch("skylock_cli.api.auth_requests.client.post")
     def test_register_connection_error(self, mock_post):
-        """Test registration when a ConnectionError occurs (backend is offline)"""
-        mock_post.side_effect = ConnectionError(
-            "Failed to connect to the server. Please check your network connection."
-        )
+        """Test registration when a ConnectError occurs (backend is offline)"""
+        mock_post.side_effect = ConnectError("Failed to connect to the server")
 
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
                 register_user("testuser", "testpass")
             self.assertIn(
-                "Failed to connect to the server. Please check your network \nconnection.",
+                "The server is not reachable at the moment. Please try again later.",
                 mock_stderr.getvalue(),
             )
 
@@ -127,16 +126,14 @@ class TestLoginUser(unittest.TestCase):
 
     @patch("skylock_cli.api.auth_requests.client.post")
     def test_login_connection_error(self, mock_post):
-        """Test login when a ConnectionError occurs (backend is offline)"""
-        mock_post.side_effect = ConnectionError(
-            "Failed to connect to the server. Please check your network connection."
-        )
+        """Test login when a ConnectError occurs (backend is offline)"""
+        mock_post.side_effect = ConnectError("Failed to connect to the server")
 
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
                 login_user("testuser", "testpass")
             self.assertIn(
-                "Failed to connect to the server. Please check your network \nconnection.",
+                "The server is not reachable at the moment. Please try again later.",
                 mock_stderr.getvalue(),
             )
 

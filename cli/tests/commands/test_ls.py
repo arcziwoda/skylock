@@ -5,9 +5,10 @@ Tests for the ls command
 import unittest
 from unittest.mock import patch
 from typer.testing import CliRunner
+from httpx import ConnectError
 from skylock_cli.cli import app
 from skylock_cli.exceptions import api_exceptions
-from tests.helpers import assert_connection_error, mock_test_context
+from tests.helpers import assert_connect_error, mock_test_context
 
 runner = CliRunner()
 
@@ -128,13 +129,10 @@ class TestLSCommand(unittest.TestCase):
 
     @patch("skylock_cli.core.nav.send_ls_request")
     def test_ls_connection_error(self, mock_send):
-        """Test the ls command when a ConnectionError occurs (backend is offline)"""
-        mock_send.side_effect = ConnectionError(
-            "Failed to connect to the server. Please check your network connection."
-        )
-
+        """Test the ls command when ConnectError occurs (backend is offline)"""
+        mock_send.side_effect = ConnectError("Failed to connect to the server")
         result = runner.invoke(app, ["ls"])
-        assert_connection_error(result)
+        assert_connect_error(result)
 
     @patch("skylock_cli.core.nav.send_ls_request")
     def test_ls_directory_not_found(self, mock_send):

@@ -2,13 +2,15 @@
 Tests for the mkdir command
 """
 
+import re
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 from typer.testing import CliRunner
+from httpx import ConnectError
 from skylock_cli.cli import app
 from skylock_cli.exceptions import api_exceptions
-from tests.helpers import mock_test_context
+from tests.helpers import mock_test_context, assert_connect_error
 
 runner = CliRunner()
 
@@ -85,17 +87,10 @@ class TestMKDIRCommand(unittest.TestCase):
 
     @patch("skylock_cli.core.dir_operations.send_mkdir_request")
     def test_mkdir_connection_error(self, mock_send):
-        """Test the mkdir command when a ConnectionError occurs (backend is offline)"""
-        mock_send.side_effect = ConnectionError(
-            "Failed to connect to the server. Please check your network connection."
-        )
-
+        """Test the mkdir command when a ConnectError occurs (backend is offline)"""
+        mock_send.side_effect = ConnectError("Failed to connect to the server")
         result = runner.invoke(app, ["mkdir", "test_dir"])
-        self.assertEqual(result.exit_code, 1)
-        self.assertIn(
-            "Failed to connect to the server. Please check your network \nconnection.",
-            result.output,
-        )
+        assert_connect_error(result)
 
     @patch("skylock_cli.core.dir_operations.send_mkdir_request")
     def test_mkdir_invalid_path_error(self, mock_send):
@@ -113,9 +108,12 @@ class TestMKDIRCommand(unittest.TestCase):
 
         result = runner.invoke(app, ["mkdir", "test_dir/child_dir"])
         self.assertEqual(result.exit_code, 1)
-        self.assertIn(
-            "Directory `/child_dir` is missing! Use the --parent flag to create parent \ndirectories.\n",
+        self.assertRegex(
             result.output,
+            re.compile(
+                r"Directory `/child_dir` is missing! Use the --parent flag to create parent\s+directories\.\n",
+                re.MULTILINE,
+            ),
         )
 
     @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
