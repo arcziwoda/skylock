@@ -13,11 +13,11 @@ def mock_response_with_status(status_code, json_data=None):
     return mock_response
 
 
-def assert_connection_error(result):
+def assert_connect_error(result):
     """Connection error assert"""
     assert result.exit_code == 1
     assert (
-        "Failed to connect to the server. Please check your network \nconnection."
+        "The server is not reachable at the moment. Please try again later."
         in result.output
     )
 

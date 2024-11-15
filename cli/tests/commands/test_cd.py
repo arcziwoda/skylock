@@ -6,9 +6,10 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 from typer.testing import CliRunner
+from httpx import ConnectError
 from skylock_cli.cli import app
 from skylock_cli.exceptions import api_exceptions
-from tests.helpers import assert_connection_error, mock_test_context
+from tests.helpers import assert_connect_error, mock_test_context
 
 runner = CliRunner()
 
@@ -68,13 +69,10 @@ class TestCDCommand(unittest.TestCase):
 
     @patch("skylock_cli.core.nav.send_cd_request")
     def test_cd_connection_error(self, mock_send):
-        """Test the cd command when a ConnectionError occurs (backend is offline)"""
-        mock_send.side_effect = ConnectionError(
-            "Failed to connect to the server. Please check your network connection."
-        )
-
+        """Test the cd command when a Connect Eroor occurs (server is down)"""
+        mock_send.side_effect = ConnectError("Failed to connect to the server")
         result = runner.invoke(app, ["cd", "test_dir/"])
-        assert_connection_error(result)
+        assert_connect_error(result)
 
 
 if __name__ == "__main__":

@@ -8,13 +8,14 @@ from pathlib import Path
 from unittest.mock import patch
 from typer.testing import CliRunner
 from art import text2art
+from httpx import ConnectError
 from skylock_cli.model.token import Token
 from skylock_cli.model.context import Context
 from skylock_cli.model.directory import Directory
 from skylock_cli.cli import app
 from skylock_cli.exceptions import api_exceptions
 from skylock_cli.config import ROOT_PATH
-from tests.helpers import assert_connection_error
+from tests.helpers import assert_connect_error
 
 
 runner = CliRunner()
@@ -94,13 +95,10 @@ class TestLoginCommand(unittest.TestCase):
 
     @patch("skylock_cli.core.auth.send_login_request")
     def test_login_connection_error(self, mock_send):
-        """Test the login command when a ConnectionError occurs (backend is offline)"""
-        mock_send.side_effect = ConnectionError(
-            "Failed to connect to the server. Please check your network connection."
-        )
-
+        """Test the login command when a ConnectError occurs (backend is offline)"""
+        mock_send.side_effect = ConnectError("Failed to connect to the server")
         result = runner.invoke(app, ["login", "testuser"], input="testpass")
-        assert_connection_error(result)
+        assert_connect_error(result)
 
 
 if __name__ == "__main__":
