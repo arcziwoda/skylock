@@ -113,18 +113,6 @@ class TestLoginUser(unittest.TestCase):
             self.assertIn("Invalid username or password", mock_stderr.getvalue())
 
     @patch("skylock_cli.api.auth_requests.client.post")
-    def test_login_skylock_api_error(self, mock_post):
-        """Test login with a SkyLockAPIError"""
-        mock_post.return_value = mock_response_with_status(
-            HTTPStatus.INTERNAL_SERVER_ERROR
-        )
-
-        with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
-            with self.assertRaises(exceptions.Exit):
-                login_user("testuser", "testpass")
-            self.assertIn("Failed to login user", mock_stderr.getvalue())
-
-    @patch("skylock_cli.api.auth_requests.client.post")
     def test_login_connection_error(self, mock_post):
         """Test login when a ConnectError occurs (backend is offline)"""
         mock_post.side_effect = ConnectError("Failed to connect to the server")
@@ -136,6 +124,18 @@ class TestLoginUser(unittest.TestCase):
                 "The server is not reachable at the moment. Please try again later.",
                 mock_stderr.getvalue(),
             )
+
+    @patch("skylock_cli.api.auth_requests.client.post")
+    def test_login_skylock_api_error(self, mock_post):
+        """Test login with a SkyLockAPIError"""
+        mock_post.return_value = mock_response_with_status(
+            HTTPStatus.INTERNAL_SERVER_ERROR
+        )
+
+        with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
+            with self.assertRaises(exceptions.Exit):
+                login_user("testuser", "testpass")
+            self.assertIn("Failed to login user", mock_stderr.getvalue())
 
 
 if __name__ == "__main__":
