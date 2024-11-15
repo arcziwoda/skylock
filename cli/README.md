@@ -18,9 +18,47 @@ This user command line interface enables to:
 - **Download Folders**: Download entire folders as ZIP files.
 - **Unix-Style Navigation**: Move through your file tree using familiar Unix-style commands.
 
-## Usage
+## Example usage
 
-**TODO**: Put example instructions here in the future
+### Register a new user
+```sh
+slock register <username>
+```
+
+### Login
+```sh
+slock login <username>
+```
+
+This is what should appear after you login succesfully
+```sh
+User logged in successfully
+Hello, username
+Welcome to our file hosting service
+ ____   _            _                   _    
+/ ___| | | __ _   _ | |      ___    ___ | | __
+\___ \ | |/ /| | | || |     / _ \  / __|| |/ /
+ ___) ||   < | |_| || |___ | (_) || (__ |   < 
+|____/ |_|\_\ \__, ||_____| \___/  \___||_|\_\
+              |___/                           
+
+Your current working directory is: /
+```
+
+### List the contents of a directory
+```sh
+slock ls [directory_path]
+```
+
+### Change the current working directory
+```sh
+slock cd [directory_path]
+```
+
+### You can run this command to get information about the usage of all commands
+```sh
+slock --help
+```
 
 ## Installation
 
@@ -43,7 +81,13 @@ make install
 ## Tests:
 
 ```bash
-pytest
+make test
+```
+
+You can test the code using mutiple Python versions using the tox tool:
+
+```bash
+tox
 ```
 
 ## Documentation:
