@@ -20,7 +20,7 @@ def register(
     username: Annotated[str, typer.Argument(help="The username of the new user")]
 ) -> None:
     """
-    Register a new user in the SkyLock.
+    Register a new user in the SkyLock
     """
     password = typer.prompt("Password", hide_input=True)
     confirm_password = typer.prompt("Confirm password", hide_input=True)
@@ -37,7 +37,7 @@ def login(
     username: Annotated[str, typer.Argument(help="The username of the user")]
 ) -> None:
     """
-    Login to the SkyLock.
+    Login to the SkyLock as a user
     """
     password = typer.prompt("Password", hide_input=True)
     context = login_user(username, password)
@@ -63,7 +63,7 @@ def mkdir(
     ] = False,
 ) -> None:
     """
-    Create a new directory in the SkyLock.
+    Create a new directory in the SkyLock
     """
     created_path = create_directory(directory_path, parent)
     cwd = get_working_directory()
