@@ -25,6 +25,8 @@ If not created, random JWT_SECRET and default DATABASE_URL ("sqlite:///./data/db
 
 Make sure to replace the `JWT_SECRET` with your own secure secret key and configure `DATABASE_URL` according to your database setup.
 
+Note that it is possible to run docker compose with optional .env file from Docker Compose 2.24.0 version
+
 ## How to run
 
 ### Option 1: Running with Docker Compose
