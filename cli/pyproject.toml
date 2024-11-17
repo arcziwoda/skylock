@@ -66,3 +66,16 @@ commands =
   poetry install
   poetry run pytest
 """
+
+[tool.coverage.run]
+branch = true
+source = [
+  "skylock_cli"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+  "def __init__",
+  "if __name__ == .__main__.:",
+  "tests/*"
+]
