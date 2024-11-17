@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, Response, UploadFile, status
 
 from skylock.api.dependencies import get_current_user, get_skylock_facade
@@ -48,9 +50,9 @@ router = APIRouter(tags=["Resource"], prefix="/files")
 )
 def upload_file(
     file: UploadFile,
-    path: str = Depends(validate_path_not_empty),
-    user: db_models.UserEntity = Depends(get_current_user),
-    skylock: SkylockFacade = Depends(get_skylock_facade),
+    path: Annotated[str, Depends(validate_path_not_empty)],
+    user: Annotated[db_models.UserEntity, Depends(get_current_user)],
+    skylock: Annotated[SkylockFacade, Depends(get_skylock_facade)],
 ):
     skylock.upload_file(user_path=UserPath(path=path, owner=user), file_data=file.file)
 
@@ -81,9 +83,9 @@ def upload_file(
     },
 )
 def download_file(
-    path: str = Depends(validate_path_not_empty),
-    user: db_models.UserEntity = Depends(get_current_user),
-    skylock: SkylockFacade = Depends(get_skylock_facade),
+    path: Annotated[str, Depends(validate_path_not_empty)],
+    user: Annotated[db_models.UserEntity, Depends(get_current_user)],
+    skylock: Annotated[SkylockFacade, Depends(get_skylock_facade)],
 ):
     file_data = skylock.download_file(UserPath(path=path, owner=user))
     return Response(content=file_data.read(), media_type="application/octet-stream")

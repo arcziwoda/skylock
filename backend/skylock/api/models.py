@@ -1,5 +1,3 @@
-from typing import List
-
 from pydantic import BaseModel
 
 
@@ -19,8 +17,8 @@ class File(BaseModel):
 
 
 class FolderContents(BaseModel):
-    files: List[File]
-    folders: List[Folder]
+    files: list[File]
+    folders: list[Folder]
 
 
 class LoginUserRequest(BaseModel):
