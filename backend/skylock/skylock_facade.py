@@ -26,8 +26,7 @@ class SkylockFacade:
         folder = self._resource_service.get_folder(user_path)
         parent_path = f"/{user_path.path}" if user_path.path else ""
         children_files = [
-            models.File(name=file.name, path=f"{parent_path}/{file.name}")
-            for file in folder.files
+            models.File(name=file.name, path=f"{parent_path}/{file.name}") for file in folder.files
         ]
         children_folders = [
             models.Folder(name=folder.name, path=f"{parent_path}/{folder.name}")
