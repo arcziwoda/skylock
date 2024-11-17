@@ -2,17 +2,14 @@
 User model class.
 """
 
-from pydantic import BaseModel
+from typing import Annotated
+from pydantic import BaseModel, Field
 
 
 class User(BaseModel):
     """
     Stores user information.
-
-    Attributes:
-        username (str): The username of the user.
-        password (str): The password of the user.
     """
 
-    username: str
-    password: str
+    username: Annotated[str, Field(description="Username of the user")]
+    password: Annotated[str, Field(description="Password of the user")]

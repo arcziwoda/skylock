@@ -2,7 +2,7 @@
 Module that contains the token model.
 """
 
-from typing import Optional
+from typing import Optional, Annotated
 from pydantic import BaseModel, Field
 from jose import jwt
 from jose.exceptions import ExpiredSignatureError, JWTError
@@ -11,14 +11,10 @@ from jose.exceptions import ExpiredSignatureError, JWTError
 class Token(BaseModel):
     """
     Represents an authentication token returned from the API.
-
-    Attributes:
-        access_token (str): The token used for authenticated requests.
-        token_type (str): The type of the token, typically 'Bearer'.
     """
 
-    access_token: Optional[str] = Field(default="")
-    token_type: Optional[str] = Field(default="")
+    access_token: Annotated[Optional[str], Field(description="Access token")] = ""
+    token_type: Annotated[Optional[str], Field(description="Token type")] = "Bearer"
 
     def is_valid(self) -> bool:
         """
