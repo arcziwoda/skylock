@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Response, UploadFile, status
-from fastapi import Depends
 from typing import Annotated
+
+from fastapi import APIRouter, Depends, Response, UploadFile, status
 
 from skylock.api.dependencies import get_current_user, get_skylock_facade
 from skylock.api.validation import validate_path_not_empty

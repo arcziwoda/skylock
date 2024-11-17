@@ -1,6 +1,6 @@
-from fastapi import APIRouter, status
-from fastapi import Depends
 from typing import Annotated
+
+from fastapi import APIRouter, Depends, status
 
 from skylock.api import models
 from skylock.api.dependencies import get_current_user, get_skylock_facade
