@@ -3,10 +3,10 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
-import os
 import dotenv
 
 from skylock.database.models import metadata
+from skylock.config import DATABASE_URL
 
 from alembic import context
 
@@ -30,7 +30,7 @@ target_metadata = None
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 dotenv.load_dotenv()
-config.set_main_option("sqlalchemy.url", os.environ["DATABASE_URL"])
+config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
 target_metadata = metadata
 

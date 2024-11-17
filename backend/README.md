@@ -13,7 +13,7 @@ Before starting, make sure you have the following installed:
 
 ### Configuration
 
-Before running the application, you need to create a `.env` file in the root directory of your project with the following environment variables:
+Before running the application, you should to create a `.env` file in the root directory of your project with the following environment variables:
 
 ```dotenv
 # .env file
@@ -21,7 +21,11 @@ JWT_SECRET=<your-jwt-secret>
 DATABASE_URL=<your-database-url>
 ```
 
+If not created, random JWT_SECRET and default DATABASE_URL ("sqlite:///./data/db.sqlite") will be set instead
+
 Make sure to replace the `JWT_SECRET` with your own secure secret key and configure `DATABASE_URL` according to your database setup.
+
+Note that it is possible to run docker compose with optional .env file from Docker Compose 2.24.0 version
 
 ## How to run
 
