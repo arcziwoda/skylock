@@ -1,6 +1,6 @@
 [tool.poetry]
 authors = ["Oliwier Szypczyn <01178608@pw.edu.pl>"]
-description = ""
+description = "Skylock CLI is a command line interface for Skylock API."
 name = "skylock_cli"
 readme = "README.md"
 version = "0.1.0"
@@ -51,5 +51,31 @@ disable = [
 
 [tool.pytest.ini_options]
 filterwarnings = [
-    "ignore::DeprecationWarning:.*jose.jwt.*"
+  "ignore::DeprecationWarning:.*jose.jwt.*"
+]
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py39, py310, py311, py312, py313
+
+[testenv]
+deps =
+  poetry
+commands =
+  poetry install
+  poetry run pytest
+"""
+
+[tool.coverage.run]
+branch = true
+source = [
+  "skylock_cli"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+  "def __init__",
+  "if __name__ == .__main__.:",
+  "tests/*"
 ]

@@ -3,6 +3,7 @@ Module with Directory model class
 """
 
 from pathlib import Path
+from typing import Optional, Annotated
 from pydantic import (
     BaseModel,
     field_validator,
@@ -17,9 +18,11 @@ from skylock_cli.config import ROOT_PATH
 class Directory(BaseModel):
     """Stores directory metadata"""
 
-    path: Path = Field(default=ROOT_PATH)
-    name: str = Field(default=None)
-    color: str = MAGENTA
+    path: Annotated[Optional[Path], Field(description="Directory path")] = ROOT_PATH
+    name: Annotated[Optional[str], Field(description="Directory name")] = None
+    color: Annotated[
+        Optional[str], Field(description="Directory color used to pretty print in CLI")
+    ] = MAGENTA
 
     @field_serializer("path")
     def serialize_path(self, path: Path) -> str:
