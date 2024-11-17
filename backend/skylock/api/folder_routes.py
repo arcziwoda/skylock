@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, status
+from fastapi import Depends
+from typing import Annotated
 
 from skylock.api import models
 from skylock.api.dependencies import get_current_user, get_skylock_facade
@@ -59,8 +61,8 @@ router = APIRouter(tags=["Resource"], prefix="/folders")
 )
 def get_folder_contents(
     path: str,
-    user: db_models.UserEntity = Depends(get_current_user),
-    skylock: SkylockFacade = Depends(get_skylock_facade),
+    user: Annotated[db_models.UserEntity, Depends(get_current_user)],
+    skylock: Annotated[SkylockFacade, Depends(get_skylock_facade)],
 ) -> models.FolderContents:
     return skylock.get_folder_contents(UserPath(path=path, owner=user))
 
@@ -110,9 +112,9 @@ def get_folder_contents(
     },
 )
 def create_folder(
-    path: str = Depends(validate_path_not_empty),
-    user: db_models.UserEntity = Depends(get_current_user),
-    skylock: SkylockFacade = Depends(get_skylock_facade),
+    path: Annotated[str, Depends(validate_path_not_empty)],
+    user: Annotated[db_models.UserEntity, Depends(get_current_user)],
+    skylock: Annotated[SkylockFacade, Depends(get_skylock_facade)],
 ):
     skylock.create_folder_for_user(UserPath(path=path, owner=user))
     return {"message": "Folder created"}
@@ -172,10 +174,10 @@ def create_folder(
     },
 )
 def delete_folder(
-    path: str = Depends(validate_path_not_empty),
+    path: Annotated[str, Depends(validate_path_not_empty)],
+    user: Annotated[db_models.UserEntity, Depends(get_current_user)],
+    skylock: Annotated[SkylockFacade, Depends(get_skylock_facade)],
     recursive: bool = False,
-    user: db_models.UserEntity = Depends(get_current_user),
-    skylock: SkylockFacade = Depends(get_skylock_facade),
 ):
     skylock.delete_folder(UserPath(path=path, owner=user), is_recursively=recursive)
     return {"message": "Folder deleted"}

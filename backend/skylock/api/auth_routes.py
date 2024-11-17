@@ -1,3 +1,4 @@
+from typing import Annotated
 from fastapi import APIRouter, Depends, status
 
 from skylock.api import models
@@ -40,7 +41,7 @@ router = APIRouter(tags=["Auth"], prefix="/auth")
 )
 def register_user(
     request: models.RegisterUserRequest,
-    skylock: SkylockFacade = Depends(get_skylock_facade),
+    skylock: Annotated[SkylockFacade, Depends(get_skylock_facade)],
 ):
     skylock.register_user(username=request.username, password=request.password)
     return {"message": "User successfully registered"}
@@ -75,6 +76,6 @@ def register_user(
 )
 def login_user(
     request: models.LoginUserRequest,
-    skylock: SkylockFacade = Depends(get_skylock_facade),
+    skylock: Annotated[SkylockFacade, Depends(get_skylock_facade)],
 ) -> models.Token:
     return skylock.login_user(username=request.username, password=request.password)
