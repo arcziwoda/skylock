@@ -24,11 +24,7 @@ router = APIRouter(tags=["Resource"], prefix="/files")
     responses={
         201: {
             "description": "File uploaded successfully",
-            "content": {
-                "application/json": {
-                    "example": {"message": "File uploaded successfully"}
-                }
-            },
+            "content": {"application/json": {"example": {"message": "File uploaded successfully"}}},
         },
         400: {
             "description": "Invalid path provided, most likely empty",
@@ -36,15 +32,11 @@ router = APIRouter(tags=["Resource"], prefix="/files")
         },
         401: {
             "description": "Unauthorized user",
-            "content": {
-                "application/json": {"example": {"detail": "Not authenticated"}}
-            },
+            "content": {"application/json": {"example": {"detail": "Not authenticated"}}},
         },
         409: {
             "description": "Resource already exists",
-            "content": {
-                "application/json": {"example": {"detail": "File already exists"}}
-            },
+            "content": {"application/json": {"example": {"detail": "File already exists"}}},
         },
     },
 )
@@ -72,9 +64,7 @@ def upload_file(
         },
         401: {
             "description": "Unauthorized user",
-            "content": {
-                "application/json": {"example": {"detail": "Not authenticated"}}
-            },
+            "content": {"application/json": {"example": {"detail": "Not authenticated"}}},
         },
         404: {
             "description": "File not found",

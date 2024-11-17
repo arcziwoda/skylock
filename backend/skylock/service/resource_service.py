@@ -14,9 +14,7 @@ from skylock.utils.storage import delete_file_data, get_file_data, save_file_dat
 
 
 class ResourceService:
-    def __init__(
-        self, file_repository: FileRepository, folder_repository: FolderRepository
-    ):
+    def __init__(self, file_repository: FileRepository, folder_repository: FolderRepository):
         self._file_repository = file_repository
         self._folder_repository = folder_repository
 
@@ -24,9 +22,7 @@ class ResourceService:
         current_folder = self._get_root_folder_by_name(user_path.root_folder_name)
 
         if current_folder is None:
-            raise LookupError(
-                f"Root folder: {user_path.root_folder_name} does not exist"
-            )
+            raise LookupError(f"Root folder: {user_path.root_folder_name} does not exist")
 
         for folder_name in user_path.parts:
             current_folder = self._folder_repository.get_by_name_and_parent_id(
@@ -56,9 +52,7 @@ class ResourceService:
         folder = self.get_folder(user_path)
         self._delete_folder(folder, is_recursively=is_recursively)
 
-    def _delete_folder(
-        self, folder: db_models.FolderEntity, is_recursively: bool = False
-    ):
+    def _delete_folder(self, folder: db_models.FolderEntity, is_recursively: bool = False):
         if folder.is_root():
             raise ForbiddenActionException("Deletion of root folder is forbidden")
 
@@ -130,17 +124,13 @@ class ResourceService:
         if self._get_root_folder_by_name(user_path.root_folder_name):
             raise RootFolderAlreadyExistsException("This root folder already exists")
         self._folder_repository.save(
-            db_models.FolderEntity(
-                name=user_path.root_folder_name, owner=user_path.owner
-            )
+            db_models.FolderEntity(name=user_path.root_folder_name, owner=user_path.owner)
         )
 
     def _get_root_folder_by_name(self, name: str) -> Optional[db_models.FolderEntity]:
         return self._folder_repository.get_by_name_and_parent_id(name, None)
 
-    def _assert_no_children_matching_name(
-        self, folder: db_models.FolderEntity, name: str
-    ):
+    def _assert_no_children_matching_name(self, folder: db_models.FolderEntity, name: str):
         exists_file_of_name = name in [file.name for file in folder.files]
         exists_folder_of_name = name in [folder.name for folder in folder.subfolders]
         if exists_file_of_name or exists_folder_of_name:

@@ -48,3 +48,6 @@ disable = [
     "E1136", # (object-not-subscriptable)
     "W0511", # (TODO)
 ]
+
+[tool.black]
+line-length = 100

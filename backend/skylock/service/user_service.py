@@ -21,9 +21,7 @@ class UserService:
             raise UserAlreadyExists(f"User with username {username} already exists")
 
         hashed_password = self.password_hasher.hash(password)
-        new_user_entity = db_models.UserEntity(
-            username=username, password=hashed_password
-        )
+        new_user_entity = db_models.UserEntity(username=username, password=hashed_password)
 
         return self.user_repository.save(new_user_entity)
 

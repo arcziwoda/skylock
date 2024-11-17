@@ -31,9 +31,7 @@ class FolderEntity(Base):
     __tablename__ = "folders"
 
     name: orm.Mapped[str] = orm.mapped_column(nullable=False)
-    parent_folder_id: orm.Mapped[Optional[int]] = orm.mapped_column(
-        ForeignKey("folders.id")
-    )
+    parent_folder_id: orm.Mapped[Optional[int]] = orm.mapped_column(ForeignKey("folders.id"))
     owner_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("users.id"))
 
     parent_folder: orm.Mapped[Optional["FolderEntity"]] = orm.relationship(
@@ -48,9 +46,7 @@ class FolderEntity(Base):
         "FolderEntity", back_populates="parent_folder", lazy="selectin"
     )
 
-    owner: orm.Mapped[UserEntity] = orm.relationship(
-        "UserEntity", back_populates="folders"
-    )
+    owner: orm.Mapped[UserEntity] = orm.relationship("UserEntity", back_populates="folders")
 
     def is_root(self) -> bool:
         return self.parent_folder_id is None
@@ -63,10 +59,6 @@ class FileEntity(Base):
     folder_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("folders.id"))
     owner_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("users.id"))
 
-    folder: orm.Mapped[FolderEntity] = orm.relationship(
-        "FolderEntity", back_populates="files"
-    )
+    folder: orm.Mapped[FolderEntity] = orm.relationship("FolderEntity", back_populates="files")
 
-    owner: orm.Mapped[UserEntity] = orm.relationship(
-        "UserEntity", back_populates="files"
-    )
+    owner: orm.Mapped[UserEntity] = orm.relationship("UserEntity", back_populates="files")
