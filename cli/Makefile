@@ -13,7 +13,7 @@ test-coverage:
 	coverage report --sort=cover
 
 mkdocs:
-	mkdocs serve --dev-addr 0.0.0.0:8090
+	mkdocs serve --dev-addr localhost:8090
 
 
 help:
