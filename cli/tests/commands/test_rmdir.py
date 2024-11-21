@@ -45,7 +45,7 @@ class TestRMDIRCommand(unittest.TestCase):
     @patch("skylock_cli.core.nav.send_cd_request")
     @patch("skylock_cli.core.dir_operations.send_rmdir_request")
     @patch("skylock_cli.core.context_manager.ContextManager.get_context")
-    def test_rmdir_success_chnage_dir(
+    def test_rmdir_success_change_dir(
         self,
         mock_get_context,
         mock_send_rmdir,

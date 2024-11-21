@@ -15,6 +15,7 @@ from skylock_cli.core.file_operations import (
     _generate_unique_file_path,
     upload_file,
     download_file,
+    remove_file,
 )
 from tests.helpers import mock_test_context, mock_response_with_status
 
@@ -387,6 +388,76 @@ class TestDownloadFile(unittest.TestCase):
                 "The server is not reachable at the moment. Please try again later.",
                 mock_stderr.getvalue(),
             )
+
+
+class TestRemoveFile(unittest.TestCase):
+    """Test cases for the remove_file function from core.file_operations"""
+
+    @patch("skylock_cli.api.file_requests.client.delete")
+    def test_remove_file_success(self, mock_delete):
+        """Test successful file removal"""
+        mock_delete.return_value = mock_response_with_status(HTTPStatus.NO_CONTENT)
+
+        remove_file("test.txt")
+        mock_delete.assert_called_once()
+
+    @patch("skylock_cli.api.file_requests.client.delete")
+    def test_remove_file_not_found(self, mock_delete):
+        """Test removal when the file is not found"""
+        mock_delete.return_value = mock_response_with_status(HTTPStatus.NOT_FOUND)
+
+        with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
+            with self.assertRaises(exceptions.Exit):
+                remove_file("test.txt")
+            self.assertIn("File `/test.txt` not found!", mock_stderr.getvalue())
+
+    @patch("skylock_cli.api.file_requests.client.delete")
+    def test_remove_file_skylock_api_error(self, mock_delete):
+        """Test removal with a SkyLockAPIError"""
+        mock_delete.return_value = mock_response_with_status(
+            HTTPStatus.INTERNAL_SERVER_ERROR
+        )
+
+        with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
+            with self.assertRaises(exceptions.Exit):
+                remove_file("test.txt")
+            self.assertIn(
+                "Failed to remove file (Error Code: 500)",
+                mock_stderr.getvalue(),
+            )
+
+    @patch("skylock_cli.api.file_requests.client.delete")
+    def test_remove_file_connection_error(self, mock_delete):
+        """Test removal when a ConnectError occurs (backend is offline)"""
+        mock_delete.side_effect = ConnectError("Failed to connect to the server")
+        with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
+            with self.assertRaises(exceptions.Exit):
+                remove_file("test.txt")
+            self.assertIn(
+                "The server is not reachable at the moment. Please try again later.",
+                mock_stderr.getvalue(),
+            )
+
+    @patch("skylock_cli.api.file_requests.client.delete")
+    def test_remove_file_unauthorized(self, mock_delete):
+        """Test removal when the user is unauthorized"""
+        mock_delete.return_value = mock_response_with_status(HTTPStatus.UNAUTHORIZED)
+
+        with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
+            with self.assertRaises(exceptions.Exit):
+                remove_file("test.txt")
+            self.assertIn(
+                "User is unauthorized. Please login to use this command.",
+                mock_stderr.getvalue(),
+            )
+
+    def test_remove_not_a_file_error(self):
+        """Test removal when the path is not a file"""
+
+        with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
+            with self.assertRaises(exceptions.Exit):
+                remove_file("test_dir/")
+            self.assertIn("test_dir/ is not a file", mock_stderr.getvalue())
 
 
 if __name__ == "__main__":
