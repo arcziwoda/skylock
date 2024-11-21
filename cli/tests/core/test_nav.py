@@ -21,12 +21,12 @@ class TestListDirectory(unittest.TestCase):
     def test_list_directory_success(self, mock_send_ls_request):
         """Test successful directory listing"""
         mock_files = [
-            {"name": "file1.txt", "path": "/test/file1.txt"},
-            {"name": "file2.txt", "path": "/test/file2.txt"},
+            {"name": "file1.txt", "path": "/test/file1.txt", "is_public": False},
+            {"name": "file2.txt", "path": "/test/file2.txt", "is_public": True},
         ]
         mock_folders = [
-            {"name": "folder1", "path": "/test/folder1"},
-            {"name": "folder2", "path": "/test/folder2"},
+            {"name": "folder1", "path": "/test/folder1", "is_public": False},
+            {"name": "folder2", "path": "/test/folder2", "is_public": True},
         ]
 
         mock_send_ls_request.return_value = {
@@ -37,10 +37,30 @@ class TestListDirectory(unittest.TestCase):
         result, path = list_directory("/test")
 
         expected_result = [
-            File(name="file1.txt", path="/test/file1.txt"),
-            File(name="file2.txt", path="/test/file2.txt"),
-            Directory(name="folder1/", path="/test/folder1/"),
-            Directory(name="folder2/", path="/test/folder2/"),
+            File(
+                name="file1.txt",
+                path="/test/file1.txt",
+                is_public=False,
+                type_label="file",
+            ),
+            File(
+                name="file2.txt",
+                path="/test/file2.txt",
+                is_public=True,
+                type_label="file",
+            ),
+            Directory(
+                name="folder1/",
+                path="/test/folder1/",
+                is_public=False,
+                type_label="directory",
+            ),
+            Directory(
+                name="folder2/",
+                path="/test/folder2/",
+                is_public=True,
+                type_label="directory",
+            ),
         ]
 
         self.assertEqual(result, expected_result)

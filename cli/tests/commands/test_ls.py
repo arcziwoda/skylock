@@ -28,8 +28,8 @@ class TestLSCommand(unittest.TestCase):
         mock_get_context.return_value = mock_test_context()
 
         mock_files = [
-            {"name": "file1.txt", "path": "/file1.txt"},
             {"name": "file2.txt", "path": "/file2.txt"},
+            {"name": "file1.txt", "path": "/file1.txt"},
         ]
         mock_folders = [
             {"name": "folder1", "path": "/folder1"},
@@ -42,6 +42,43 @@ class TestLSCommand(unittest.TestCase):
         self.assertEqual(result.exit_code, 0)
         self.assertIn("Contents of /", result.output)
         self.assertIn("file1.txt  file2.txt  folder1/  folder2/", result.output)
+
+    @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
+    @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
+    @patch("skylock_cli.core.nav.send_ls_request")
+    @patch("skylock_cli.core.context_manager.ContextManager.get_context")
+    def test_ls_long_success(
+        self, mock_get_context, mock_send, _mock_is_valid, _mock_is_expired
+    ):
+        """Test the ls command"""
+        mock_get_context.return_value = mock_test_context()
+
+        mock_files = [
+            {"name": "file2.txt", "path": "/file2.txt", "is_public": True},
+            {"name": "file1.txt", "path": "/file1.txt", "is_public": False},
+        ]
+        mock_folders = [
+            {"name": "folder1", "path": "/folder1", "is_public": True},
+            {"name": "folder2", "path": "/folder2", "is_public": False},
+        ]
+
+        mock_send.return_value = {"files": mock_files, "folders": mock_folders}
+
+        result = self.runner.invoke(app, ["ls", "-l"])
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("Contents of /", result.output)
+        self.assertIn(
+            "│ file      │ file1.txt │ /file1.txt │ private 🔐 │", result.output
+        )
+        self.assertIn(
+            "│ file      │ file2.txt │ /file2.txt │ public 🔓  │", result.output
+        )
+        self.assertIn(
+            "│ directory │ folder1/  │ /folder1   │ public 🔓  │", result.output
+        )
+        self.assertIn(
+            "│ directory │ folder2/  │ /folder2   │ private 🔐 │", result.output
+        )
 
     @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
     @patch("skylock_cli.model.token.Token.is_valid", return_value=True)

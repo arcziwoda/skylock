@@ -21,6 +21,8 @@ class TestFile(unittest.TestCase):
         self.assertEqual(file.name, "example.txt")
         self.assertEqual(file.path, Path("/home/user/example.txt"))
         self.assertEqual(file.color, YELLOW)
+        self.assertFalse(file.is_public)
+        self.assertEqual(file.type_label, "file")
 
     def test_file_default_color(self):
         """
