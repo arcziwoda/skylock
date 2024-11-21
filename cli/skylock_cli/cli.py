@@ -6,13 +6,16 @@ from pathlib import Path
 from typing import Optional
 from typing_extensions import Annotated
 import typer
+from rich.console import Console
+from rich.table import Table
 from art import text2art
 from skylock_cli.core.auth import register_user, login_user
 from skylock_cli.core.dir_operations import create_directory, remove_directory
-from skylock_cli.core.file_operations import upload_file, download_file
+from skylock_cli.core.file_operations import upload_file, download_file, remove_file
 from skylock_cli.core.nav import list_directory, change_directory, get_working_directory
 
 app = typer.Typer(pretty_exceptions_show_locals=False)
+console = Console()
 
 
 @app.command()
@@ -100,10 +103,32 @@ def rmdir(
 
 
 @app.command()
+def rm(
+    file_path: Annotated[
+        str,
+        typer.Argument(
+            help="The path of the file to remove. Must not end with / as this command removes files, not directories."
+        ),
+    ]
+) -> None:
+    """
+    Remove a file from the SkyLock.
+    """
+    removed_path = remove_file(file_path)
+    cwd = get_working_directory()
+
+    typer.secho(f"Current working directory: {cwd.path}", fg=typer.colors.BLUE)
+    typer.secho(f"File {removed_path} removed successfully", fg=typer.colors.GREEN)
+
+
+@app.command()
 def ls(
     directory_path: Annotated[
         Optional[Path], typer.Argument(help="The directory to list")
-    ] = Path(".")
+    ] = Path("."),
+    long: Annotated[
+        bool, typer.Option("-l", "--long", help="List in long format")
+    ] = False,
 ) -> None:
     """
     List the contents of a directory.
@@ -112,9 +137,26 @@ def ls(
 
     typer.secho(f"Contents of {path}", fg=typer.colors.BLUE)
 
-    for item in contents:
-        typer.echo(typer.style(item.name, fg=item.color), nl=False)
-        typer.echo("  ", nl=False)
+    if long:
+        table = Table()
+        table.add_column("Type", justify="left")
+        table.add_column("Name", justify="left", no_wrap=True)
+        table.add_column("Path", justify="left")
+        table.add_column("Visibility", justify="left")
+
+        for item in contents:
+            table.add_row(
+                f"[{item.color}]{item.type_label}[/{item.color}]",
+                f"[{item.color}]{item.name}[/{item.color}]",
+                f"[{item.color}]{item.path}[/{item.color}]",
+                f"[{item.visibility_color}]{item.visibility_label}[/{item.visibility_color}]",
+            )
+
+        console.print(table)
+    else:
+        for item in contents:
+            typer.echo(typer.style(f"{item.name}", fg=item.color), nl=False)
+            typer.echo("  ", nl=False)
 
     if contents:
         typer.echo()

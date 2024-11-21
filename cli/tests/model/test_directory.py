@@ -23,6 +23,7 @@ class TestDirectory(unittest.TestCase):
         self.assertEqual(directory.path, Path("/home/user"))
         self.assertEqual(directory.name, "user/")
         self.assertEqual(directory.color, MAGENTA)
+        self.assertEqual(directory.type_label, "directory")
 
     def test_directory_default_path(self):
         """
@@ -30,6 +31,7 @@ class TestDirectory(unittest.TestCase):
         """
         directory = Directory(name="root")
         self.assertEqual(directory.path, ROOT_PATH)
+        self.assertEqual(directory.type_label, "directory")
 
     def test_directory_default_color(self):
         """
@@ -37,6 +39,7 @@ class TestDirectory(unittest.TestCase):
         """
         directory = Directory(path=Path("/home/user"), name="user")
         self.assertEqual(directory.color, MAGENTA)
+        self.assertEqual(directory.type_label, "directory")
 
     def test_directory_serialize_path(self):
         """
@@ -44,6 +47,7 @@ class TestDirectory(unittest.TestCase):
         """
         directory = Directory(path=Path("/home/user"), name="user")
         self.assertEqual(directory.serialize_path(directory.path), "/home/user")
+        self.assertEqual(directory.type_label, "directory")
 
     def test_directory_ensure_trailing_slash(self):
         """
@@ -51,6 +55,7 @@ class TestDirectory(unittest.TestCase):
         """
         directory = Directory(path=Path("/home/user"), name="user")
         self.assertEqual(directory.name, "user/")
+        self.assertEqual(directory.type_label, "directory")
 
 
 if __name__ == "__main__":

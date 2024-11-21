@@ -27,6 +27,18 @@ class NotADirectoryError(SkyLockCoreError):
         super().__init__(message)
 
 
+class NotAFileError(SkyLockCoreError):
+    """Exception raised when a file is expected but a directory is provided.
+
+    Args:
+        path (str): The path of the directory.
+    """
+
+    def __init__(self, path: str) -> None:
+        message = f"{path} is not a file"
+        super().__init__(message)
+
+
 class RootDirectoryError(SkyLockCoreError):
     """Exception raised when attempting to delete the root directory."""
 
