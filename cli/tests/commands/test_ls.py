@@ -10,11 +10,12 @@ from skylock_cli.cli import app
 from skylock_cli.exceptions import api_exceptions
 from tests.helpers import assert_connect_error, mock_test_context
 
-runner = CliRunner()
-
 
 class TestLSCommand(unittest.TestCase):
     """Test cases for the ls command"""
+
+    def setUp(self):
+        self.runner = CliRunner()
 
     @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
     @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
@@ -37,7 +38,7 @@ class TestLSCommand(unittest.TestCase):
 
         mock_send.return_value = {"files": mock_files, "folders": mock_folders}
 
-        result = runner.invoke(app, ["ls"])
+        result = self.runner.invoke(app, ["ls"])
         self.assertEqual(result.exit_code, 0)
         self.assertIn("Contents of /", result.output)
         self.assertIn("file1.txt  file2.txt  folder1/  folder2/", result.output)
@@ -54,7 +55,7 @@ class TestLSCommand(unittest.TestCase):
 
         mock_send.return_value = {"files": [], "folders": []}
 
-        result = runner.invoke(app, ["ls"])
+        result = self.runner.invoke(app, ["ls"])
         self.assertEqual(result.exit_code, 0)
         self.assertIn("Contents of /", result.output)
         self.assertIn("No contents in directory", result.output)
@@ -77,7 +78,7 @@ class TestLSCommand(unittest.TestCase):
 
         mock_send.return_value = {"files": mock_files, "folders": mock_folders}
 
-        result = runner.invoke(app, ["ls", "/test"])
+        result = self.runner.invoke(app, ["ls", "/test"])
         self.assertEqual(result.exit_code, 0)
         self.assertIn("Contents of /test", result.output)
         self.assertIn("file1.txt  file2.txt", result.output)
@@ -100,7 +101,7 @@ class TestLSCommand(unittest.TestCase):
 
         mock_send.return_value = {"files": mock_files, "folders": mock_folders}
 
-        result = runner.invoke(app, ["ls"])
+        result = self.runner.invoke(app, ["ls"])
         self.assertEqual(result.exit_code, 0)
         self.assertIn("Contents of /", result.output)
         self.assertIn("folder1/  folder2/", result.output)
@@ -110,7 +111,7 @@ class TestLSCommand(unittest.TestCase):
         """Test the ls command when the user is unauthorized"""
         mock_send.side_effect = api_exceptions.UserUnauthorizedError()
 
-        result = runner.invoke(app, ["ls"])
+        result = self.runner.invoke(app, ["ls"])
         self.assertEqual(result.exit_code, 1)
         self.assertIn(
             "User is unauthorized. Please login to use this command.", result.output
@@ -123,7 +124,7 @@ class TestLSCommand(unittest.TestCase):
             "An unexpected API error occurred"
         )
 
-        result = runner.invoke(app, ["ls"])
+        result = self.runner.invoke(app, ["ls"])
         self.assertEqual(result.exit_code, 1)
         self.assertIn("An unexpected API error occurred", result.output)
 
@@ -131,7 +132,7 @@ class TestLSCommand(unittest.TestCase):
     def test_ls_connection_error(self, mock_send):
         """Test the ls command when ConnectError occurs (backend is offline)"""
         mock_send.side_effect = ConnectError("Failed to connect to the server")
-        result = runner.invoke(app, ["ls"])
+        result = self.runner.invoke(app, ["ls"])
         assert_connect_error(result)
 
     @patch("skylock_cli.core.nav.send_ls_request")
@@ -139,7 +140,7 @@ class TestLSCommand(unittest.TestCase):
         """Test the ls command when a DirectoryNotFoundError occurs"""
         mock_send.side_effect = api_exceptions.DirectoryNotFoundError("/test")
 
-        result = runner.invoke(app, ["ls", "/test"])
+        result = self.runner.invoke(app, ["ls", "/test"])
         self.assertEqual(result.exit_code, 1)
         self.assertIn("Directory `/test` does not exist!", result.output)
 
@@ -148,7 +149,7 @@ class TestLSCommand(unittest.TestCase):
         """Test the ls command when an InvalidResponseFormatError occurs"""
         mock_send.side_effect = api_exceptions.InvalidResponseFormatError()
 
-        result = runner.invoke(app, ["ls"])
+        result = self.runner.invoke(app, ["ls"])
         self.assertEqual(result.exit_code, 1)
         self.assertIn("Invalid response format!", result.output)
 

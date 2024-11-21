@@ -10,18 +10,19 @@ from skylock_cli.cli import app
 from skylock_cli.exceptions import api_exceptions
 from tests.helpers import assert_connect_error
 
-runner = CliRunner()
-
 
 class TestRegisterCommand(unittest.TestCase):
     """Test cases for the register command"""
+
+    def setUp(self):
+        self.runner = CliRunner()
 
     @patch("skylock_cli.core.auth.send_register_request")
     def test_register_success(self, mock_send):
         """Test the register command"""
         mock_send.return_value = None
 
-        result = runner.invoke(
+        result = self.runner.invoke(
             app, ["register", "testuser1"], input="testpass1\ntestpass1"
         )
 
@@ -33,7 +34,7 @@ class TestRegisterCommand(unittest.TestCase):
         """Test the register command when the user already exists"""
         mock_send.side_effect = api_exceptions.UserAlreadyExistsError("testuser")
 
-        result = runner.invoke(
+        result = self.runner.invoke(
             app, ["register", "testuser"], input="testpass\ntestpass"
         )
         self.assertEqual(result.exit_code, 1)
@@ -46,7 +47,7 @@ class TestRegisterCommand(unittest.TestCase):
             "An unexpected API error occurred"
         )
 
-        result = runner.invoke(
+        result = self.runner.invoke(
             app, ["register", "testuser2"], input="testpass2\ntestpass2"
         )
         self.assertEqual(result.exit_code, 1)
@@ -56,7 +57,7 @@ class TestRegisterCommand(unittest.TestCase):
     def test_register_connection_error(self, mock_send):
         """Test the register command when a ConnectError occurs (backend is offline)"""
         mock_send.side_effect = ConnectError("Failed to connect to the server")
-        result = runner.invoke(
+        result = self.runner.invoke(
             app, ["register", "testuser3"], input="testpass3\ntestpass3"
         )
         assert_connect_error(result)
@@ -64,7 +65,7 @@ class TestRegisterCommand(unittest.TestCase):
     @patch("skylock_cli.core.auth.send_register_request")
     def test_register_password_mismatch(self, _mock_send):
         """Test the register command when the passwords do not match"""
-        result = runner.invoke(
+        result = self.runner.invoke(
             app, ["register", "testuser4"], input="testpass4\ntestpass5"
         )
         self.assertEqual(result.exit_code, 1)

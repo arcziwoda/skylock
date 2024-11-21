@@ -124,3 +124,7 @@ class TestDownloadCommand(unittest.TestCase):
         result = self.runner.invoke(app, ["download", "file.txt"])
         self.assertEqual(result.exit_code, 1)
         self.assertIn("Failed to download file (Error Code: 500)", result.output)
+
+
+if __name__ == "__main__":
+    unittest.main()
