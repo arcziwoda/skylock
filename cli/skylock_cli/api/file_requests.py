@@ -38,7 +38,9 @@ def send_upload_request(token: Token, virtual_path: Path, files: dict) -> None:
         raise api_exceptions.InvalidPathError(virtual_path)
 
     if response.status_code != HTTPStatus.CREATED:
-        raise api_exceptions.SkyLockAPIError(f"Failed to upload file (Error Code: {response.status_code})")
+        raise api_exceptions.SkyLockAPIError(
+            f"Failed to upload file (Error Code: {response.status_code})"
+        )
 
 
 def send_download_request(token: Token, virtual_path: Path) -> bytes:
@@ -67,9 +69,39 @@ def send_download_request(token: Token, virtual_path: Path) -> bytes:
         raise api_exceptions.FileNotFoundError(virtual_path)
 
     if response.status_code != HTTPStatus.OK:
-        raise api_exceptions.SkyLockAPIError(f"Failed to download file (Error Code: {response.status_code})")
+        raise api_exceptions.SkyLockAPIError(
+            f"Failed to download file (Error Code: {response.status_code})"
+        )
 
     if not response.content:
         raise api_exceptions.InvalidResponseFormatError()
 
     return response.content
+
+
+def send_rm_request(token: Token, virtual_path: Path) -> None:
+    """
+    Send a remove request to the SkyLock backend API.
+
+    Args:
+        token (Token): The token object containing authentication token.
+        virtual_path (Path): The path of the file to remove.
+    """
+    url = "/files/remove" + quote(str(virtual_path))
+    auth = bearer_auth.BearerAuth(token)
+
+    response = client.delete(url=url, auth=auth)
+
+    if response.status_code == HTTPStatus.UNAUTHORIZED:
+        raise api_exceptions.UserUnauthorizedError()
+
+    if response.status_code == HTTPStatus.BAD_REQUEST:
+        raise api_exceptions.InvalidPathError(virtual_path)
+
+    if response.status_code == HTTPStatus.NOT_FOUND:
+        raise api_exceptions.FileNotFoundError(virtual_path)
+
+    if response.status_code != HTTPStatus.NO_CONTENT:
+        raise api_exceptions.SkyLockAPIError(
+            f"Failed to remove file (Error Code: {response.status_code})"
+        )

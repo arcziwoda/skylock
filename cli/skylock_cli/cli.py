@@ -9,7 +9,7 @@ import typer
 from art import text2art
 from skylock_cli.core.auth import register_user, login_user
 from skylock_cli.core.dir_operations import create_directory, remove_directory
-from skylock_cli.core.file_operations import upload_file, download_file
+from skylock_cli.core.file_operations import upload_file, download_file, remove_file
 from skylock_cli.core.nav import list_directory, change_directory, get_working_directory
 
 app = typer.Typer(pretty_exceptions_show_locals=False)
@@ -97,6 +97,25 @@ def rmdir(
 
     typer.secho(f"Current working directory: {cwd.path}", fg=typer.colors.BLUE)
     typer.secho(f"Directory {removed_path} removed successfully", fg=typer.colors.GREEN)
+
+
+@app.command()
+def rm(
+    file_path: Annotated[
+        str,
+        typer.Argument(
+            help="The path of the file to remove. Must not end with / as this command removes files, not directories."
+        ),
+    ]
+) -> None:
+    """
+    Remove a file from the SkyLock.
+    """
+    removed_path = remove_file(file_path)
+    cwd = get_working_directory()
+
+    typer.secho(f"Current working directory: {cwd.path}", fg=typer.colors.BLUE)
+    typer.secho(f"File {removed_path} removed successfully", fg=typer.colors.GREEN)
 
 
 @app.command()
