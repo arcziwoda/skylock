@@ -438,6 +438,14 @@ class TestRemoveFile(unittest.TestCase):
                 mock_stderr.getvalue(),
             )
 
+    def test_remove_not_a_file_error(self):
+        """Test removal when the path is not a file"""
+
+        with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
+            with self.assertRaises(exceptions.Exit):
+                remove_file("test_dir/")
+            self.assertIn("test_dir/ is not a file", mock_stderr.getvalue())
+
     @patch("skylock_cli.api.file_requests.client.delete")
     def test_remove_file_unauthorized(self, mock_delete):
         """Test removal when the user is unauthorized"""
@@ -450,14 +458,6 @@ class TestRemoveFile(unittest.TestCase):
                 "User is unauthorized. Please login to use this command.",
                 mock_stderr.getvalue(),
             )
-
-    def test_remove_not_a_file_error(self):
-        """Test removal when the path is not a file"""
-
-        with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
-            with self.assertRaises(exceptions.Exit):
-                remove_file("test_dir/")
-            self.assertIn("test_dir/ is not a file", mock_stderr.getvalue())
 
 
 if __name__ == "__main__":
