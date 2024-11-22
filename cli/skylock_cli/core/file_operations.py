@@ -11,6 +11,8 @@ from skylock_cli.api.file_requests import (
     send_upload_request,
     send_download_request,
     send_rm_request,
+    send_make_public_request,
+    send_make_private_request,
 )
 from skylock_cli.exceptions.core_exceptions import NotAFileError
 from skylock_cli.config import DOWNLOADS_DIR
@@ -66,6 +68,24 @@ def remove_file(file_path: str) -> Path:
 
         joind_path = path_parser.parse_path(current_context.cwd.path, file_path)
         send_rm_request(current_context.token, joind_path)
+    return joind_path
+
+
+def make_file_public(file_path: str) -> None:
+    """Make a file public"""
+    current_context = context_manager.ContextManager.get_context()
+    with CLIExceptionHandler():
+        joind_path = path_parser.parse_path(current_context.cwd.path, Path(file_path))
+        send_make_public_request(current_context.token, joind_path)
+    return joind_path
+
+
+def make_file_private(file_path: str) -> None:
+    """Make a file private"""
+    current_context = context_manager.ContextManager.get_context()
+    with CLIExceptionHandler():
+        joind_path = path_parser.parse_path(current_context.cwd.path, Path(file_path))
+        send_make_private_request(current_context.token, joind_path)
     return joind_path
 
 
