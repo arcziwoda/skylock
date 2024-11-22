@@ -262,6 +262,8 @@ def make_public(
     else:
         path = make_file_public(resource_path)
         resource_type = "File"
+    cwd = get_working_directory()
+    typer.secho(f"Current working directory: {cwd.path}", fg=typer.colors.BLUE)
     typer.secho(f"{resource_type} {path} is now public", fg=typer.colors.GREEN)
 
 
@@ -283,6 +285,8 @@ def make_private(
     else:
         path = make_file_private(resource_path)
         resource_type = "File"
+    cwd = get_working_directory()
+    typer.secho(f"Current working directory: {cwd.path}", fg=typer.colors.BLUE)
     typer.secho(f"{resource_type} {path} is now private", fg=typer.colors.GREEN)
 
 
