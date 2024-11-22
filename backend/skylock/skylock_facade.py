@@ -26,11 +26,33 @@ class SkylockFacade:
         folder = self._resource_service.get_folder(user_path)
         parent_path = f"/{user_path.path}" if user_path.path else ""
         children_files = [
-            models.File(name=file.name, path=f"{parent_path}/{file.name}") for file in folder.files
+            models.File(name=file.name, is_public=file.is_public, path=f"{parent_path}/{file.name}")
+            for file in folder.files
         ]
         children_folders = [
-            models.Folder(name=folder.name, path=f"{parent_path}/{folder.name}")
+            models.Folder(
+                name=folder.name, is_public=folder.is_public, path=f"{parent_path}/{folder.name}"
+            )
             for folder in folder.subfolders
+        ]
+        return models.FolderContents(files=children_files, folders=children_folders)
+
+    def get_public_folder_contents(self, folder_id: str) -> models.FolderContents:
+        current_folder = self._resource_service.get_folder_by_id(folder_id)
+
+        children_files = [
+            models.File(
+                name=file.name, is_public=file.is_public, path=f"{current_folder.name}/{file.name}"
+            )
+            for file in current_folder.files
+        ]
+        children_folders = [
+            models.Folder(
+                name=folder.name,
+                is_public=folder.is_public,
+                path=f"{current_folder.name}/{folder.name}",
+            )
+            for folder in current_folder.subfolders
         ]
         return models.FolderContents(files=children_files, folders=children_folders)
 
@@ -38,6 +60,11 @@ class SkylockFacade:
         if user_path.is_root_folder():
             raise ForbiddenActionException("Deletion of root folder is forbidden")
         self._resource_service.delete_folder(user_path, is_recursively=is_recursively)
+
+    def update_folder_visability(self, user_path: UserPath, is_public: bool):
+        folder = self._resource_service.get_folder(user_path)
+        folder.is_public = is_public
+        self._resource_service.update_folder(folder)
 
     def upload_file(self, user_path: UserPath, file_data: IO[bytes]):
         self._resource_service.create_file(user_path, file_data)

@@ -33,6 +33,7 @@ class FolderEntity(Base):
     name: orm.Mapped[str] = orm.mapped_column(nullable=False)
     parent_folder_id: orm.Mapped[Optional[int]] = orm.mapped_column(ForeignKey("folders.id"))
     owner_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("users.id"))
+    is_public: orm.Mapped[bool] = orm.mapped_column(nullable=False, default=False)
 
     parent_folder: orm.Mapped[Optional["FolderEntity"]] = orm.relationship(
         "FolderEntity", remote_side="FolderEntity.id", back_populates="subfolders"
@@ -58,6 +59,7 @@ class FileEntity(Base):
     name: orm.Mapped[str] = orm.mapped_column(nullable=False)
     folder_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("folders.id"))
     owner_id: orm.Mapped[int] = orm.mapped_column(ForeignKey("users.id"))
+    is_public: orm.Mapped[bool] = orm.mapped_column(nullable=False, default=False)
 
     folder: orm.Mapped[FolderEntity] = orm.relationship("FolderEntity", back_populates="files")
 
