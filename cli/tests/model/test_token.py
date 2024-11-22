@@ -100,3 +100,7 @@ class TestToken(unittest.TestCase):
         """
         token = Token(**self.valid_token_data)
         assert not token.is_expired()
+
+
+if __name__ == "__main__":
+    unittest.main()

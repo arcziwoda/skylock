@@ -3,12 +3,11 @@ Module for navigating the file system.
 """
 
 from pathlib import Path
-from typing import List, Tuple
 from pydantic import TypeAdapter
 from skylock_cli.core import context_manager, path_parser
 from skylock_cli.utils.cli_exception_handler import CLIExceptionHandler
 from skylock_cli.api.nav_requests import send_ls_request, send_cd_request
-from skylock_cli.model import directory, file
+from skylock_cli.model import directory, file, resource
 from skylock_cli.exceptions.core_exceptions import (
     UserTokenExpiredError,
     InvalidUserTokenError,
@@ -17,7 +16,7 @@ from skylock_cli.exceptions.core_exceptions import (
 
 def list_directory(
     directory_path: Path,
-) -> Tuple[List, Path]:
+) -> tuple[list[resource.Resource], Path]:
     """
     List the contents of a directory.
     """
@@ -25,8 +24,10 @@ def list_directory(
     with CLIExceptionHandler():
         joind_path = path_parser.parse_path(current_context.cwd.path, directory_path)
         response = send_ls_request(current_context.token, joind_path)
-        files = TypeAdapter(List[file.File]).validate_python(response["files"])
-        directories = TypeAdapter(List[directory.Directory]).validate_python(response["folders"])
+        files = TypeAdapter(list[file.File]).validate_python(response["files"])
+        directories = TypeAdapter(list[directory.Directory]).validate_python(
+            response["folders"]
+        )
     return (sorted(files + directories, key=lambda x: x.name), joind_path)
 
 

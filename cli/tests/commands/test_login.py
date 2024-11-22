@@ -18,11 +18,11 @@ from skylock_cli.config import ROOT_PATH
 from tests.helpers import assert_connect_error
 
 
-runner = CliRunner()
-
-
 class TestLoginCommand(unittest.TestCase):
     """Test cases for the login command"""
+
+    def setUp(self):
+        self.runner = CliRunner()
 
     @patch("skylock_cli.core.auth.send_login_request")
     @patch("skylock_cli.core.context_manager.ContextManager.ensure_context_file_exists")
@@ -46,7 +46,7 @@ class TestLoginCommand(unittest.TestCase):
         new_token = Token(access_token="new_token", token_type="bearer")
         mock_send.return_value = new_token
 
-        result = runner.invoke(app, ["login", "testuser"], input="testpass")
+        result = self.runner.invoke(app, ["login", "testuser"], input="testpass")
         self.assertEqual(result.exit_code, 0)
         self.assertIn("User logged in successfully", result.output)
         self.assertIn("Hello, testuser", result.output)
@@ -69,7 +69,7 @@ class TestLoginCommand(unittest.TestCase):
         """Test the login command when an AuthenticationError occurs"""
         mock_send.side_effect = api_exceptions.AuthenticationError()
 
-        result = runner.invoke(app, ["login", "testuser"], input="wrongpass")
+        result = self.runner.invoke(app, ["login", "testuser"], input="wrongpass")
         self.assertEqual(result.exit_code, 1)
         self.assertIn("Invalid username or password", result.output)
 
@@ -80,7 +80,7 @@ class TestLoginCommand(unittest.TestCase):
             "An unexpected API error occurred"
         )
 
-        result = runner.invoke(app, ["login", "testuser"], input="testpass")
+        result = self.runner.invoke(app, ["login", "testuser"], input="testpass")
         self.assertEqual(result.exit_code, 1)
         self.assertIn("An unexpected API error occurred", result.output)
 
@@ -89,7 +89,7 @@ class TestLoginCommand(unittest.TestCase):
         """Test the login command when a TokenNotFoundError occurs"""
         mock_send.side_effect = api_exceptions.TokenNotFoundError()
 
-        result = runner.invoke(app, ["login", "testuser"], input="testpass")
+        result = self.runner.invoke(app, ["login", "testuser"], input="testpass")
         self.assertEqual(result.exit_code, 1)
         self.assertIn("Token not found in the response", result.output)
 
@@ -97,7 +97,7 @@ class TestLoginCommand(unittest.TestCase):
     def test_login_connection_error(self, mock_send):
         """Test the login command when a ConnectError occurs (backend is offline)"""
         mock_send.side_effect = ConnectError("Failed to connect to the server")
-        result = runner.invoke(app, ["login", "testuser"], input="testpass")
+        result = self.runner.invoke(app, ["login", "testuser"], input="testpass")
         assert_connect_error(result)
 
 
