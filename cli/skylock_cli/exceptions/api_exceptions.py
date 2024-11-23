@@ -129,7 +129,9 @@ class FileAlreadyExistsError(SkyLockAPIError):
     """
 
     def __init__(self, file_path: Path) -> None:
-        message = f"File `{file_path}` already exists!"
+        message = (
+            f"File `{file_path}` already exists! Use the --force flag to overwrite it."
+        )
         super().__init__(message)
 
 

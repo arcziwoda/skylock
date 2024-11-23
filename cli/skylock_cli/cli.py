@@ -205,6 +205,9 @@ def upload(
             help="The destination path to upload the file to. Defaults to the current directory.",
         ),
     ] = Path("."),
+    force: Annotated[
+        Optional[bool], typer.Option("-f", "--force", help="Overwrite existing file")
+    ] = False,
 ) -> None:
     """
     Upload a file to the SkyLock.
@@ -218,7 +221,7 @@ def upload(
         typer.secho(f"{file_path} is not a file.", fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
-    path = upload_file(file_path, destination_path)
+    path = upload_file(file_path, destination_path, force)
     cwd = get_working_directory()
 
     typer.secho(f"Current working directory: {cwd.path}", fg=typer.colors.BLUE)
