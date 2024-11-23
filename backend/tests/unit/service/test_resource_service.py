@@ -227,7 +227,7 @@ def test_get_file_not_found(resource_service, mock_file_repository):
         resource_service.get_file(user_path)
 
 
-def test_create_file_in_root_forbidden(resource_service):
+def test_create_file_empty_name_forbidden(resource_service):
     user = UserEntity(id="user-123", username="testuser")
     user_path = UserPath("", user)
 
