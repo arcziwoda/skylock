@@ -79,3 +79,44 @@ def download_file(
 ):
     file_data = skylock.download_file(UserPath(path=path, owner=user))
     return Response(content=file_data.read(), media_type="application/octet-stream")
+
+
+@router.delete(
+    "/{path:path}",
+    summary="Delete a file",
+    description=(
+        """
+        This endpoint allows users to delete a file from a specified path.
+        The user must own the file or have appropriate permissions.
+        If the file does not exist or the path is invalid, an appropriate error will be raised.
+        """
+    ),
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses={
+        204: {
+            "description": "File deleted successfully",
+        },
+        400: {
+            "description": "Invalid path provided, most likely empty",
+            "content": {"application/json": {"example": {"detail": "Invalid path"}}},
+        },
+        401: {
+            "description": "Unauthorized user",
+            "content": {"application/json": {"example": {"detail": "Not authenticated"}}},
+        },
+        404: {
+            "description": "File not found",
+            "content": {"application/json": {"example": {"detail": "File not found"}}},
+        },
+        403: {
+            "description": "Forbidden action, user is not authorized to delete the file",
+            "content": {"application/json": {"example": {"detail": "Forbidden action"}}},
+        },
+    },
+)
+def delete_file(
+    path: Annotated[str, Depends(validate_path_not_empty)],
+    user: Annotated[db_models.UserEntity, Depends(get_current_user)],
+    skylock: Annotated[SkylockFacade, Depends(get_skylock_facade)],
+):
+    skylock.delete_file(UserPath(path=path, owner=user))

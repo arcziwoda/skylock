@@ -87,7 +87,7 @@ def send_rm_request(token: Token, virtual_path: Path) -> None:
         token (Token): The token object containing authentication token.
         virtual_path (Path): The path of the file to remove.
     """
-    url = "/files/remove" + quote(str(virtual_path))
+    url = "/files" + quote(str(virtual_path))
     auth = bearer_auth.BearerAuth(token)
 
     response = client.delete(url=url, auth=auth)
