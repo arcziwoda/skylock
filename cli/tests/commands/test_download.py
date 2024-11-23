@@ -98,7 +98,7 @@ class TestDownloadCommand(unittest.TestCase):
         mock_send.side_effect = api_exceptions.FileNotFoundError("file.txt")
         result = self.runner.invoke(app, ["download", "file.txt"])
         self.assertEqual(result.exit_code, 1)
-        self.assertIn("File `file.txt` not found!", result.output)
+        self.assertIn("File `file.txt` does not exist!", result.output)
 
     @patch("skylock_cli.core.file_operations.send_download_request")
     def test_download_connection_error(self, mock_send):

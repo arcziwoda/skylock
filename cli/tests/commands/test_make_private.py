@@ -105,7 +105,7 @@ class TestMakeprivateCommand(unittest.TestCase):
 
         result = self.runner.invoke(app, ["make-private", "test_file.txt"])
         self.assertEqual(result.exit_code, 1)
-        self.assertIn("File `/test_file.txt` not found!", result.output)
+        self.assertIn("File `/test_file.txt` does not exist!", result.output)
 
     @patch("skylock_cli.core.file_operations.send_make_private_request")
     def test_make_private_file_skylock_api_error(self, mock_send):

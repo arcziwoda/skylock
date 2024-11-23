@@ -61,7 +61,7 @@ class TestRMCommand(unittest.TestCase):
 
         result = self.runner.invoke(app, ["rm", "test.txt"])
         self.assertEqual(result.exit_code, 1)
-        self.assertIn("File `test.txt` not found!", result.output)
+        self.assertIn("File `test.txt` does not exist!", result.output)
 
     @patch("skylock_cli.core.file_operations.send_rm_request")
     def test_rm_skylock_api_error(self, mock_send):

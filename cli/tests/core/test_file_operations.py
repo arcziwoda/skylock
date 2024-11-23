@@ -347,7 +347,7 @@ class TestDownloadFile(unittest.TestCase):
                 download_file(Path("non_existent_file.txt"))
 
             self.assertIn(
-                "File `/test/non_existent_file.txt` not found!",
+                "File `/test/non_existent_file.txt` does not exist!",
                 mock_stderr.getvalue(),
             )
 
@@ -411,7 +411,7 @@ class TestRemoveFile(unittest.TestCase):
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
                 remove_file("test.txt")
-            self.assertIn("File `/test.txt` not found!", mock_stderr.getvalue())
+            self.assertIn("File `/test.txt` does not exist!", mock_stderr.getvalue())
 
     @patch("skylock_cli.api.file_requests.client.delete")
     def test_remove_file_skylock_api_error(self, mock_delete):
@@ -481,7 +481,7 @@ class TestMakeFilePublic(unittest.TestCase):
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
                 make_file_public("test.txt")
-            self.assertIn("File `/test.txt` not found!", mock_stderr.getvalue())
+            self.assertIn("File `/test.txt` does not exist!", mock_stderr.getvalue())
 
     @patch("skylock_cli.api.file_requests.client.patch")
     def test_make_file_public_skylock_api_error(self, mock_patch):
@@ -530,7 +530,19 @@ class TestMakeFilePrivate(unittest.TestCase):
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
             with self.assertRaises(exceptions.Exit):
                 make_file_private("test.txt")
-            self.assertIn("File `/test.txt` not found!", mock_stderr.getvalue())
+            self.assertIn("File `/test.txt` does not exist!", mock_stderr.getvalue())
+
+    @patch("skylock_cli.api.file_requests.client.patch")
+    def test_make_file_private_connection_error(self, mock_patch):
+        """Test making a file private when a ConnectError occurs (backend is offline)"""
+        mock_patch.side_effect = ConnectError("Failed to connect to the server")
+        with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
+            with self.assertRaises(exceptions.Exit):
+                make_file_private("test.txt")
+            self.assertIn(
+                "The server is not reachable at the moment. Please try again later.",
+                mock_stderr.getvalue(),
+            )
 
     @patch("skylock_cli.api.file_requests.client.patch")
     def test_make_file_private_skylock_api_error(self, mock_patch):
@@ -544,18 +556,6 @@ class TestMakeFilePrivate(unittest.TestCase):
                 make_file_private("test.txt")
             self.assertIn(
                 "Failed to make file private (Error Code: 500)",
-                mock_stderr.getvalue(),
-            )
-
-    @patch("skylock_cli.api.file_requests.client.patch")
-    def test_make_file_private_connection_error(self, mock_patch):
-        """Test making a file private when a ConnectError occurs (backend is offline)"""
-        mock_patch.side_effect = ConnectError("Failed to connect to the server")
-        with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
-            with self.assertRaises(exceptions.Exit):
-                make_file_private("test.txt")
-            self.assertIn(
-                "The server is not reachable at the moment. Please try again later.",
                 mock_stderr.getvalue(),
             )
 
