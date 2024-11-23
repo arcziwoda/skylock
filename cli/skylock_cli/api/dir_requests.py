@@ -100,13 +100,13 @@ def send_make_public_request(token: Token, path: Path) -> None:
     auth = bearer_auth.BearerAuth(token)
     body = {"is_public": True}
 
-    response = client.patch(url=url, auth=auth, headers=API_HEADERS, json=body)
-
-    if response.status_code == HTTPStatus.UNAUTHORIZED:
-        raise api_exceptions.UserUnauthorizedError()
+    response = client.patch(url=url, auth=auth, json=body, headers=API_HEADERS)
 
     if response.status_code == HTTPStatus.NOT_FOUND:
         raise api_exceptions.DirectoryNotFoundError(path)
+
+    if response.status_code == HTTPStatus.UNAUTHORIZED:
+        raise api_exceptions.UserUnauthorizedError()
 
     if response.status_code != HTTPStatus.OK:
         raise api_exceptions.SkyLockAPIError(
@@ -126,13 +126,13 @@ def send_make_private_request(token: Token, path: Path) -> None:
     auth = bearer_auth.BearerAuth(token)
     body = {"is_public": False}
 
-    response = client.patch(url=url, auth=auth, headers=API_HEADERS, json=body)
-
-    if response.status_code == HTTPStatus.UNAUTHORIZED:
-        raise api_exceptions.UserUnauthorizedError()
+    response = client.patch(url=url, auth=auth, json=body, headers=API_HEADERS)
 
     if response.status_code == HTTPStatus.NOT_FOUND:
         raise api_exceptions.DirectoryNotFoundError(path)
+
+    if response.status_code == HTTPStatus.UNAUTHORIZED:
+        raise api_exceptions.UserUnauthorizedError()
 
     if response.status_code != HTTPStatus.OK:
         raise api_exceptions.SkyLockAPIError(
