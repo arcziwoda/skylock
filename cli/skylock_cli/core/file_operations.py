@@ -19,7 +19,9 @@ from skylock_cli.config import DOWNLOADS_DIR
 from skylock_cli.scripts.setup_config import create_downloads_dir
 
 
-def upload_file(real_file_path: Path, destination_path: Path, force: bool) -> Path:
+def upload_file(
+    real_file_path: Path, destination_path: Path, force: bool, public: bool
+) -> Path:
     """Upload a file"""
     current_context = context_manager.ContextManager.get_context()
     with CLIExceptionHandler():
@@ -30,7 +32,13 @@ def upload_file(real_file_path: Path, destination_path: Path, force: bool) -> Pa
 
         with open(real_file_path, "rb") as file:
             files = {"file": (real_file_path.name, file)}
-            send_upload_request(current_context.token, joind_path, files, force)
+            send_upload_request(
+                current_context.token,
+                joind_path,
+                files,
+                force,
+                public,
+            )
 
     return joind_path
 
