@@ -14,7 +14,9 @@ from skylock_cli.exceptions import api_exceptions
 client = Client(base_url=API_URL)
 
 
-def send_upload_request(token: Token, virtual_path: Path, files: dict) -> None:
+def send_upload_request(
+    token: Token, virtual_path: Path, files: dict, force: bool, public: bool
+) -> None:
     """
     Send an upload request to the SkyLock backend API.
 
@@ -25,14 +27,18 @@ def send_upload_request(token: Token, virtual_path: Path, files: dict) -> None:
     """
     url = "/files/upload" + quote(str(virtual_path))
     auth = bearer_auth.BearerAuth(token)
+    params = {"force": force, "is_public": public}
 
-    response = client.post(url=url, auth=auth, files=files, headers=API_HEADERS)
+    response = client.post(
+        url=url, auth=auth, files=files, headers=API_HEADERS, params=params
+    )
 
     if response.status_code == HTTPStatus.UNAUTHORIZED:
         raise api_exceptions.UserUnauthorizedError()
 
     if response.status_code == HTTPStatus.CONFLICT:
-        raise api_exceptions.FileAlreadyExistsError(virtual_path)
+        if not force:
+            raise api_exceptions.FileAlreadyExistsError(virtual_path)
 
     if response.status_code == HTTPStatus.BAD_REQUEST:
         raise api_exceptions.InvalidPathError(virtual_path)

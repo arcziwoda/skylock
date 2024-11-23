@@ -88,10 +88,29 @@ class TestUploadFile(unittest.TestCase):
     @patch("skylock_cli.core.file_operations.send_upload_request", return_value=None)
     def test_upload_file_success(self, _mock_send, _mock_get_context):
         """Test the upload_file function with a successful upload"""
+        force_flag = False
+        public_flag = False
+
         with tempfile.NamedTemporaryFile() as temp_file:
             temp_file_path = Path(temp_file.name)
             temp_file_name = temp_file_path.name
-            result = upload_file(temp_file_path, Path("."))
+            result = upload_file(temp_file_path, Path("."), force_flag, public_flag)
+
+            self.assertEqual(result, Path(f"/{temp_file_name}"))
+
+    @patch(
+        "skylock_cli.core.context_manager.ContextManager.get_context",
+        return_value=mock_test_context(),
+    )
+    @patch("skylock_cli.core.file_operations.send_upload_request", return_value=None)
+    def test_upload_file_success_force(self, _mock_send, _mock_get_context):
+        """Test the upload_file function with a successful upload"""
+        force_flag = True
+        public_flag = False
+        with tempfile.NamedTemporaryFile() as temp_file:
+            temp_file_path = Path(temp_file.name)
+            temp_file_name = temp_file_path.name
+            result = upload_file(temp_file_path, Path("."), force_flag, public_flag)
 
             self.assertEqual(result, Path(f"/{temp_file_name}"))
 
@@ -102,10 +121,12 @@ class TestUploadFile(unittest.TestCase):
     @patch("skylock_cli.core.file_operations.send_upload_request", return_value=None)
     def test_upload_file_with_different_cwd(self, _mock_send, _mock_get_context):
         """Test the upload_file function with a different current working directory"""
+        force_flag = False
+        public_flag = False
         with tempfile.NamedTemporaryFile() as temp_file:
             temp_file_path = Path(temp_file.name)
             temp_file_name = temp_file_path.name
-            result = upload_file(temp_file_path, Path("."))
+            result = upload_file(temp_file_path, Path("."), force_flag, public_flag)
 
             self.assertEqual(result, Path(f"/test/{temp_file_name}"))
 
@@ -118,10 +139,12 @@ class TestUploadFile(unittest.TestCase):
         self, _mock_send, _mock_get_context
     ):
         """Test the upload_file function with a destination path other than the current working directory"""
+        force_flag = False
+        public_flag = False
         with tempfile.NamedTemporaryFile() as temp_file:
             temp_file_path = Path(temp_file.name)
             temp_file_name = temp_file_path.name
-            result = upload_file(temp_file_path, Path("/test"))
+            result = upload_file(temp_file_path, Path("/test"), force_flag, public_flag)
 
             self.assertEqual(result, Path(f"/test/{temp_file_name}"))
 
@@ -135,11 +158,13 @@ class TestUploadFile(unittest.TestCase):
     )
     def test_upload_file_with_unauthorized_error(self, _mock_send, _mock_get_context):
         """Test the upload_file function with an unauthorized error"""
+        force_flag = False
+        public_flag = False
         with tempfile.NamedTemporaryFile() as temp_file:
             temp_file_path = Path(temp_file.name)
             with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
                 with self.assertRaises(exceptions.Exit):
-                    upload_file(temp_file_path, Path("."))
+                    upload_file(temp_file_path, Path("."), force_flag, public_flag)
 
                 self.assertIn(
                     "User is unauthorized. Please login to use this command.",
@@ -154,17 +179,43 @@ class TestUploadFile(unittest.TestCase):
         "skylock_cli.api.file_requests.client.post",
         return_value=mock_response_with_status(HTTPStatus.CONFLICT),
     )
-    def test_upload_file_already_exists(self, _mock_send, _mock_get_context):
+    def test_upload_file_already_exists_no_force(self, _mock_send, _mock_get_context):
         """Test the upload_file function with an unauthorized error"""
+        force_flag = False
+        public_flag = False
         with tempfile.NamedTemporaryFile() as temp_file:
             temp_file_path = Path(temp_file.name)
             temp_file_name = os.path.basename(temp_file_path)
             with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
                 with self.assertRaises(exceptions.Exit):
-                    upload_file(temp_file_path, Path("."))
+                    upload_file(temp_file_path, Path("."), force_flag, public_flag)
 
                 self.assertIn(
-                    f"File `/{temp_file_name}` already exists!", mock_stderr.getvalue()
+                    f"File `/{temp_file_name}` already exists! Use the --force flag to overwrite it.",
+                    mock_stderr.getvalue(),
+                )
+
+    @patch(
+        "skylock_cli.core.context_manager.ContextManager.get_context",
+        return_value=mock_test_context(),
+    )
+    @patch(
+        "skylock_cli.api.file_requests.client.post",
+        return_value=mock_response_with_status(HTTPStatus.CONFLICT),
+    )
+    def test_upload_file_already_exists_force(self, _mock_send, _mock_get_context):
+        """Test the upload_file function with an unauthorized error"""
+        force_flag = True
+        public_flag = False
+        with tempfile.NamedTemporaryFile() as temp_file:
+            temp_file_path = Path(temp_file.name)
+            with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
+                with self.assertRaises(exceptions.Exit):
+                    upload_file(temp_file_path, Path("."), force_flag, public_flag)
+
+                self.assertIn(
+                    "Failed to upload file (Error Code: 409)",
+                    mock_stderr.getvalue(),
                 )
 
     @patch(
@@ -177,12 +228,14 @@ class TestUploadFile(unittest.TestCase):
     )
     def test_upload_file_dest_path_does_not_exists(self, _mock_send, _mock_get_context):
         """Test the upload_file function with an unauthorized error"""
+        force_flag = False
+        public_flag = False
         with tempfile.NamedTemporaryFile() as temp_file:
             temp_file_path = Path(temp_file.name)
             temp_file_name = os.path.basename(temp_file_path)
             with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
                 with self.assertRaises(exceptions.Exit):
-                    upload_file(temp_file_path, Path("."))
+                    upload_file(temp_file_path, Path("."), force_flag, public_flag)
 
                 self.assertIn(
                     f"Invalid path `/{temp_file_name}`!", mock_stderr.getvalue()
@@ -200,11 +253,13 @@ class TestUploadFile(unittest.TestCase):
         self, _mock_send, _mock_get_context
     ):
         """Test the upload_file function with an unauthorized error"""
+        force_flag = False
+        public_flag = False
         with tempfile.NamedTemporaryFile() as temp_file:
             temp_file_path = Path(temp_file.name)
             with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
                 with self.assertRaises(exceptions.Exit):
-                    upload_file(temp_file_path, Path("."))
+                    upload_file(temp_file_path, Path("."), force_flag, public_flag)
 
                 self.assertIn(
                     "Failed to upload file (Error Code: 500)", mock_stderr.getvalue()
@@ -218,11 +273,13 @@ class TestUploadFile(unittest.TestCase):
     def test_upload_file_with_connection_error(self, mock_send, _mock_get_context):
         """Test the upload_file function with a connection error"""
         mock_send.side_effect = ConnectError("Failed to connect to the server")
+        force_flag = False
+        public_flag = False
         with tempfile.NamedTemporaryFile() as temp_file:
             temp_file_path = Path(temp_file.name)
             with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
                 with self.assertRaises(exceptions.Exit):
-                    upload_file(temp_file_path, Path("."))
+                    upload_file(temp_file_path, Path("."), force_flag, public_flag)
 
                 self.assertIn(
                     "The server is not reachable at the moment. Please try again later.",

@@ -74,13 +74,16 @@ def mkdir(
     ],
     parent: Annotated[
         Optional[bool],
-        typer.Option("--parent", "-p", help="Create parent directories as needed"),
+        typer.Option("--parent", help="Create parent directories as needed"),
+    ] = False,
+    public: Annotated[
+        Optional[bool], typer.Option("--public", help="Make directory public")
     ] = False,
 ) -> None:
     """
     Create a new directory in the SkyLock
     """
-    created_path = create_directory(directory_path, parent)
+    created_path = create_directory(directory_path, parent, public)
     cwd = get_working_directory()
 
     typer.secho(f"Current working directory: {cwd.path}", fg=typer.colors.BLUE)
@@ -205,6 +208,12 @@ def upload(
             help="The destination path to upload the file to. Defaults to the current directory.",
         ),
     ] = Path("."),
+    force: Annotated[
+        Optional[bool], typer.Option("-f", "--force", help="Overwrite existing file")
+    ] = False,
+    public: Annotated[
+        Optional[bool], typer.Option("--public", help="Make uploaded file public")
+    ] = False,
 ) -> None:
     """
     Upload a file to the SkyLock.
@@ -218,7 +227,7 @@ def upload(
         typer.secho(f"{file_path} is not a file.", fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
-    path = upload_file(file_path, destination_path)
+    path = upload_file(file_path, destination_path, force, public)
     cwd = get_working_directory()
 
     typer.secho(f"Current working directory: {cwd.path}", fg=typer.colors.BLUE)

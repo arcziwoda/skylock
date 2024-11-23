@@ -70,6 +70,29 @@ class TestUploadCommand(unittest.TestCase):
     @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
     @patch(
         "skylock_cli.core.context_manager.ContextManager.get_context",
+        return_value=mock_test_context(),
+    )
+    @patch("skylock_cli.core.file_operations.send_upload_request", return_value=None)
+    def test_upload_success_force(
+        self, _mock_send, _mock_get_context, _mock_is_valid, _mock_is_expired
+    ):
+        """Test successful file upload"""
+        with tempfile.NamedTemporaryFile() as temp_file:
+            temp_file_path = temp_file.name
+            temp_file_name = os.path.basename(temp_file_path)
+            result = self.runner.invoke(app, ["upload", temp_file.name, "--force"])
+
+            self.assertEqual(result.exit_code, 0)
+            self.assertIn("Current working directory: /", result.output)
+            self.assertIn(
+                f"File {temp_file_path} uploaded to /{temp_file_name} successfully",
+                result.output,
+            )
+
+    @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
+    @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
+    @patch(
+        "skylock_cli.core.context_manager.ContextManager.get_context",
         return_value=mock_test_context(Path("/test")),
     )
     @patch("skylock_cli.core.file_operations.send_upload_request", return_value=None)
@@ -104,7 +127,7 @@ class TestUploadCommand(unittest.TestCase):
             )
 
     @patch("skylock_cli.core.file_operations.send_upload_request")
-    def test_upload_file_already_exists(self, mock_send):
+    def test_upload_file_already_exists_no_force(self, mock_send):
         """Test the upload command when the file already exists"""
         mock_send.side_effect = api_exceptions.FileAlreadyExistsError("test_file")
 
@@ -113,7 +136,10 @@ class TestUploadCommand(unittest.TestCase):
             result = self.runner.invoke(app, ["upload", temp_file_path])
 
             self.assertEqual(result.exit_code, 1)
-            self.assertIn("File `test_file` already exists!", result.output)
+            self.assertIn(
+                "File `test_file` already exists! Use the --force flag to overwrite it",
+                result.output,
+            )
 
     @patch("skylock_cli.core.file_operations.send_upload_request")
     def test_upload_invalid_path(self, mock_send):
