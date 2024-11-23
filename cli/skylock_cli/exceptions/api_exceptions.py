@@ -141,5 +141,5 @@ class FileNotFoundError(SkyLockAPIError):
     """
 
     def __init__(self, file_path: Path) -> None:
-        message = f"File `{file_path}` not found!"
+        message = f"File `{file_path}` does not exist!"
         super().__init__(message)
