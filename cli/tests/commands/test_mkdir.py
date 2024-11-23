@@ -23,7 +23,7 @@ class TestMKDIRCommand(unittest.TestCase):
     @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
     @patch("skylock_cli.core.dir_operations.send_mkdir_request")
     @patch("skylock_cli.core.context_manager.ContextManager.get_context")
-    def test_mkdir_success_parent_flag_long(
+    def test_mkdir_success_parent_flag(
         self, mock_get_context, mock_send, _mock_is_valid, _mock_is_expired
     ):
         """Test the mkdir command"""
@@ -33,24 +33,24 @@ class TestMKDIRCommand(unittest.TestCase):
         self.assertEqual(result.exit_code, 0)
         self.assertIn("Current working directory: /", result.output)
         mock_send.assert_called_once_with(
-            mock_get_context.return_value.token, Path("/test_dir"), True
+            mock_get_context.return_value.token, Path("/test_dir"), True, False
         )
 
     @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
     @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
     @patch("skylock_cli.core.dir_operations.send_mkdir_request")
     @patch("skylock_cli.core.context_manager.ContextManager.get_context")
-    def test_mkdir_success_parent_flag_short(
+    def test_mkdir_success_public_flag(
         self, mock_get_context, mock_send, _mock_is_valid, _mock_is_expired
     ):
         """Test the mkdir command"""
         mock_get_context.return_value = mock_test_context()
 
-        result = self.runner.invoke(app, ["mkdir", "test_dir", "-p"])
+        result = self.runner.invoke(app, ["mkdir", "test_dir", "--public"])
         self.assertEqual(result.exit_code, 0)
         self.assertIn("Current working directory: /", result.output)
         mock_send.assert_called_once_with(
-            mock_get_context.return_value.token, Path("/test_dir"), True
+            mock_get_context.return_value.token, Path("/test_dir"), False, True
         )
 
     @patch("skylock_cli.core.dir_operations.send_mkdir_request")
@@ -131,7 +131,7 @@ class TestMKDIRCommand(unittest.TestCase):
         self.assertEqual(result.exit_code, 0)
         self.assertIn("Current working directory: /", result.output)
         mock_send.assert_called_once_with(
-            mock_get_context.return_value.token, Path("/test_dir"), False
+            mock_get_context.return_value.token, Path("/test_dir"), False, False
         )
 
 
