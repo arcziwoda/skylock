@@ -10,9 +10,21 @@ from rich.console import Console
 from rich.table import Table
 from art import text2art
 from skylock_cli.core.auth import register_user, login_user
-from skylock_cli.core.dir_operations import create_directory, remove_directory
-from skylock_cli.core.file_operations import upload_file, download_file, remove_file
+from skylock_cli.core.dir_operations import (
+    create_directory,
+    remove_directory,
+    make_directory_public,
+    make_directory_private,
+)
+from skylock_cli.core.file_operations import (
+    upload_file,
+    download_file,
+    remove_file,
+    make_file_public,
+    make_file_private,
+)
 from skylock_cli.core.nav import list_directory, change_directory, get_working_directory
+from skylock_cli.core.path_parser import is_directory
 
 app = typer.Typer(pretty_exceptions_show_locals=False)
 console = Console()
@@ -230,6 +242,52 @@ def download(
         f"File {file_path.name} downloaded successfully to {typer.style(file_path.parent, fg=typer.colors.CYAN, underline=True)}",
         fg=typer.colors.GREEN,
     )
+
+
+@app.command()
+def make_public(
+    resource_path: Annotated[
+        str,
+        typer.Argument(
+            help="The path of the resource to set as public. If you want to set a directory as public, the path must end with /"
+        ),
+    ]
+) -> None:
+    """
+    Set a resource as public.
+    """
+    if is_directory(resource_path):
+        path = make_directory_public(resource_path)
+        resource_type = "Directory"
+    else:
+        path = make_file_public(resource_path)
+        resource_type = "File"
+    cwd = get_working_directory()
+    typer.secho(f"Current working directory: {cwd.path}", fg=typer.colors.BLUE)
+    typer.secho(f"{resource_type} {path} is now public", fg=typer.colors.GREEN)
+
+
+@app.command()
+def make_private(
+    resource_path: Annotated[
+        str,
+        typer.Argument(
+            help="The path of the resource to set as private. If you want to set a directory as private, the path must end with /"
+        ),
+    ]
+) -> None:
+    """
+    Set a resource as private.
+    """
+    if is_directory(resource_path):
+        path = make_directory_private(resource_path)
+        resource_type = "Directory"
+    else:
+        path = make_file_private(resource_path)
+        resource_type = "File"
+    cwd = get_working_directory()
+    typer.secho(f"Current working directory: {cwd.path}", fg=typer.colors.BLUE)
+    typer.secho(f"{resource_type} {path} is now private", fg=typer.colors.GREEN)
 
 
 if __name__ == "__main__":
