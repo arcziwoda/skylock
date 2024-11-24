@@ -171,3 +171,55 @@ def delete_folder(
 ):
     skylock.delete_folder(UserPath(path=path, owner=user), is_recursively=recursive)
     return {"message": "Folder deleted"}
+
+
+@router.patch(
+    "/{path:path}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Change folder visablity",
+    description=(
+        """
+        This endpoint allows the user to share a specified folder and its subfolders. 
+        Sharing a folder opens it up to public access.
+        """
+    ),
+    responses={
+        204: {
+            "description": "Folder visablity cahnged successfully",
+            "content": {"application/json": {"example": {"message": "Folder visablity changed"}}},
+        },
+        400: {
+            "description": "Invalid path provided, most likely empty",
+            "content": {"application/json": {"example": {"detail": "Invalid path"}}},
+        },
+        401: {
+            "description": "Unauthorized user",
+            "content": {"application/json": {"example": {"detail": "Not authenticated"}}},
+        },
+        403: {
+            "description": "Sharing the root folder is forbidden",
+            "content": {
+                "application/json": {"example": {"detail": "Sharing your root folder is forbidden"}}
+            },
+        },
+        404: {
+            "description": "Resource not found",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "Resource not found",
+                        "missing": "folder_name",
+                    }
+                }
+            },
+        },
+    },
+)
+def change_folder_visability(
+    path: Annotated[str, Depends(validate_path_not_empty)],
+    user: Annotated[db_models.UserEntity, Depends(get_current_user)],
+    skylock: Annotated[SkylockFacade, Depends(get_skylock_facade)],
+    is_public: bool,
+):
+    skylock.update_folder_visability(UserPath(path=path, owner=user), is_public)
+    return {"message": "Folder visability changed"}

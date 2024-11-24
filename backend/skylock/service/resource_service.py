@@ -33,6 +33,17 @@ class ResourceService:
 
         return current_folder
 
+    def get_folder_by_id(self, id: str) -> db_models.FolderEntity:
+        current_folder = self._folder_repository.get_by_folder_id(id)
+
+        if current_folder is None:
+            raise LookupError(f"Folder with id: {id} does not exist")
+
+        if not current_folder.is_public:
+            raise ForbiddenActionException(f"Folder with id {id} is not public")
+
+        return current_folder
+
     def create_folder(self, user_path: UserPath) -> db_models.FolderEntity:
         if user_path.is_root_folder():
             raise ForbiddenActionException("Creation of root folder is forbidden")
@@ -51,6 +62,9 @@ class ResourceService:
     def delete_folder(self, user_path: UserPath, is_recursively: bool = False):
         folder = self.get_folder(user_path)
         self._delete_folder(folder, is_recursively=is_recursively)
+
+    def update_folder(self, folder):
+        self._folder_repository.save(folder)
 
     def _delete_folder(self, folder: db_models.FolderEntity, is_recursively: bool = False):
         if folder.is_root():
@@ -76,6 +90,9 @@ class ResourceService:
 
         if file is None:
             raise ResourceNotFoundException(missing_resource_name=user_path.name)
+
+        if file.owner_id != user_path.owner.id:
+            raise ForbiddenActionException("You do not have access to ths file")
 
         return file
 

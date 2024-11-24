@@ -9,11 +9,13 @@ class Token(BaseModel):
 class Folder(BaseModel):
     name: str
     path: str
+    is_public: bool
 
 
 class File(BaseModel):
     name: str
     path: str
+    is_public: bool
 
 
 class FolderContents(BaseModel):
