@@ -11,13 +11,17 @@ from skylock_cli.api.file_requests import (
     send_upload_request,
     send_download_request,
     send_rm_request,
+    send_make_public_request,
+    send_make_private_request,
 )
 from skylock_cli.exceptions.core_exceptions import NotAFileError
 from skylock_cli.config import DOWNLOADS_DIR
 from skylock_cli.scripts.setup_config import create_downloads_dir
 
 
-def upload_file(real_file_path: Path, destination_path: Path) -> Path:
+def upload_file(
+    real_file_path: Path, destination_path: Path, force: bool, public: bool
+) -> Path:
     """Upload a file"""
     current_context = context_manager.ContextManager.get_context()
     with CLIExceptionHandler():
@@ -28,7 +32,13 @@ def upload_file(real_file_path: Path, destination_path: Path) -> Path:
 
         with open(real_file_path, "rb") as file:
             files = {"file": (real_file_path.name, file)}
-            send_upload_request(current_context.token, joind_path, files)
+            send_upload_request(
+                current_context.token,
+                joind_path,
+                files,
+                force,
+                public,
+            )
 
     return joind_path
 
@@ -66,6 +76,24 @@ def remove_file(file_path: str) -> Path:
 
         joind_path = path_parser.parse_path(current_context.cwd.path, file_path)
         send_rm_request(current_context.token, joind_path)
+    return joind_path
+
+
+def make_file_public(file_path: str) -> None:
+    """Make a file public"""
+    current_context = context_manager.ContextManager.get_context()
+    with CLIExceptionHandler():
+        joind_path = path_parser.parse_path(current_context.cwd.path, Path(file_path))
+        send_make_public_request(current_context.token, joind_path)
+    return joind_path
+
+
+def make_file_private(file_path: str) -> None:
+    """Make a file private"""
+    current_context = context_manager.ContextManager.get_context()
+    with CLIExceptionHandler():
+        joind_path = path_parser.parse_path(current_context.cwd.path, Path(file_path))
+        send_make_private_request(current_context.token, joind_path)
     return joind_path
 
 

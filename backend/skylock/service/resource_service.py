@@ -97,7 +97,7 @@ class ResourceService:
         return file
 
     def create_file(self, user_path: UserPath, data: IO[bytes]) -> db_models.FileEntity:
-        if user_path.is_root_folder():
+        if not user_path.name:
             raise ForbiddenActionException("Creation of file with no name is forbidden")
 
         file_name = user_path.name

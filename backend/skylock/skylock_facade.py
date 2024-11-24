@@ -71,3 +71,6 @@ class SkylockFacade:
 
     def download_file(self, user_path: UserPath) -> IO[bytes]:
         return self._resource_service.get_file_data(user_path)
+
+    def delete_file(self, user_path: UserPath):
+        self._resource_service.delete_file(user_path)
