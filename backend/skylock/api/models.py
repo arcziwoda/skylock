@@ -31,3 +31,7 @@ class LoginUserRequest(BaseModel):
 class RegisterUserRequest(BaseModel):
     username: str
     password: str
+
+
+class VisabilityRequest(BaseModel):
+    is_public: bool
