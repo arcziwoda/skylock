@@ -10,7 +10,7 @@ router = APIRouter(tags=["Resource"], prefix="/shared")
 
 
 @router.get(
-    "/{folder_id:path}",
+    "/folders/{folder_id:path}",
     summary="Get public folder contents",
     description=(
         """

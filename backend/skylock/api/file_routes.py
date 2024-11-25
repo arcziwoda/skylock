@@ -2,11 +2,13 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Response, UploadFile, status
 
+
 from skylock.api.dependencies import get_current_user, get_skylock_facade
 from skylock.api.validation import validate_path_not_empty
 from skylock.database import models as db_models
 from skylock.skylock_facade import SkylockFacade
 from skylock.utils.path import UserPath
+from skylock.api.models import VisabilityRequest
 
 router = APIRouter(tags=["Resource"], prefix="/files")
 
@@ -120,3 +122,49 @@ def delete_file(
     skylock: Annotated[SkylockFacade, Depends(get_skylock_facade)],
 ):
     skylock.delete_file(UserPath(path=path, owner=user))
+
+
+@router.patch(
+    "/{path:path}",
+    status_code=status.HTTP_200_OK,
+    summary="Change file visablity",
+    description=(
+        """
+        This endpoint allows the user to change the visability of a specified file. 
+        Sharing a file opens it up to public access.
+        """
+    ),
+    responses={
+        204: {
+            "description": "file visablity cahnged successfully",
+            "content": {"application/json": {"message": "file visablity changed"}},
+        },
+        400: {
+            "description": "Invalid path provided, most likely empty",
+            "content": {"application/json": {"example": {"detail": "Invalid path"}}},
+        },
+        401: {
+            "description": "Unauthorized user",
+            "content": {"application/json": {"example": {"detail": "Not authenticated"}}},
+        },
+        404: {
+            "description": "Resource not found",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "Resource not found",
+                        "missing": "file_name",
+                    }
+                }
+            },
+        },
+    },
+)
+def change_file_visability(
+    path: Annotated[str, Depends(validate_path_not_empty)],
+    user: Annotated[db_models.UserEntity, Depends(get_current_user)],
+    skylock: Annotated[SkylockFacade, Depends(get_skylock_facade)],
+    is_public: VisabilityRequest,
+):
+    skylock.update_folder_visability(UserPath(path=path, owner=user), is_public.is_public)
+    return {"message": f"file visability changed to: public = {is_public.is_public}"}

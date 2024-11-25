@@ -66,11 +66,19 @@ class SkylockFacade:
         folder.is_public = is_public
         self._resource_service.update_folder(folder)
 
+    def update_file_visability(self, user_path: UserPath, is_public: bool):
+        file = self._resource_service.get_file(user_path)
+        file.is_public = is_public
+        self._resource_service.update_file(file)
+
     def upload_file(self, user_path: UserPath, file_data: IO[bytes]):
         self._resource_service.create_file(user_path, file_data)
 
     def download_file(self, user_path: UserPath) -> IO[bytes]:
         return self._resource_service.get_file_data(user_path)
+
+    def download_public_file(self, file_id: str) -> IO[bytes]:
+        return self._resource_service.get_public_file_data(file_id)
 
     def delete_file(self, user_path: UserPath):
         self._resource_service.delete_file(user_path)

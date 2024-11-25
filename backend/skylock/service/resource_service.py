@@ -63,7 +63,7 @@ class ResourceService:
         folder = self.get_folder(user_path)
         self._delete_folder(folder, is_recursively=is_recursively)
 
-    def update_folder(self, folder):
+    def update_folder(self, folder: db_models.FolderEntity):
         self._folder_repository.save(folder)
 
     def _delete_folder(self, folder: db_models.FolderEntity, is_recursively: bool = False):
@@ -96,6 +96,17 @@ class ResourceService:
 
         return file
 
+    def get_file_by_id(self, file_id: str) -> db_models.FileEntity:
+        file = self._file_repository.get_by_id(file_id)
+
+        if file is None:
+            raise ResourceNotFoundException(missing_resource_name=file_id)
+
+        if not file.is_public:
+            raise ForbiddenActionException(f"File with id {id} is not public")
+
+        return file
+
     def create_file(self, user_path: UserPath, data: IO[bytes]) -> db_models.FileEntity:
         if not user_path.name:
             raise ForbiddenActionException("Creation of file with no name is forbidden")
@@ -114,6 +125,9 @@ class ResourceService:
 
         return new_file
 
+    def update_file(self, file: db_models.FileEntity):
+        self._file_repository.save(file)
+
     def delete_file(self, user_path: UserPath):
         file = self.get_file(user_path)
         self._delete_file(file)
@@ -124,6 +138,10 @@ class ResourceService:
 
     def get_file_data(self, user_path: UserPath) -> IO[bytes]:
         file = self.get_file(user_path)
+        return self._get_file_data(file)
+
+    def get_public_file_data(self, file_id: str) -> IO[bytes]:
+        file = self.get_file_by_id(file_id)
         return self._get_file_data(file)
 
     def _save_file_data(self, file: db_models.FileEntity, data: IO[bytes]):

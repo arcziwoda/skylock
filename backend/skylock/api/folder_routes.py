@@ -179,7 +179,7 @@ def delete_folder(
     summary="Change folder visablity",
     description=(
         """
-        This endpoint allows the user to share a specified folder and its subfolders. 
+        This endpoint allows the user to change visability of a specified folder and its subfolders. 
         Sharing a folder opens it up to public access.
         """
     ),
@@ -197,9 +197,11 @@ def delete_folder(
             "content": {"application/json": {"example": {"detail": "Not authenticated"}}},
         },
         403: {
-            "description": "Sharing the root folder is forbidden",
+            "description": "Changing visability of the root folder is forbidden",
             "content": {
-                "application/json": {"example": {"detail": "Sharing your root folder is forbidden"}}
+                "application/json": {
+                    "example": {"detail": "Changing visability of your root folder is forbidden"}
+                }
             },
         },
         404: {
