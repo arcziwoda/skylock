@@ -175,7 +175,7 @@ def delete_folder(
 
 @router.patch(
     "/{path:path}",
-    status_code=status.HTTP_204_NO_CONTENT,
+    status_code=status.HTTP_200_OK,
     summary="Change folder visablity",
     description=(
         """
@@ -186,7 +186,7 @@ def delete_folder(
     responses={
         204: {
             "description": "Folder visablity cahnged successfully",
-            "content": {"application/json": {"example": {"message": "Folder visablity changed"}}},
+            "content": {"application/json": {"message": "Folder visablity changed"}},
         },
         400: {
             "description": "Invalid path provided, most likely empty",
@@ -222,4 +222,4 @@ def change_folder_visability(
     is_public: models.VisabilityRequest,
 ):
     skylock.update_folder_visability(UserPath(path=path, owner=user), is_public.is_public)
-    return {"message": "Folder visability changed"}
+    return {"message": f"Folder visability changed to: public = {is_public.is_public}"}
