@@ -20,8 +20,10 @@ class SkylockFacade:
         return self._user_service.login_user(username, password)
 
     def create_folder_for_user(self, user_path: UserPath) -> models.Folder:
-        folder = self._resource_service.create_folder(user_path)
-        return models.Folder(name=folder.name, path=user_path.path, is_public=folder.is_public)
+        folder_entity = self._resource_service.create_folder(user_path)
+        return models.Folder(
+            name=folder_entity.name, path=user_path.path, is_public=folder_entity.is_public
+        )
 
     def get_folder_contents(self, user_path: UserPath) -> models.FolderContents:
         folder = self._resource_service.get_folder(user_path)
@@ -72,8 +74,11 @@ class SkylockFacade:
         file.is_public = is_public
         self._resource_service.update_file(file)
 
-    def upload_file(self, user_path: UserPath, file_data: IO[bytes]):
-        self._resource_service.create_file(user_path, file_data)
+    def upload_file(self, user_path: UserPath, file_data: IO[bytes]) -> models.File:
+        file_entity = self._resource_service.create_file(user_path, file_data)
+        return models.File(
+            name=file_entity.name, path=user_path.path, is_public=file_entity.is_public
+        )
 
     def download_file(self, user_path: UserPath) -> IO[bytes]:
         return self._resource_service.get_file_data(user_path)

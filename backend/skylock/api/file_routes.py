@@ -8,7 +8,7 @@ from skylock.api.validation import validate_path_not_empty
 from skylock.database import models as db_models
 from skylock.skylock_facade import SkylockFacade
 from skylock.utils.path import UserPath
-from skylock.api.models import VisabilityRequest
+from skylock.api import models
 
 router = APIRouter(tags=["Resource"], prefix="/files")
 
@@ -47,8 +47,8 @@ def upload_file(
     path: Annotated[str, Depends(validate_path_not_empty)],
     user: Annotated[db_models.UserEntity, Depends(get_current_user)],
     skylock: Annotated[SkylockFacade, Depends(get_skylock_facade)],
-):
-    skylock.upload_file(user_path=UserPath(path=path, owner=user), file_data=file.file)
+) -> models.File:
+    return skylock.upload_file(user_path=UserPath(path=path, owner=user), file_data=file.file)
 
 
 @router.get(
@@ -164,7 +164,7 @@ def change_file_visability(
     path: Annotated[str, Depends(validate_path_not_empty)],
     user: Annotated[db_models.UserEntity, Depends(get_current_user)],
     skylock: Annotated[SkylockFacade, Depends(get_skylock_facade)],
-    is_public: VisabilityRequest,
+    is_public: models.VisabilityRequest,
 ):
     skylock.update_folder_visability(UserPath(path=path, owner=user), is_public.is_public)
     return {"message": f"file visability changed to: public = {is_public.is_public}"}
