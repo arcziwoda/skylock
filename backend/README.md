@@ -2,6 +2,8 @@
 
 This is a FastAPI-based application for managing file sharing with features like user registration, authentication, and more.
 
+Service is being hosted at (<https://skylock.czumpers.com/>)
+
 ## Requirements
 
 Before starting, make sure you have the following installed:
@@ -34,7 +36,7 @@ Note that it is possible to run docker compose with optional .env file from Dock
 **Build and start the containers**:
 
 ```bash
-docker compose up --build
+docker compose -f docker-compose.dev.yml up --build
 ```
 
 ### Option 2: Running with Poetry
