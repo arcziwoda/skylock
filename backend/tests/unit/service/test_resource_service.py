@@ -239,6 +239,7 @@ def test_delete_file_success(resource_service, mock_file_repository):
     user = UserEntity(id="user-123", username="testuser")
     user_path = UserPath("subfolder/file.txt", user)
     file = MagicMock()
+    file.owner_id = user.id
 
     mock_file_repository.get_by_name_and_parent.return_value = file
 
