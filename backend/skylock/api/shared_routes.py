@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 
 from skylock.api import models
 from skylock.api.dependencies import get_skylock_facade
@@ -10,7 +10,7 @@ router = APIRouter(tags=["Resource"], prefix="/shared")
 
 
 @router.get(
-    "/folders/{folder_id:path}",
+    "/folders/{folder_id}",
     summary="Get public folder contents",
     description=(
         """
@@ -59,3 +59,34 @@ def get_public_folder_contents(
     skylock: Annotated[SkylockFacade, Depends(get_skylock_facade)],
 ) -> models.FolderContents:
     return skylock.get_public_folder_contents(folder_id)
+
+
+@router.get(
+    "/files/download/{file_id}",
+    summary="Download a public file",
+    description="This endpoint allows users to download a shared (public) file by id.",
+    responses={
+        200: {
+            "description": "File downloaded successfully",
+            "content": {"application/octet-stream": {}},
+        },
+        400: {
+            "description": "Invalid file id provided, most likely not shared",
+            "content": {"application/json": {"example": {"detail": "Invalid path"}}},
+        },
+        401: {
+            "description": "Unauthorized user",
+            "content": {"application/json": {"example": {"detail": "Not authenticated"}}},
+        },
+        404: {
+            "description": "File not found",
+            "content": {"application/json": {"example": {"detail": "File not found"}}},
+        },
+    },
+)
+def download_public_file(
+    file_id: str,
+    skylock: Annotated[SkylockFacade, Depends(get_skylock_facade)],
+):
+    file_data = skylock.download_public_file(file_id)
+    return Response(content=file_data.read(), media_type="application/octet-stream")

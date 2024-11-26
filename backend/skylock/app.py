@@ -8,7 +8,7 @@ from skylock.utils.exception_handlers import (
     invalid_credentials_handler,
 )
 
-from skylock.api import auth_routes, folder_routes, file_routes, public_folder_routes
+from skylock.api import auth_routes, folder_routes, file_routes, shared_routes
 from skylock.utils.exceptions import (
     FolderNotEmptyException,
     InvalidCredentialsException,
@@ -32,4 +32,4 @@ app.add_exception_handler(ForbiddenActionException, forbidden_action_handler)
 app.include_router(auth_routes.router)
 app.include_router(folder_routes.router)
 app.include_router(file_routes.router)
-app.include_router(public_folder_routes.router)
+app.include_router(shared_routes.router)
