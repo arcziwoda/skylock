@@ -74,5 +74,3 @@ class FileRepository(DatabaseRepository[models.FileEntity]):
         return self.filter_one_or_none(
             models.FileEntity.name == name, models.FileEntity.folder == parent
         )
-
-

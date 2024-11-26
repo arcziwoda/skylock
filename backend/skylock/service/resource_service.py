@@ -33,14 +33,14 @@ class ResourceService:
 
         return current_folder
 
-    def get_folder_by_id(self, id: str) -> db_models.FolderEntity:
-        current_folder = self._folder_repository.get_by_folder_id(id)
+    def get_folder_by_id(self, folder_id: str) -> db_models.FolderEntity:
+        current_folder = self._folder_repository.get_by_folder_id(folder_id)
 
         if current_folder is None:
-            raise LookupError(f"Folder with id: {id} does not exist")
+            raise LookupError(f"Folder with id: {folder_id} does not exist")
 
         if not current_folder.is_public:
-            raise ForbiddenActionException(f"Folder with id {id} is not public")
+            raise ForbiddenActionException(f"Folder with id {folder_id} is not public")
 
         return current_folder
 
