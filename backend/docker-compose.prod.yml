@@ -1,0 +1,21 @@
+services:
+  skylock:
+    container_name: skylock
+    image: docker.czumpers.com/skylock:prod
+    env_file:
+      - path: .env
+    entrypoint: ["./entrypoint_prod.sh"]
+    networks:
+      - traefik-public
+    volumes:
+      - ./data:/app/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.skylock.rule=Host(`skylock.czumpers.com`)"
+      - "traefik.http.routers.skylock.entrypoints=websecure"
+      - "traefik.http.routers.skylock.tls.certresolver=myresolver"
+      - "com.centurylinklabs.watchtower.enable=true"
+
+networks:
+  traefik-public:
+    external: true
