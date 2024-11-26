@@ -110,8 +110,7 @@ def create_folder(
     user: Annotated[db_models.UserEntity, Depends(get_current_user)],
     skylock: Annotated[SkylockFacade, Depends(get_skylock_facade)],
 ):
-    skylock.create_folder_for_user(UserPath(path=path, owner=user))
-    return {"message": "Folder created"}
+    return skylock.create_folder_for_user(UserPath(path=path, owner=user))
 
 
 @router.delete(
@@ -175,18 +174,18 @@ def delete_folder(
 
 @router.patch(
     "/{path:path}",
-    status_code=status.HTTP_204_NO_CONTENT,
+    status_code=status.HTTP_200_OK,
     summary="Change folder visablity",
     description=(
         """
-        This endpoint allows the user to share a specified folder and its subfolders. 
+        This endpoint allows the user to change visability of a specified folder and its subfolders. 
         Sharing a folder opens it up to public access.
         """
     ),
     responses={
         204: {
             "description": "Folder visablity cahnged successfully",
-            "content": {"application/json": {"example": {"message": "Folder visablity changed"}}},
+            "content": {"application/json": {"message": "Folder visablity changed"}},
         },
         400: {
             "description": "Invalid path provided, most likely empty",
@@ -197,9 +196,11 @@ def delete_folder(
             "content": {"application/json": {"example": {"detail": "Not authenticated"}}},
         },
         403: {
-            "description": "Sharing the root folder is forbidden",
+            "description": "Changing visability of the root folder is forbidden",
             "content": {
-                "application/json": {"example": {"detail": "Sharing your root folder is forbidden"}}
+                "application/json": {
+                    "example": {"detail": "Changing visability of your root folder is forbidden"}
+                }
             },
         },
         404: {
@@ -219,7 +220,7 @@ def change_folder_visability(
     path: Annotated[str, Depends(validate_path_not_empty)],
     user: Annotated[db_models.UserEntity, Depends(get_current_user)],
     skylock: Annotated[SkylockFacade, Depends(get_skylock_facade)],
-    is_public: bool,
+    is_public: models.VisabilityRequest,
 ):
-    skylock.update_folder_visability(UserPath(path=path, owner=user), is_public)
-    return {"message": "Folder visability changed"}
+    skylock.update_folder_visability(UserPath(path=path, owner=user), is_public.is_public)
+    return {"message": f"Folder visability changed to: public = {is_public.is_public}"}

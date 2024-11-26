@@ -19,8 +19,11 @@ class SkylockFacade:
     def login_user(self, username: str, password: str) -> models.Token:
         return self._user_service.login_user(username, password)
 
-    def create_folder_for_user(self, user_path: UserPath):
-        self._resource_service.create_folder(user_path)
+    def create_folder_for_user(self, user_path: UserPath) -> models.Folder:
+        folder_entity = self._resource_service.create_folder(user_path)
+        return models.Folder(
+            name=folder_entity.name, path=user_path.path, is_public=folder_entity.is_public
+        )
 
     def get_folder_contents(self, user_path: UserPath) -> models.FolderContents:
         folder = self._resource_service.get_folder(user_path)
@@ -66,11 +69,22 @@ class SkylockFacade:
         folder.is_public = is_public
         self._resource_service.update_folder(folder)
 
-    def upload_file(self, user_path: UserPath, file_data: IO[bytes]):
-        self._resource_service.create_file(user_path, file_data)
+    def update_file_visability(self, user_path: UserPath, is_public: bool):
+        file = self._resource_service.get_file(user_path)
+        file.is_public = is_public
+        self._resource_service.update_file(file)
+
+    def upload_file(self, user_path: UserPath, file_data: IO[bytes]) -> models.File:
+        file_entity = self._resource_service.create_file(user_path, file_data)
+        return models.File(
+            name=file_entity.name, path=user_path.path, is_public=file_entity.is_public
+        )
 
     def download_file(self, user_path: UserPath) -> IO[bytes]:
         return self._resource_service.get_file_data(user_path)
+
+    def download_public_file(self, file_id: str) -> IO[bytes]:
+        return self._resource_service.get_public_file_data(file_id)
 
     def delete_file(self, user_path: UserPath):
         self._resource_service.delete_file(user_path)
