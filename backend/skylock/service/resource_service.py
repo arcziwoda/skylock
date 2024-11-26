@@ -34,15 +34,20 @@ class ResourceService:
         return current_folder
 
     def get_folder_by_id(self, folder_id: str) -> db_models.FolderEntity:
-        current_folder = self._folder_repository.get_by_folder_id(folder_id)
+        current_folder = self._folder_repository.get_by_id(folder_id)
 
         if current_folder is None:
-            raise LookupError(f"Folder with id: {folder_id} does not exist")
-
-        if not current_folder.is_public:
-            raise ForbiddenActionException(f"Folder with id {folder_id} is not public")
+            raise ResourceNotFoundException(missing_resource_name=folder_id)
 
         return current_folder
+
+    def get_public_folder(self, folder_id: str) -> db_models.FolderEntity:
+        folder = self.get_folder_by_id(folder_id)
+
+        if not folder.is_public:
+            raise ForbiddenActionException(f"Folder with id {folder_id} is not public")
+
+        return folder
 
     def create_folder(self, user_path: UserPath) -> db_models.FolderEntity:
         if user_path.is_root_folder():
@@ -102,9 +107,6 @@ class ResourceService:
         if file is None:
             raise ResourceNotFoundException(missing_resource_name=file_id)
 
-        if not file.is_public:
-            raise ForbiddenActionException(f"File with id {id} is not public")
-
         return file
 
     def create_file(self, user_path: UserPath, data: IO[bytes]) -> db_models.FileEntity:
@@ -142,6 +144,10 @@ class ResourceService:
 
     def get_public_file_data(self, file_id: str) -> IO[bytes]:
         file = self.get_file_by_id(file_id)
+
+        if not file.is_public:
+            raise ForbiddenActionException(f"File with id {id} is not public")
+
         return self._get_file_data(file)
 
     def _save_file_data(self, file: db_models.FileEntity, data: IO[bytes]):

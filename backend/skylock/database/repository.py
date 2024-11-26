@@ -60,9 +60,6 @@ class FolderRepository(DatabaseRepository[models.FolderEntity]):
             models.FolderEntity.name == name,
         )
 
-    def get_by_folder_id(self, folder_id: str) -> Optional[models.FolderEntity]:
-        return super().get_by_id(folder_id)
-
 
 class FileRepository(DatabaseRepository[models.FileEntity]):
     def __init__(self, session: Session):

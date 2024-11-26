@@ -8,7 +8,7 @@ services:
     networks:
       - traefik-public
     volumes:
-      - ./data:/app/data
+      - skylock-data:/app/data
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.skylock.rule=Host(`skylock.czumpers.com`)"
@@ -19,3 +19,6 @@ services:
 networks:
   traefik-public:
     external: true
+
+volumes:
+  skylock-data:
