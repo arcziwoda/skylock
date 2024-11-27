@@ -23,11 +23,32 @@ class TestMKDIRCommand(unittest.TestCase):
     @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
     @patch("skylock_cli.core.dir_operations.send_mkdir_request")
     @patch("skylock_cli.core.context_manager.ContextManager.get_context")
+    def test_mkdir_success(
+        self, mock_get_context, mock_send, _mock_is_valid, _mock_is_expired
+    ):
+        """Test the mkdir command"""
+        mock_get_context.return_value = mock_test_context()
+        mock_send.return_value = {"name": "test_dir", "path": "", "is_public": False}
+
+        result = self.runner.invoke(app, ["mkdir", "test_dir"])
+        self.assertEqual(result.exit_code, 0)
+        self.assertIn("Current working directory: /", result.output)
+        mock_send.assert_called_once_with(
+            mock_get_context.return_value.token, Path("/test_dir"), False, False
+        )
+        self.assertIn("Directory test_dir/ created successfully", result.output)
+        self.assertIn("Visibility: private 🔐", result.output)
+
+    @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
+    @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
+    @patch("skylock_cli.core.dir_operations.send_mkdir_request")
+    @patch("skylock_cli.core.context_manager.ContextManager.get_context")
     def test_mkdir_success_parent_flag(
         self, mock_get_context, mock_send, _mock_is_valid, _mock_is_expired
     ):
         """Test the mkdir command"""
         mock_get_context.return_value = mock_test_context()
+        mock_send.return_value = {"name": "test_dir", "path": "", "is_public": False}
 
         result = self.runner.invoke(app, ["mkdir", "test_dir", "--parent"])
         self.assertEqual(result.exit_code, 0)
@@ -35,6 +56,8 @@ class TestMKDIRCommand(unittest.TestCase):
         mock_send.assert_called_once_with(
             mock_get_context.return_value.token, Path("/test_dir"), True, False
         )
+        self.assertIn("Directory test_dir/ created successfully", result.output)
+        self.assertIn("Visibility: private 🔐", result.output)
 
     @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
     @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
@@ -45,6 +68,7 @@ class TestMKDIRCommand(unittest.TestCase):
     ):
         """Test the mkdir command"""
         mock_get_context.return_value = mock_test_context()
+        mock_send.return_value = {"name": "test_dir", "path": "", "is_public": True}
 
         result = self.runner.invoke(app, ["mkdir", "test_dir", "--public"])
         self.assertEqual(result.exit_code, 0)
@@ -52,6 +76,8 @@ class TestMKDIRCommand(unittest.TestCase):
         mock_send.assert_called_once_with(
             mock_get_context.return_value.token, Path("/test_dir"), False, True
         )
+        self.assertIn("Directory test_dir/ created successfully", result.output)
+        self.assertIn("Visibility: public 🔓", result.output)
 
     @patch("skylock_cli.core.dir_operations.send_mkdir_request")
     def test_mdkir_token_expired(self, mock_send):
@@ -115,23 +141,6 @@ class TestMKDIRCommand(unittest.TestCase):
                 r"Directory `/child_dir` is missing! Use the --parent flag to create parent\s+directories\.\n",
                 re.MULTILINE,
             ),
-        )
-
-    @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
-    @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
-    @patch("skylock_cli.core.dir_operations.send_mkdir_request")
-    @patch("skylock_cli.core.context_manager.ContextManager.get_context")
-    def test_mkdir_success(
-        self, mock_get_context, mock_send, _mock_is_valid, _mock_is_expired
-    ):
-        """Test the mkdir command"""
-        mock_get_context.return_value = mock_test_context()
-
-        result = self.runner.invoke(app, ["mkdir", "test_dir"])
-        self.assertEqual(result.exit_code, 0)
-        self.assertIn("Current working directory: /", result.output)
-        mock_send.assert_called_once_with(
-            mock_get_context.return_value.token, Path("/test_dir"), False, False
         )
 
 

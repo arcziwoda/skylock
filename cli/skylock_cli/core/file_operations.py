@@ -5,8 +5,10 @@ Module to handle logic for file operations
 from pathlib import Path
 import os
 import tempfile
+from pydantic import TypeAdapter
 from skylock_cli.utils.cli_exception_handler import CLIExceptionHandler
 from skylock_cli.core import path_parser, context_manager
+from skylock_cli.model.file import File
 from skylock_cli.api.file_requests import (
     send_upload_request,
     send_download_request,
@@ -24,7 +26,7 @@ def upload_file(
     destination_path: Path,
     force: bool = False,
     public: bool = False,
-) -> Path:
+) -> File:
     """Upload a file"""
     current_context = context_manager.ContextManager.get_context()
     with CLIExceptionHandler():
@@ -35,7 +37,7 @@ def upload_file(
 
         with open(real_file_path, "rb") as file:
             files = {"file": (real_file_path.name, file)}
-            send_upload_request(
+            response = send_upload_request(
                 current_context.token,
                 joind_path,
                 files,
@@ -43,7 +45,9 @@ def upload_file(
                 public,
             )
 
-    return joind_path
+        new_file = TypeAdapter(File).validate_python(response)
+
+    return new_file
 
 
 def download_file(virtual_file_path: Path) -> Path:

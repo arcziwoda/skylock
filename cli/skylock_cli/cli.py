@@ -83,11 +83,18 @@ def mkdir(
     """
     Create a new directory in the SkyLock
     """
-    created_path = create_directory(directory_path, parent, public)
+    new_dir = create_directory(directory_path, parent, public)
     cwd = get_working_directory()
 
     typer.secho(f"Current working directory: {cwd.path}", fg=typer.colors.BLUE)
-    typer.secho(f"Directory {created_path} created successfully", fg=typer.colors.GREEN)
+    typer.secho(
+        f"Directory {new_dir.name} created successfully",
+        fg=typer.colors.GREEN,
+    )
+    typer.secho(
+        f"Visibility: {new_dir.visibility_label}",
+        fg=new_dir.visibility_color,
+    )
 
 
 @app.command()
@@ -152,7 +159,7 @@ def ls(
 
     typer.secho(f"Contents of {path}", fg=typer.colors.BLUE)
 
-    if long:
+    if long and contents:
         table = Table()
         table.add_column("Type", justify="left")
         table.add_column("Name", justify="left", no_wrap=True)
@@ -227,12 +234,17 @@ def upload(
         typer.secho(f"{file_path} is not a file.", fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
-    path = upload_file(file_path, destination_path, force, public)
+    new_file = upload_file(file_path, destination_path, force, public)
     cwd = get_working_directory()
 
     typer.secho(f"Current working directory: {cwd.path}", fg=typer.colors.BLUE)
     typer.secho(
-        f"File {file_path} uploaded to {path} successfully", fg=typer.colors.GREEN
+        f"File {new_file.name} uploaded to {new_file.path} successfully",
+        fg=typer.colors.GREEN,
+    )
+    typer.secho(
+        f"Visibility: {new_file.visibility_label}",
+        fg=new_file.visibility_color,
     )
 
 

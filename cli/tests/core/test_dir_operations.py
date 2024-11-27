@@ -25,22 +25,42 @@ class TestCreateDirectory(unittest.TestCase):
     @patch("skylock_cli.api.dir_requests.client.post")
     def test_create_directory_success(self, mock_post):
         """Test successful directory creation"""
-        mock_post.return_value = mock_response_with_status(HTTPStatus.CREATED)
+        return_json = {"name": "test_dir", "path": "", "is_public": False}
+        mock_post.return_value = mock_response_with_status(
+            HTTPStatus.CREATED, return_json
+        )
         parent_flag = False
         public_flag = False
 
-        create_directory("test_dir", parent_flag, public_flag)
+        new_dir = create_directory("test_dir", parent_flag, public_flag)
         mock_post.assert_called_once()
+        self.assertEqual(new_dir.name, "test_dir/")
+        self.assertEqual(new_dir.path, Path("."))
+        self.assertFalse(new_dir.is_public)
+        self.assertEqual(new_dir.color, "magenta")
+        self.assertEqual(new_dir.type_label, "directory")
+        self.assertEqual(new_dir.visibility_label, "private 🔐")
+        self.assertEqual(new_dir.visibility_color, "red")
 
     @patch("skylock_cli.api.dir_requests.client.post")
-    def test_create_directory_success_parent(self, mock_post):
+    def test_create_directory_success_public(self, mock_post):
         """Test successful directory creation"""
-        mock_post.return_value = mock_response_with_status(HTTPStatus.CREATED)
-        parent_flag = True
-        public_flag = False
+        return_json = {"name": "test_dir", "path": "", "is_public": True}
+        mock_post.return_value = mock_response_with_status(
+            HTTPStatus.CREATED, return_json
+        )
+        parent_flag = False
+        public_flag = True
 
-        create_directory("test_dir", parent_flag, public_flag)
+        new_dir = create_directory("test_dir", parent_flag, public_flag)
         mock_post.assert_called_once()
+        self.assertEqual(new_dir.name, "test_dir/")
+        self.assertEqual(new_dir.path, Path("."))
+        self.assertTrue(new_dir.is_public)
+        self.assertEqual(new_dir.color, "magenta")
+        self.assertEqual(new_dir.type_label, "directory")
+        self.assertEqual(new_dir.visibility_label, "public 🔓")
+        self.assertEqual(new_dir.visibility_color, "green")
 
     @patch("skylock_cli.api.dir_requests.client.post")
     def test_create_directory_already_exists(self, mock_post):
