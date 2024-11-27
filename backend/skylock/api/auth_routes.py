@@ -22,14 +22,18 @@ router = APIRouter(tags=["Auth"], prefix="/auth")
         201: {
             "description": "User successfully registered",
             "content": {
-                "application/json": {"example": {"message": "User successfully registered"}}
+                "application/json": {
+                    "example": {"message": "User successfully registered"}
+                }
             },
         },
         409: {
             "description": "User with the provided username already exists",
             "content": {
                 "application/json": {
-                    "example": {"detail": "User with username {username} already exists"}
+                    "example": {
+                        "detail": "User with username {username} already exists"
+                    }
                 }
             },
         },
@@ -64,7 +68,9 @@ def register_user(
         },
         401: {
             "description": "Invalid credentials provided",
-            "content": {"application/json": {"example": {"detail": "Invalid credentials"}}},
+            "content": {
+                "application/json": {"example": {"detail": "Invalid credentials"}}
+            },
         },
     },
 )

@@ -62,7 +62,9 @@ def file_repository(db_session):
 
 @pytest.fixture
 def resource_service(file_repository, folder_repository):
-    return ResourceService(file_repository=file_repository, folder_repository=folder_repository)
+    return ResourceService(
+        file_repository=file_repository, folder_repository=folder_repository
+    )
 
 
 @pytest.fixture

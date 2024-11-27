@@ -29,7 +29,9 @@ def get_resource_service(
     file_repository=Depends(get_file_repository),
     folder_repository=Depends(get_folder_repository),
 ) -> ResourceService:
-    return ResourceService(file_repository=file_repository, folder_repository=folder_repository)
+    return ResourceService(
+        file_repository=file_repository, folder_repository=folder_repository
+    )
 
 
 def get_skylock_facade(

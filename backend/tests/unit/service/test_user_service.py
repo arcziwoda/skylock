@@ -44,7 +44,9 @@ def user_entity(user_data):
     )
 
 
-def test_register_user_successful(user_service, mock_user_repository, user_data, user_entity):
+def test_register_user_successful(
+    user_service, mock_user_repository, user_data, user_entity
+):
     mock_user_repository.get_by_username.return_value = None
     mock_user_repository.save.return_value = user_entity
 
@@ -55,14 +57,18 @@ def test_register_user_successful(user_service, mock_user_repository, user_data,
     mock_user_repository.save.assert_called_once()
 
 
-def test_register_user_already_exists(user_service, mock_user_repository, user_data, user_entity):
+def test_register_user_already_exists(
+    user_service, mock_user_repository, user_data, user_entity
+):
     mock_user_repository.get_by_username.return_value = user_entity
 
     with pytest.raises(UserAlreadyExists):
         user_service.register_user(user_data["username"], user_data["password"])
 
 
-def test_login_user_successful(user_service, mock_user_repository, user_data, user_entity):
+def test_login_user_successful(
+    user_service, mock_user_repository, user_data, user_entity
+):
     mock_user_repository.get_by_username.return_value = user_entity
 
     with patch(
@@ -78,7 +84,9 @@ def test_login_user_successful(user_service, mock_user_repository, user_data, us
     mock_user_repository.get_by_username.assert_called_once_with(user_data["username"])
 
 
-def test_login_user_invalid_credentials(user_service, mock_user_repository, user_data, user_entity):
+def test_login_user_invalid_credentials(
+    user_service, mock_user_repository, user_data, user_entity
+):
     mock_user_repository.get_by_username.return_value = user_entity
 
     with pytest.raises(InvalidCredentialsException):
@@ -92,7 +100,9 @@ def test_login_user_not_found(user_service, mock_user_repository, user_data):
         user_service.login_user(user_data["username"], user_data["password"])
 
 
-def test_verify_user_successful(user_service, mock_user_repository, user_data, user_entity):
+def test_verify_user_successful(
+    user_service, mock_user_repository, user_data, user_entity
+):
     mock_user_repository.get_by_username.return_value = user_entity
 
     result = user_service.verify_user(user_data["username"], user_data["password"])

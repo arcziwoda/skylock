@@ -23,7 +23,9 @@ app = FastAPI(title="File Sharing API", version="1.0.0", root_path="/api/v1")
 
 app.add_exception_handler(UserAlreadyExists, user_already_exists_handler)
 app.add_exception_handler(InvalidCredentialsException, invalid_credentials_handler)
-app.add_exception_handler(ResourceAlreadyExistsException, resource_already_exists_handler)
+app.add_exception_handler(
+    ResourceAlreadyExistsException, resource_already_exists_handler
+)
 app.add_exception_handler(ResourceNotFoundException, resource_not_found_handler)
 app.add_exception_handler(FolderNotEmptyException, folder_not_empty_handler)
 app.add_exception_handler(ForbiddenActionException, forbidden_action_handler)
