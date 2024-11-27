@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Response, UploadFile, status
+from fastapi import APIRouter, Depends, Response, UploadFile, status, Form
 
 
 from skylock.api.dependencies import get_current_user, get_skylock_facade
@@ -26,11 +26,7 @@ router = APIRouter(tags=["Resource"], prefix="/files")
     responses={
         201: {
             "description": "File uploaded successfully",
-            "content": {
-                "application/json": {
-                    "example": {"message": "File uploaded successfully"}
-                }
-            },
+            "content": {"application/json": {"example": {"message": "File uploaded successfully"}}},
         },
         400: {
             "description": "Invalid path provided, most likely empty",
@@ -38,25 +34,21 @@ router = APIRouter(tags=["Resource"], prefix="/files")
         },
         401: {
             "description": "Unauthorized user",
-            "content": {
-                "application/json": {"example": {"detail": "Not authenticated"}}
-            },
+            "content": {"application/json": {"example": {"detail": "Not authenticated"}}},
         },
         409: {
             "description": "Resource already exists",
-            "content": {
-                "application/json": {"example": {"detail": "File already exists"}}
-            },
+            "content": {"application/json": {"example": {"detail": "File already exists"}}},
         },
     },
 )
 def upload_file(
-    file: UploadFile,
     path: Annotated[str, Depends(validate_path_not_empty)],
     user: Annotated[db_models.UserEntity, Depends(get_current_user)],
     skylock: Annotated[SkylockFacade, Depends(get_skylock_facade)],
-    force: bool,
-    public: bool,
+    file: UploadFile,
+    force: bool = False,
+    public: bool = False,
 ) -> models.File:
     return skylock.upload_file(
         user_path=UserPath(path=path, owner=user),
@@ -81,9 +73,7 @@ def upload_file(
         },
         401: {
             "description": "Unauthorized user",
-            "content": {
-                "application/json": {"example": {"detail": "Not authenticated"}}
-            },
+            "content": {"application/json": {"example": {"detail": "Not authenticated"}}},
         },
         404: {
             "description": "File not found",
@@ -121,9 +111,7 @@ def download_file(
         },
         401: {
             "description": "Unauthorized user",
-            "content": {
-                "application/json": {"example": {"detail": "Not authenticated"}}
-            },
+            "content": {"application/json": {"example": {"detail": "Not authenticated"}}},
         },
         404: {
             "description": "File not found",
@@ -131,9 +119,7 @@ def download_file(
         },
         403: {
             "description": "Forbidden action, user is not authorized to delete the file",
-            "content": {
-                "application/json": {"example": {"detail": "Forbidden action"}}
-            },
+            "content": {"application/json": {"example": {"detail": "Forbidden action"}}},
         },
     },
 )
@@ -166,9 +152,7 @@ def delete_file(
         },
         401: {
             "description": "Unauthorized user",
-            "content": {
-                "application/json": {"example": {"detail": "Not authenticated"}}
-            },
+            "content": {"application/json": {"example": {"detail": "Not authenticated"}}},
         },
         404: {
             "description": "Resource not found",

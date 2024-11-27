@@ -85,11 +85,9 @@ class SkylockFacade:
         self._resource_service.update_file(file)
 
     def upload_file(
-        self, user_path: UserPath, file_data: IO[bytes], force: bool, public: bool
+        self, user_path: UserPath, file_data: IO[bytes], force: bool = False, public: bool = False
     ) -> models.File:
-        file_entity = self._resource_service.create_file(
-            user_path, file_data, force, public
-        )
+        file_entity = self._resource_service.create_file(user_path, file_data, force, public)
         return models.File(
             name=file_entity.name,
             path=user_path.parent.path,
