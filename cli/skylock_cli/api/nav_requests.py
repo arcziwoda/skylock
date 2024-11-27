@@ -28,9 +28,15 @@ def send_ls_request(token: Token, path: Path):
         raise api_exceptions.DirectoryNotFoundError(path)
 
     if response.status_code != HTTPStatus.OK:
-        raise api_exceptions.SkyLockAPIError(f"Failed to list directory (Error Code: {response.status_code})")
+        raise api_exceptions.SkyLockAPIError(
+            f"Failed to list directory (Error Code: {response.status_code})"
+        )
 
-    if not response.json() or "files" not in response.json() or "folders" not in response.json():
+    if (
+        not response.json()
+        or "files" not in response.json()
+        or "folders" not in response.json()
+    ):
         raise api_exceptions.InvalidResponseFormatError()
 
     return response.json()
@@ -50,4 +56,6 @@ def send_cd_request(token: Token, path: Path) -> None:
         raise api_exceptions.DirectoryNotFoundError(path)
 
     if response.status_code != HTTPStatus.OK:
-        raise api_exceptions.SkyLockAPIError(f"Failed to change directory (Error Code: {response.status_code})")
+        raise api_exceptions.SkyLockAPIError(
+            f"Failed to change directory (Error Code: {response.status_code})"
+        )

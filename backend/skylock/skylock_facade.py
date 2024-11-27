@@ -22,19 +22,27 @@ class SkylockFacade:
     def create_folder_for_user(self, user_path: UserPath) -> models.Folder:
         folder_entity = self._resource_service.create_folder(user_path)
         return models.Folder(
-            name=folder_entity.name, path=user_path.parent.path, is_public=folder_entity.is_public
+            name=folder_entity.name,
+            path=user_path.parent.path,
+            is_public=folder_entity.is_public,
         )
 
     def get_folder_contents(self, user_path: UserPath) -> models.FolderContents:
         folder = self._resource_service.get_folder(user_path)
         parent_path = f"/{user_path.path}" if user_path.path else ""
         children_files = [
-            models.File(name=file.name, is_public=file.is_public, path=f"{parent_path}/{file.name}")
+            models.File(
+                name=file.name,
+                is_public=file.is_public,
+                path=f"{parent_path}/{file.name}",
+            )
             for file in folder.files
         ]
         children_folders = [
             models.Folder(
-                name=folder.name, is_public=folder.is_public, path=f"{parent_path}/{folder.name}"
+                name=folder.name,
+                is_public=folder.is_public,
+                path=f"{parent_path}/{folder.name}",
             )
             for folder in folder.subfolders
         ]
@@ -45,7 +53,9 @@ class SkylockFacade:
 
         children_files = [
             models.File(
-                name=file.name, is_public=file.is_public, path=f"{current_folder.name}/{file.name}"
+                name=file.name,
+                is_public=file.is_public,
+                path=f"{current_folder.name}/{file.name}",
             )
             for file in current_folder.files
         ]
@@ -74,10 +84,14 @@ class SkylockFacade:
         file.is_public = is_public
         self._resource_service.update_file(file)
 
-    def upload_file(self, user_path: UserPath, file_data: IO[bytes]) -> models.File:
-        file_entity = self._resource_service.create_file(user_path, file_data)
+    def upload_file(
+        self, user_path: UserPath, file_data: IO[bytes], force: bool = False, public: bool = False
+    ) -> models.File:
+        file_entity = self._resource_service.create_file(user_path, file_data, force, public)
         return models.File(
-            name=file_entity.name, path=user_path.parent.path, is_public=file_entity.is_public
+            name=file_entity.name,
+            path=user_path.parent.path,
+            is_public=file_entity.is_public,
         )
 
     def download_file(self, user_path: UserPath) -> IO[bytes]:
