@@ -20,7 +20,10 @@ from skylock_cli.scripts.setup_config import create_downloads_dir
 
 
 def upload_file(
-    real_file_path: Path, destination_path: Path, force: bool, public: bool
+    real_file_path: Path,
+    destination_path: Path,
+    force: bool = False,
+    public: bool = False,
 ) -> Path:
     """Upload a file"""
     current_context = context_manager.ContextManager.get_context()

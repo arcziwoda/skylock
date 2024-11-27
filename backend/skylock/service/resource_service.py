@@ -109,7 +109,9 @@ class ResourceService:
 
         return file
 
-    def create_file(self, user_path: UserPath, data: IO[bytes]) -> db_models.FileEntity:
+    def create_file(
+        self, user_path: UserPath, data: IO[bytes], force: bool, public: bool
+    ) -> db_models.FileEntity:
         if not user_path.name:
             raise ForbiddenActionException("Creation of file with no name is forbidden")
 
@@ -117,10 +119,18 @@ class ResourceService:
         parent_path = user_path.parent
         parent = self.get_folder(parent_path)
 
+        if force:
+            try:
+                self.delete_file(user_path)
+            except ResourceNotFoundException:
+                pass
+
         self._assert_no_children_matching_name(parent, file_name)
 
         new_file = self._file_repository.save(
-            db_models.FileEntity(name=file_name, folder=parent, owner=user_path.owner)
+            db_models.FileEntity(
+                name=file_name, folder=parent, owner=user_path.owner, is_public=public
+            )
         )
 
         self._save_file_data(file=new_file, data=data)

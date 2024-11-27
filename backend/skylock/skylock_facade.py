@@ -74,8 +74,8 @@ class SkylockFacade:
         file.is_public = is_public
         self._resource_service.update_file(file)
 
-    def upload_file(self, user_path: UserPath, file_data: IO[bytes]) -> models.File:
-        file_entity = self._resource_service.create_file(user_path, file_data)
+    def upload_file(self, user_path: UserPath, file_data: IO[bytes], force:bool, public:bool) -> models.File:
+        file_entity = self._resource_service.create_file(user_path, file_data, force, public)
         return models.File(
             name=file_entity.name, path=user_path.parent.path, is_public=file_entity.is_public
         )

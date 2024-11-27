@@ -27,11 +27,9 @@ def send_upload_request(
     """
     url = "/files/upload" + quote(str(virtual_path))
     auth = bearer_auth.BearerAuth(token)
-    params = {"force": force, "is_public": public}
+    params = {"force": force, "public": public}
 
-    response = client.post(
-        url=url, auth=auth, files=files, headers=API_HEADERS, params=params
-    )
+    response = client.post(url=url, auth=auth, files=files, params=params)
 
     if response.status_code == HTTPStatus.UNAUTHORIZED:
         raise api_exceptions.UserUnauthorizedError()

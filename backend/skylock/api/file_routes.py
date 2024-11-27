@@ -47,8 +47,12 @@ def upload_file(
     path: Annotated[str, Depends(validate_path_not_empty)],
     user: Annotated[db_models.UserEntity, Depends(get_current_user)],
     skylock: Annotated[SkylockFacade, Depends(get_skylock_facade)],
+    force: bool,
+    public: bool,
 ) -> models.File:
-    return skylock.upload_file(user_path=UserPath(path=path, owner=user), file_data=file.file)
+    return skylock.upload_file(
+        user_path=UserPath(path=path, owner=user), file_data=file.file, force=force, public=public
+    )
 
 
 @router.get(
