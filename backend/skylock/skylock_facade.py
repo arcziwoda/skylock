@@ -74,15 +74,21 @@ class SkylockFacade:
             raise ForbiddenActionException("Deletion of root folder is forbidden")
         self._resource_service.delete_folder(user_path, is_recursively=is_recursively)
 
-    def update_folder_visability(self, user_path: UserPath, is_public: bool):
+    def update_folder_visability(self, user_path: UserPath, is_public: bool) -> models.Folder:
         folder = self._resource_service.get_folder(user_path)
         folder.is_public = is_public
         self._resource_service.update_folder(folder)
+        return models.Folder(
+            name=folder.name, path=f"{user_path.path}/{folder.name}", is_public=folder.is_public
+        )
 
-    def update_file_visability(self, user_path: UserPath, is_public: bool):
+    def update_file_visability(self, user_path: UserPath, is_public: bool) -> models.File:
         file = self._resource_service.get_file(user_path)
         file.is_public = is_public
         self._resource_service.update_file(file)
+        return models.File(
+            name=file.name, is_public=file.is_public, path=f"{user_path.path}/{file.name}"
+        )
 
     def upload_file(
         self, user_path: UserPath, file_data: IO[bytes], force: bool = False, public: bool = False

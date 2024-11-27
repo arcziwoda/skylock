@@ -109,7 +109,7 @@ def create_folder(
     path: Annotated[str, Depends(validate_path_not_empty)],
     user: Annotated[db_models.UserEntity, Depends(get_current_user)],
     skylock: Annotated[SkylockFacade, Depends(get_skylock_facade)],
-):
+) -> models.Folder:
     return skylock.create_folder_for_user(UserPath(path=path, owner=user))
 
 
@@ -221,6 +221,5 @@ def change_folder_visability(
     user: Annotated[db_models.UserEntity, Depends(get_current_user)],
     skylock: Annotated[SkylockFacade, Depends(get_skylock_facade)],
     is_public: models.VisabilityRequest,
-):
-    skylock.update_folder_visability(UserPath(path=path, owner=user), is_public.is_public)
-    return {"message": f"Folder visability changed to: public = {is_public.is_public}"}
+) -> models.Folder:
+    return skylock.update_folder_visability(UserPath(path=path, owner=user), is_public.is_public)
