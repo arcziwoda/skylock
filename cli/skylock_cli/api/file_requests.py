@@ -16,7 +16,7 @@ client = Client(base_url=API_URL)
 
 def send_upload_request(
     token: Token, virtual_path: Path, files: dict, force: bool, public: bool
-) -> None:
+) -> dict:
     """
     Send an upload request to the SkyLock backend API.
 
@@ -45,6 +45,8 @@ def send_upload_request(
         raise api_exceptions.SkyLockAPIError(
             f"Failed to upload file (Error Code: {response.status_code})"
         )
+
+    return response.json()
 
 
 def send_download_request(token: Token, virtual_path: Path) -> bytes:

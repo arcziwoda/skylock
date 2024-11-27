@@ -234,12 +234,14 @@ def upload(
         typer.secho(f"{file_path} is not a file.", fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
-    path = upload_file(file_path, destination_path, force, public)
+    new_file = upload_file(file_path, destination_path, force, public)
     cwd = get_working_directory()
 
     typer.secho(f"Current working directory: {cwd.path}", fg=typer.colors.BLUE)
+    typer.secho(f"File {new_file.name} uploaded successfully", fg=typer.colors.GREEN)
     typer.secho(
-        f"File {file_path} uploaded to {path} successfully", fg=typer.colors.GREEN
+        f"Visibility: {new_file.visibility_label}",
+        fg=new_file.visibility_color,
     )
 
 
