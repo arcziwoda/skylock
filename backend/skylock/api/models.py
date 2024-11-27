@@ -35,3 +35,8 @@ class RegisterUserRequest(BaseModel):
 
 class VisabilityRequest(BaseModel):
     is_public: bool
+
+
+class UploadOptions(BaseModel):
+    force: bool
+    public: bool
