@@ -49,22 +49,28 @@ class TestUploadCommand(unittest.TestCase):
         "skylock_cli.core.context_manager.ContextManager.get_context",
         return_value=mock_test_context(),
     )
-    @patch("skylock_cli.core.file_operations.send_upload_request", return_value=None)
+    @patch("skylock_cli.core.file_operations.send_upload_request")
     def test_upload_success(
-        self, _mock_send, _mock_get_context, _mock_is_valid, _mock_is_expired
+        self, mock_send, _mock_get_context, _mock_is_valid, _mock_is_expired
     ):
         """Test successful file upload"""
         with tempfile.NamedTemporaryFile() as temp_file:
             temp_file_path = temp_file.name
             temp_file_name = os.path.basename(temp_file_path)
+            mock_send.return_value = {
+                "name": temp_file_name,
+                "path": "",
+                "is_public": False,
+            }
             result = self.runner.invoke(app, ["upload", temp_file.name])
 
             self.assertEqual(result.exit_code, 0)
             self.assertIn("Current working directory: /", result.output)
             self.assertIn(
-                f"File {temp_file_path} uploaded to /{temp_file_name} successfully",
+                f"File {temp_file_name} uploaded to . successfully",
                 result.output,
             )
+            self.assertIn("Visibility: private 🔐", result.output)
 
     @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
     @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
@@ -72,22 +78,57 @@ class TestUploadCommand(unittest.TestCase):
         "skylock_cli.core.context_manager.ContextManager.get_context",
         return_value=mock_test_context(),
     )
-    @patch("skylock_cli.core.file_operations.send_upload_request", return_value=None)
-    def test_upload_success_force(
-        self, _mock_send, _mock_get_context, _mock_is_valid, _mock_is_expired
+    @patch("skylock_cli.core.file_operations.send_upload_request")
+    def test_upload_success_public(
+        self, mock_send, _mock_get_context, _mock_is_valid, _mock_is_expired
     ):
         """Test successful file upload"""
         with tempfile.NamedTemporaryFile() as temp_file:
             temp_file_path = temp_file.name
             temp_file_name = os.path.basename(temp_file_path)
+            mock_send.return_value = {
+                "name": temp_file_name,
+                "path": "",
+                "is_public": True,
+            }
+            result = self.runner.invoke(app, ["upload", temp_file.name, "--public"])
+
+            self.assertEqual(result.exit_code, 0)
+            self.assertIn("Current working directory: /", result.output)
+            self.assertIn(
+                f"File {temp_file_name} uploaded to . successfully",
+                result.output,
+            )
+            self.assertIn("Visibility: public 🔓", result.output)
+
+    @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
+    @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
+    @patch(
+        "skylock_cli.core.context_manager.ContextManager.get_context",
+        return_value=mock_test_context(),
+    )
+    @patch("skylock_cli.core.file_operations.send_upload_request")
+    def test_upload_success_force(
+        self, mock_send, _mock_get_context, _mock_is_valid, _mock_is_expired
+    ):
+        """Test successful file upload"""
+        with tempfile.NamedTemporaryFile() as temp_file:
+            temp_file_path = temp_file.name
+            temp_file_name = os.path.basename(temp_file_path)
+            mock_send.return_value = {
+                "name": temp_file_name,
+                "path": "",
+                "is_public": False,
+            }
             result = self.runner.invoke(app, ["upload", temp_file.name, "--force"])
 
             self.assertEqual(result.exit_code, 0)
             self.assertIn("Current working directory: /", result.output)
             self.assertIn(
-                f"File {temp_file_path} uploaded to /{temp_file_name} successfully",
+                f"File {temp_file_name} uploaded to . successfully",
                 result.output,
             )
+            self.assertIn("Visibility: private 🔐", result.output)
 
     @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
     @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
@@ -95,22 +136,28 @@ class TestUploadCommand(unittest.TestCase):
         "skylock_cli.core.context_manager.ContextManager.get_context",
         return_value=mock_test_context(Path("/test")),
     )
-    @patch("skylock_cli.core.file_operations.send_upload_request", return_value=None)
+    @patch("skylock_cli.core.file_operations.send_upload_request")
     def test_upload_success_not_to_root(
-        self, _mock_send, _mock_get_context, _mock_is_valid, _mock_is_expired
+        self, mock_send, _mock_get_context, _mock_is_valid, _mock_is_expired
     ):
         """Test successful file upload"""
         with tempfile.NamedTemporaryFile() as temp_file:
             temp_file_path = temp_file.name
             temp_file_name = os.path.basename(temp_file_path)
+            mock_send.return_value = {
+                "name": temp_file_name,
+                "path": "/test",
+                "is_public": False,
+            }
             result = self.runner.invoke(app, ["upload", temp_file.name])
 
             self.assertEqual(result.exit_code, 0)
             self.assertIn("Current working directory: /test", result.output)
             self.assertIn(
-                f"File {temp_file_path} uploaded to /test/{temp_file_name} successfully",
+                f"File {temp_file_name} uploaded to /test successfully",
                 result.output,
             )
+            self.assertIn("Visibility: private 🔐", result.output)
 
     @patch("skylock_cli.core.file_operations.send_upload_request")
     def test_upload_token_expired(self, mock_send):

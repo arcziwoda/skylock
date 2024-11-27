@@ -85,8 +85,8 @@ class TestUploadFile(unittest.TestCase):
         "skylock_cli.core.context_manager.ContextManager.get_context",
         return_value=mock_test_context(),
     )
-    @patch("skylock_cli.core.file_operations.send_upload_request", return_value=None)
-    def test_upload_file_success(self, _mock_send, _mock_get_context):
+    @patch("skylock_cli.core.file_operations.send_upload_request")
+    def test_upload_file_success(self, mock_send, _mock_get_context):
         """Test the upload_file function with a successful upload"""
         force_flag = False
         public_flag = False
@@ -94,59 +94,74 @@ class TestUploadFile(unittest.TestCase):
         with tempfile.NamedTemporaryFile() as temp_file:
             temp_file_path = Path(temp_file.name)
             temp_file_name = temp_file_path.name
-            result = upload_file(temp_file_path, Path("."), force_flag, public_flag)
+            mock_send.return_value = {
+                "name": temp_file_name,
+                "path": "",
+                "is_public": False,
+            }
+            new_file = upload_file(temp_file_path, Path("."), force_flag, public_flag)
 
-            self.assertEqual(result, Path(f"/{temp_file_name}"))
+            self.assertEqual(new_file.name, temp_file_name)
+            self.assertEqual(new_file.path, Path("."))
+            self.assertFalse(new_file.is_public)
+            self.assertEqual(new_file.color, "yellow")
+            self.assertEqual(new_file.type_label, "file")
+            self.assertEqual(new_file.visibility_label, "private 🔐")
+            self.assertEqual(new_file.visibility_color, "red")
 
     @patch(
         "skylock_cli.core.context_manager.ContextManager.get_context",
         return_value=mock_test_context(),
     )
-    @patch("skylock_cli.core.file_operations.send_upload_request", return_value=None)
-    def test_upload_file_success_force(self, _mock_send, _mock_get_context):
+    @patch("skylock_cli.core.file_operations.send_upload_request")
+    def test_upload_file_success_public(self, mock_send, _mock_get_context):
         """Test the upload_file function with a successful upload"""
-        force_flag = True
-        public_flag = False
+        force_flag = False
+        public_flag = True
+
         with tempfile.NamedTemporaryFile() as temp_file:
             temp_file_path = Path(temp_file.name)
             temp_file_name = temp_file_path.name
-            result = upload_file(temp_file_path, Path("."), force_flag, public_flag)
+            mock_send.return_value = {
+                "name": temp_file_name,
+                "path": "",
+                "is_public": True,
+            }
+            new_file = upload_file(temp_file_path, Path("."), force_flag, public_flag)
 
-            self.assertEqual(result, Path(f"/{temp_file_name}"))
+            self.assertEqual(new_file.name, temp_file_name)
+            self.assertEqual(new_file.path, Path("."))
+            self.assertTrue(new_file.is_public)
+            self.assertEqual(new_file.color, "yellow")
+            self.assertEqual(new_file.type_label, "file")
+            self.assertEqual(new_file.visibility_label, "public 🔓")
+            self.assertEqual(new_file.visibility_color, "green")
 
     @patch(
         "skylock_cli.core.context_manager.ContextManager.get_context",
         return_value=mock_test_context(Path("/test")),
     )
-    @patch("skylock_cli.core.file_operations.send_upload_request", return_value=None)
-    def test_upload_file_with_different_cwd(self, _mock_send, _mock_get_context):
+    @patch("skylock_cli.core.file_operations.send_upload_request")
+    def test_upload_file_with_different_cwd(self, mock_send, _mock_get_context):
         """Test the upload_file function with a different current working directory"""
         force_flag = False
         public_flag = False
         with tempfile.NamedTemporaryFile() as temp_file:
             temp_file_path = Path(temp_file.name)
             temp_file_name = temp_file_path.name
-            result = upload_file(temp_file_path, Path("."), force_flag, public_flag)
+            mock_send.return_value = {
+                "name": temp_file_name,
+                "path": "/test",
+                "is_public": False,
+            }
+            new_file = upload_file(temp_file_path, Path("."), force_flag, public_flag)
 
-            self.assertEqual(result, Path(f"/test/{temp_file_name}"))
-
-    @patch(
-        "skylock_cli.core.context_manager.ContextManager.get_context",
-        return_value=mock_test_context(),
-    )
-    @patch("skylock_cli.core.file_operations.send_upload_request", side_effect=None)
-    def test_upload_file_with_other_than_cwd_destination_path(
-        self, _mock_send, _mock_get_context
-    ):
-        """Test the upload_file function with a destination path other than the current working directory"""
-        force_flag = False
-        public_flag = False
-        with tempfile.NamedTemporaryFile() as temp_file:
-            temp_file_path = Path(temp_file.name)
-            temp_file_name = temp_file_path.name
-            result = upload_file(temp_file_path, Path("/test"), force_flag, public_flag)
-
-            self.assertEqual(result, Path(f"/test/{temp_file_name}"))
+            self.assertEqual(new_file.name, temp_file_name)
+            self.assertEqual(new_file.path, Path("/test"))
+            self.assertFalse(new_file.is_public)
+            self.assertEqual(new_file.color, "yellow")
+            self.assertEqual(new_file.type_label, "file")
+            self.assertEqual(new_file.visibility_label, "private 🔐")
 
     @patch(
         "skylock_cli.core.context_manager.ContextManager.get_context",
