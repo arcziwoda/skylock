@@ -165,6 +165,5 @@ def change_file_visability(
     user: Annotated[db_models.UserEntity, Depends(get_current_user)],
     skylock: Annotated[SkylockFacade, Depends(get_skylock_facade)],
     is_public: models.VisabilityRequest,
-):
-    skylock.update_file_visability(UserPath(path=path, owner=user), is_public.is_public)
-    return {"message": f"file visability changed to: public = {is_public.is_public}"}
+) -> models.File:
+    return skylock.update_file_visability(UserPath(path=path, owner=user), is_public.is_public)
