@@ -238,7 +238,10 @@ def upload(
     cwd = get_working_directory()
 
     typer.secho(f"Current working directory: {cwd.path}", fg=typer.colors.BLUE)
-    typer.secho(f"File {new_file.name} uploaded successfully", fg=typer.colors.GREEN)
+    typer.secho(
+        f"File {new_file.name} uploaded to {new_file.path} successfully",
+        fg=typer.colors.GREEN,
+    )
     typer.secho(
         f"Visibility: {new_file.visibility_label}",
         fg=new_file.visibility_color,
