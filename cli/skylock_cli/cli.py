@@ -152,7 +152,7 @@ def ls(
 
     typer.secho(f"Contents of {path}", fg=typer.colors.BLUE)
 
-    if long:
+    if long and contents:
         table = Table()
         table.add_column("Type", justify="left")
         table.add_column("Name", justify="left", no_wrap=True)
