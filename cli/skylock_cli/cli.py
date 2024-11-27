@@ -83,11 +83,18 @@ def mkdir(
     """
     Create a new directory in the SkyLock
     """
-    created_path = create_directory(directory_path, parent, public)
+    new_dir = create_directory(directory_path, parent, public)
     cwd = get_working_directory()
 
     typer.secho(f"Current working directory: {cwd.path}", fg=typer.colors.BLUE)
-    typer.secho(f"Directory {created_path} created successfully", fg=typer.colors.GREEN)
+    typer.secho(
+        f"Directory {new_dir.name} created successfully",
+        fg=typer.colors.GREEN,
+    )
+    typer.secho(
+        f"Visibility: {new_dir.visibility_label}",
+        fg=new_dir.visibility_color,
+    )
 
 
 @app.command()

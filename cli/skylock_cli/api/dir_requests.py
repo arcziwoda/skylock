@@ -14,7 +14,7 @@ from skylock_cli.api import bearer_auth
 client = Client(base_url=API_URL)
 
 
-def send_mkdir_request(token: Token, path: Path, parent: bool, public: bool) -> None:
+def send_mkdir_request(token: Token, path: Path, parent: bool, public: bool) -> dict:
     """
     Send a mkdir request to the SkyLock backend API.
 
@@ -47,6 +47,8 @@ def send_mkdir_request(token: Token, path: Path, parent: bool, public: bool) -> 
         raise api_exceptions.SkyLockAPIError(
             f"Failed to create directory (Error Code: {response.status_code})"
         )
+
+    return response.json()
 
 
 def send_rmdir_request(token: Token, path: Path, recursive: bool) -> None:

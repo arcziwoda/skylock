@@ -3,6 +3,7 @@ Module to handle logic for directory operations
 """
 
 from pathlib import Path
+from pydantic import TypeAdapter
 from skylock_cli.api.dir_requests import (
     send_mkdir_request,
     send_rmdir_request,
@@ -10,6 +11,7 @@ from skylock_cli.api.dir_requests import (
     send_make_private_request,
 )
 from skylock_cli.core.nav import change_directory
+from skylock_cli.model.directory import Directory
 from skylock_cli.utils.cli_exception_handler import CLIExceptionHandler
 from skylock_cli.core import path_parser, context_manager
 from skylock_cli.exceptions.core_exceptions import (
@@ -19,13 +21,14 @@ from skylock_cli.exceptions.core_exceptions import (
 from skylock_cli.config import ROOT_PATH
 
 
-def create_directory(directory_path: Path, parent: bool, public: bool) -> Path:
+def create_directory(directory_path: Path, parent: bool, public: bool) -> Directory:
     """Create a directory"""
     current_context = context_manager.ContextManager.get_context()
     with CLIExceptionHandler():
         joind_path = path_parser.parse_path(current_context.cwd.path, directory_path)
-        send_mkdir_request(current_context.token, joind_path, parent, public)
-    return joind_path
+        response = send_mkdir_request(current_context.token, joind_path, parent, public)
+        new_dir = TypeAdapter(Directory).validate_python(response)
+    return new_dir
 
 
 def remove_directory(directory_path: str, recursive: bool) -> Path:
