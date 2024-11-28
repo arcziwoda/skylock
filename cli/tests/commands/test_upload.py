@@ -189,6 +189,21 @@ class TestUploadCommand(unittest.TestCase):
             )
 
     @patch("skylock_cli.core.file_operations.send_upload_request")
+    def test_upload_file_directory_does_not_exist(self, mock_send):
+        """Test the upload command when the directory does not exist"""
+        mock_send.side_effect = api_exceptions.DirectoryNotFoundError("/test")
+
+        with tempfile.NamedTemporaryFile() as temp_file:
+            temp_file_path = temp_file.name
+            result = self.runner.invoke(app, ["upload", temp_file_path])
+
+            self.assertEqual(result.exit_code, 1)
+            self.assertIn(
+                "Directory `/test` does not exist!",
+                result.output,
+            )
+
+    @patch("skylock_cli.core.file_operations.send_upload_request")
     def test_upload_invalid_path(self, mock_send):
         """Test the upload command when the path is invalid"""
         mock_send.side_effect = api_exceptions.InvalidPathError("test_path")
