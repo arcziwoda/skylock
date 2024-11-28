@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Response, UploadFile, status, Form
+from fastapi import APIRouter, Depends, Response, UploadFile, status
 
 
 from skylock.api.dependencies import get_current_user, get_skylock_facade
