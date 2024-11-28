@@ -284,7 +284,7 @@ def make_public(
     )
     pwd()
     typer.secho(
-        f"{resource.type_label.capitalize()} {resource.name} is now {resource.visibility_label}",
+        f"{resource.type_label.capitalize()} {resource.path} is now {resource.visibility_label}",
         fg=resource.visibility_color,
     )
 
@@ -308,7 +308,7 @@ def make_private(
     )
     pwd()
     typer.secho(
-        f"{resource.type_label.capitalize()} {resource.name} is now {resource.visibility_label}",
+        f"{resource.type_label.capitalize()} {resource.path} is now {resource.visibility_label}",
         fg=resource.visibility_color,
     )
 
