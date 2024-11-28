@@ -58,8 +58,10 @@ lint_cli:
   needs:
     - setup_cli
   rules:
-    - changes:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
         - cli/**/*
+      when: always
 
 test_cli:
   stage: test
@@ -70,8 +72,10 @@ test_cli:
   needs:
     - setup_cli
   rules:
-    - changes:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
         - cli/**/*
+      when: always
 
 lint_backend:
   stage: lint
@@ -82,8 +86,10 @@ lint_backend:
   needs:
     - setup_backend
   rules:
-    - changes:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
         - backend/**/*
+      when: always
 
 test_backend:
   stage: test
@@ -94,8 +100,10 @@ test_backend:
   needs:
     - setup_backend
   rules:
-    - changes:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
         - backend/**/*
+      when: always
 
 build_backend:
   rules:
