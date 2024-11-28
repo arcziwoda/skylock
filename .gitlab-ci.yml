@@ -59,6 +59,9 @@ lint_cli:
     - poetry run pylint skylock_cli tests
   needs:
     - setup_cli
+  rules:
+    - changes:
+        - cli/**/*
 
 test_cli:
   stage: test
@@ -68,6 +71,9 @@ test_cli:
     - poetry run pytest
   needs:
     - setup_cli
+  rules:
+    - changes:
+        - cli/**/*
 
 lint_backend:
   stage: lint
@@ -77,6 +83,9 @@ lint_backend:
     - poetry run pylint skylock
   needs:
     - setup_backend
+  rules:
+    - changes:
+        - backend/**/*
 
 test_backend:
   stage: test
@@ -86,3 +95,6 @@ test_backend:
     - poetry run pytest
   needs:
     - setup_backend
+  rules:
+    - changes:
+        - backend/**/*
