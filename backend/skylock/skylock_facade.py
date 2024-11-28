@@ -30,7 +30,7 @@ class SkylockFacade:
 
         return models.Folder(
             name=folder_entity.name,
-            path=user_path.parent.path,
+            path=user_path.path,
             is_public=folder_entity.is_public,
         )
 
