@@ -34,6 +34,9 @@ def send_upload_request(
     if response.status_code == HTTPStatus.UNAUTHORIZED:
         raise api_exceptions.UserUnauthorizedError()
 
+    if response.status_code == HTTPStatus.NOT_FOUND:
+        raise api_exceptions.DirectoryNotFoundError(virtual_path.parent)
+
     if response.status_code == HTTPStatus.CONFLICT:
         if not force:
             raise api_exceptions.FileAlreadyExistsError(virtual_path)
