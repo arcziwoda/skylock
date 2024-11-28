@@ -66,3 +66,11 @@ def test_user_path_absolute_path():
     user_path = UserPath(path=path, owner=user)
 
     assert user_path.path == "absolute/path"
+
+
+def test_user_path_proper_file_name():
+    user = UserEntity(id=1, username="testuser")
+    path = "file.txt"
+    user_path = UserPath(path=path, owner=user)
+
+    assert user_path.path == "file.txt"
