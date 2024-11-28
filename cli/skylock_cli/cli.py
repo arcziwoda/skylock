@@ -277,14 +277,16 @@ def make_public(
     """
     Set a resource as public.
     """
-    if is_directory(resource_path):
-        path = make_directory_public(resource_path)
-        resource_type = "Directory"
-    else:
-        path = make_file_public(resource_path)
-        resource_type = "File"
+    resource = (
+        make_directory_public(resource_path)
+        if is_directory(resource_path)
+        else make_file_public(resource_path)
+    )
     pwd()
-    typer.secho(f"{resource_type} {path} is now public", fg=typer.colors.GREEN)
+    typer.secho(
+        f"{resource.type_label.capitalize()} {resource.name} is now {resource.visibility_label}",
+        fg=resource.visibility_color,
+    )
 
 
 @app.command()
