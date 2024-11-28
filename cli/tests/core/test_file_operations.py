@@ -284,6 +284,28 @@ class TestUploadFile(unittest.TestCase):
         "skylock_cli.core.context_manager.ContextManager.get_context",
         return_value=mock_test_context(),
     )
+    @patch(
+        "skylock_cli.api.file_requests.client.post",
+        return_value=mock_response_with_status(HTTPStatus.NOT_FOUND),
+    )
+    def test_upload_file_when_destination_directory_does_not_exist(
+        self, _mock_send, _mock_get_context
+    ):
+        """Test the upload_file function with a not found error"""
+        force_flag = False
+        public_flag = False
+        with tempfile.NamedTemporaryFile() as temp_file:
+            temp_file_path = Path(temp_file.name)
+            with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
+                with self.assertRaises(exceptions.Exit):
+                    upload_file(temp_file_path, Path("."), force_flag, public_flag)
+
+                self.assertIn("Directory `/` does not exist!", mock_stderr.getvalue())
+
+    @patch(
+        "skylock_cli.core.context_manager.ContextManager.get_context",
+        return_value=mock_test_context(),
+    )
     @patch("skylock_cli.api.file_requests.client.post")
     def test_upload_file_with_connection_error(self, mock_send, _mock_get_context):
         """Test the upload_file function with a connection error"""
