@@ -87,7 +87,7 @@ def send_rmdir_request(token: Token, path: Path, recursive: bool) -> None:
         )
 
 
-def send_make_public_request(token: Token, path: Path) -> None:
+def send_make_public_request(token: Token, path: Path) -> dict:
     """
     Send a make public request to the SkyLock backend API.
 
@@ -112,8 +112,10 @@ def send_make_public_request(token: Token, path: Path) -> None:
             f"Failed to make directory public (Error Code: {response.status_code})"
         )
 
+    return response.json()
 
-def send_make_private_request(token: Token, path: Path) -> None:
+
+def send_make_private_request(token: Token, path: Path) -> dict:
     """
     Send a make private request to the SkyLock backend API.
 
@@ -137,3 +139,5 @@ def send_make_private_request(token: Token, path: Path) -> None:
         raise api_exceptions.SkyLockAPIError(
             f"Failed to make directory private (Error Code: {response.status_code})"
         )
+
+    return response.json()

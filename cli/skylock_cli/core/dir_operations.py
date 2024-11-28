@@ -53,23 +53,25 @@ def remove_directory(directory_path: str, recursive: bool) -> Path:
     return joind_path
 
 
-def make_directory_public(directory_path: str) -> None:
+def make_directory_public(directory_path: str) -> Directory:
     """Make a directory public"""
     current_context = context_manager.ContextManager.get_context()
     with CLIExceptionHandler():
         joind_path = path_parser.parse_path(
             current_context.cwd.path, Path(directory_path)
         )
-        send_make_public_request(current_context.token, joind_path)
-    return joind_path
+        response = send_make_public_request(current_context.token, joind_path)
+        changed_dir = TypeAdapter(Directory).validate_python(response)
+    return changed_dir
 
 
-def make_directory_private(directory_path: str) -> None:
+def make_directory_private(directory_path: str) -> Directory:
     """Make a directory private"""
     current_context = context_manager.ContextManager.get_context()
     with CLIExceptionHandler():
         joind_path = path_parser.parse_path(
             current_context.cwd.path, Path(directory_path)
         )
-        send_make_private_request(current_context.token, joind_path)
-    return joind_path
+        response = send_make_private_request(current_context.token, joind_path)
+        changed_dir = TypeAdapter(Directory).validate_python(response)
+    return changed_dir
