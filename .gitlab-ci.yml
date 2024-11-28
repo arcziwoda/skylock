@@ -1,3 +1,5 @@
+include: .gitlab-cd.yml
+
 stages:
   - setup
   - lint
