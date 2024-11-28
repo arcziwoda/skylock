@@ -40,6 +40,7 @@ def test_get_nested_folder(client):
 def test_create_folder_at_root_success(client):
     response = client.post("/folders/new_folder/")
     assert response.status_code == 201
+    assert client.get("/folders/new_folder").status_code == 200
 
 
 def test_create_folder_with_existing_name(client):
@@ -55,11 +56,19 @@ def test_create_subfolder_in_nonexistent_folder(client):
 def test_create_nested_folder(client):
     response = client.post("/folders/folder1/subfolder1/test_folder")
     assert response.status_code == 201
+    assert client.get("/folders/folder1/subfolder1/test_folder").status_code == 200
 
 
 def test_create_folder_empty_path(client):
     response = client.post("/folders")
     assert response.status_code == 400
+
+
+def test_create_folder_with_parents(client):
+    response = client.post("/folders/non_existent/subfolder1?parent=true")
+    assert response.status_code == 201
+    assert client.get("/folders/non_existent").status_code == 200
+    assert client.get("/folders/non_existent/subfolder1").status_code == 200
 
 
 # DELETE METHODS

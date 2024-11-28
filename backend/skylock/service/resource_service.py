@@ -64,6 +64,23 @@ class ResourceService:
         )
         return self._folder_repository.save(new_folder)
 
+    def create_folder_with_parents(self, user_path: UserPath) -> db_models.FolderEntity:
+        if user_path.is_root_folder():
+            raise ForbiddenActionException("Creation of root folder is forbidden")
+
+        for parent in user_path.parents:
+            if not parent.is_root_folder() and not self._folder_exists(parent):
+                self.create_folder(parent)
+
+        return self.create_folder(user_path)
+
+    def _folder_exists(self, user_path: UserPath) -> bool:
+        try:
+            self.get_folder(user_path)
+            return True
+        except ResourceNotFoundException:
+            return False
+
     def delete_folder(self, user_path: UserPath, is_recursively: bool = False):
         folder = self.get_folder(user_path)
         self._delete_folder(folder, is_recursively=is_recursively)

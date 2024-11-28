@@ -43,6 +43,19 @@ def test_user_path_parent():
     assert parent_path.owner == user
 
 
+def test_user_path_parents():
+    user = UserEntity(id=1, username="testuser")
+    path = "some/path/with/parents"
+    user_path = UserPath(path=path, owner=user)
+
+    assert user_path.parents == (
+        UserPath(path="some/path/with", owner=user),
+        UserPath(path="some/path", owner=user),
+        UserPath(path="some", owner=user),
+        UserPath(path="", owner=user),
+    )
+
+
 def test_user_path_parent_root_folder():
     user = UserEntity(id=1, username="testuser")
     path = ""
