@@ -86,22 +86,24 @@ def remove_file(file_path: str) -> Path:
     return joind_path
 
 
-def make_file_public(file_path: str) -> None:
+def make_file_public(file_path: str) -> File:
     """Make a file public"""
     current_context = context_manager.ContextManager.get_context()
     with CLIExceptionHandler():
         joind_path = path_parser.parse_path(current_context.cwd.path, Path(file_path))
-        send_make_public_request(current_context.token, joind_path)
-    return joind_path
+        response = send_make_public_request(current_context.token, joind_path)
+        changed_file = TypeAdapter(File).validate_python(response)
+    return changed_file
 
 
-def make_file_private(file_path: str) -> None:
+def make_file_private(file_path: str) -> File:
     """Make a file private"""
     current_context = context_manager.ContextManager.get_context()
     with CLIExceptionHandler():
         joind_path = path_parser.parse_path(current_context.cwd.path, Path(file_path))
-        send_make_private_request(current_context.token, joind_path)
-    return joind_path
+        response = send_make_private_request(current_context.token, joind_path)
+        changed_file = TypeAdapter(File).validate_python(response)
+    return changed_file
 
 
 def _generate_unique_file_path(directory: Path, file_name: str) -> Path:

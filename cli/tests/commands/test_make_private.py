@@ -26,12 +26,12 @@ class TestMakeprivateCommand(unittest.TestCase):
     ):
         """Test the mkdir command"""
         mock_get_context.return_value = mock_test_context()
-        mock_send.return_value = None
+        mock_send.return_value = {"name": "test_dir", "path": "", "is_public": False}
 
         result = self.runner.invoke(app, ["make-private", "test_dir/"])
         self.assertEqual(result.exit_code, 0)
         self.assertIn("Current working directory: /", result.output)
-        self.assertIn("Directory /test_dir is now private", result.output)
+        self.assertIn("Directory test_dir/ is now private 🔐", result.output)
 
     @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
     @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
@@ -42,12 +42,16 @@ class TestMakeprivateCommand(unittest.TestCase):
     ):
         """Test the mkdir command"""
         mock_get_context.return_value = mock_test_context()
-        mock_send.return_value = None
+        mock_send.return_value = {
+            "name": "test_file.txt",
+            "path": "",
+            "is_public": False,
+        }
 
         result = self.runner.invoke(app, ["make-private", "test_file.txt"])
         self.assertEqual(result.exit_code, 0)
         self.assertIn("Current working directory: /", result.output)
-        self.assertIn("File /test_file.txt is now private", result.output)
+        self.assertIn("File test_file.txt is now private 🔐", result.output)
 
     @patch("skylock_cli.core.dir_operations.send_make_private_request")
     def test_make_private_directory_token_expired(self, mock_send):

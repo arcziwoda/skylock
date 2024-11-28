@@ -540,10 +540,19 @@ class TestMakeFilePublic(unittest.TestCase):
     @patch("skylock_cli.api.file_requests.client.patch")
     def test_make_file_public_success(self, mock_patch):
         """Test successful file public access"""
-        mock_patch.return_value = mock_response_with_status(HTTPStatus.OK)
+        response_json = {"name": "test.txt", "path": "", "is_public": True}
+        mock_patch.return_value = mock_response_with_status(
+            HTTPStatus.OK, response_json
+        )
 
-        make_file_public("test.txt")
+        changed_file = make_file_public("test.txt")
         mock_patch.assert_called_once()
+        self.assertEqual(changed_file.name, "test.txt")
+        self.assertEqual(changed_file.path, Path("."))
+        self.assertTrue(changed_file.is_public)
+        self.assertEqual(changed_file.color, "yellow")
+        self.assertEqual(changed_file.type_label, "file")
+        self.assertEqual(changed_file.visibility_label, "public 🔓")
 
     @patch("skylock_cli.api.file_requests.client.patch")
     def test_make_file_public_not_found(self, mock_patch):
@@ -589,10 +598,19 @@ class TestMakeFilePrivate(unittest.TestCase):
     @patch("skylock_cli.api.file_requests.client.patch")
     def test_make_file_private_success(self, mock_patch):
         """Test successful file private access"""
-        mock_patch.return_value = mock_response_with_status(HTTPStatus.OK)
+        response_json = {"name": "test.txt", "path": "", "is_public": False}
+        mock_patch.return_value = mock_response_with_status(
+            HTTPStatus.OK, response_json
+        )
 
-        make_file_private("test.txt")
+        changed_file = make_file_private("test.txt")
         mock_patch.assert_called_once()
+        self.assertEqual(changed_file.name, "test.txt")
+        self.assertEqual(changed_file.path, Path("."))
+        self.assertFalse(changed_file.is_public)
+        self.assertEqual(changed_file.color, "yellow")
+        self.assertEqual(changed_file.type_label, "file")
+        self.assertEqual(changed_file.visibility_label, "private 🔐")
 
     @patch("skylock_cli.api.file_requests.client.patch")
     def test_make_file_private_not_found(self, mock_patch):

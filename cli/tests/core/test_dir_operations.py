@@ -328,10 +328,19 @@ class TestMakeDirectoryPublic(unittest.TestCase):
     @patch("skylock_cli.api.dir_requests.client.patch")
     def test_make_directory_public_success(self, mock_patch):
         """Test successful directory public access"""
-        mock_patch.return_value = mock_response_with_status(HTTPStatus.OK)
+        response_json = {"name": "test_dir", "path": "", "is_public": True}
+        mock_patch.return_value = mock_response_with_status(
+            HTTPStatus.OK, response_json
+        )
 
-        make_directory_public("test_dir/")
+        changed_dir = make_directory_public("test_dir/")
         mock_patch.assert_called_once()
+        self.assertEqual(changed_dir.name, "test_dir/")
+        self.assertEqual(changed_dir.path, Path("."))
+        self.assertTrue(changed_dir.is_public)
+        self.assertEqual(changed_dir.color, "magenta")
+        self.assertEqual(changed_dir.type_label, "directory")
+        self.assertEqual(changed_dir.visibility_label, "public 🔓")
 
     @patch("skylock_cli.api.dir_requests.client.patch")
     def test_make_directory_public_unauthorized(self, mock_patch):
@@ -392,10 +401,19 @@ class TestMakeDirectoryPrivate(unittest.TestCase):
     @patch("skylock_cli.api.dir_requests.client.patch")
     def test_make_directory_private_success(self, mock_patch):
         """Test successful directory private access"""
-        mock_patch.return_value = mock_response_with_status(HTTPStatus.OK)
+        response_json = {"name": "test_dir", "path": "", "is_public": False}
+        mock_patch.return_value = mock_response_with_status(
+            HTTPStatus.OK, response_json
+        )
 
-        make_directory_private("test_dir/")
+        changed_dir = make_directory_private("test_dir/")
         mock_patch.assert_called_once()
+        self.assertEqual(changed_dir.name, "test_dir/")
+        self.assertEqual(changed_dir.path, Path("."))
+        self.assertFalse(changed_dir.is_public)
+        self.assertEqual(changed_dir.color, "magenta")
+        self.assertEqual(changed_dir.type_label, "directory")
+        self.assertEqual(changed_dir.visibility_label, "private 🔐")
 
     @patch("skylock_cli.api.dir_requests.client.patch")
     def test_make_directory_private_unauthorized(self, mock_patch):

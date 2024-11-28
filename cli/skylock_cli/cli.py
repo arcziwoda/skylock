@@ -277,15 +277,16 @@ def make_public(
     """
     Set a resource as public.
     """
-    if is_directory(resource_path):
-        path = make_directory_public(resource_path)
-        resource_type = "Directory"
-    else:
-        path = make_file_public(resource_path)
-        resource_type = "File"
-    cwd = get_working_directory()
-    typer.secho(f"Current working directory: {cwd.path}", fg=typer.colors.BLUE)
-    typer.secho(f"{resource_type} {path} is now public", fg=typer.colors.GREEN)
+    resource = (
+        make_directory_public(resource_path)
+        if is_directory(resource_path)
+        else make_file_public(resource_path)
+    )
+    pwd()
+    typer.secho(
+        f"{resource.type_label.capitalize()} {resource.name} is now {resource.visibility_label}",
+        fg=resource.visibility_color,
+    )
 
 
 @app.command()
@@ -300,15 +301,16 @@ def make_private(
     """
     Set a resource as private.
     """
-    if is_directory(resource_path):
-        path = make_directory_private(resource_path)
-        resource_type = "Directory"
-    else:
-        path = make_file_private(resource_path)
-        resource_type = "File"
-    cwd = get_working_directory()
-    typer.secho(f"Current working directory: {cwd.path}", fg=typer.colors.BLUE)
-    typer.secho(f"{resource_type} {path} is now private", fg=typer.colors.GREEN)
+    resource = (
+        make_directory_private(resource_path)
+        if is_directory(resource_path)
+        else make_file_private(resource_path)
+    )
+    pwd()
+    typer.secho(
+        f"{resource.type_label.capitalize()} {resource.name} is now {resource.visibility_label}",
+        fg=resource.visibility_color,
+    )
 
 
 if __name__ == "__main__":
