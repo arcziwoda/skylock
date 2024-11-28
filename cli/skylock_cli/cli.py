@@ -88,7 +88,7 @@ def mkdir(
 
     typer.secho(f"Current working directory: {cwd.path}", fg=typer.colors.BLUE)
     typer.secho(
-        f"Directory {new_dir.name} created successfully",
+        f"Directory {new_dir.path} created successfully",
         fg=typer.colors.GREEN,
     )
     typer.secho(
