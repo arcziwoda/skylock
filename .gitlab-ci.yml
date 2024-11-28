@@ -126,6 +126,6 @@ build_backend:
   script:
     - echo "$DOCKER_REGISTRY_PASSWORD" | docker login -u "$DOCKER_REGISTRY_USER" --password-stdin $DOCKER_REGISTRY
     - docker build -t $DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA ./backend
-    - docker tag $DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA prod
+    - docker tag $DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA $DOCKER_IMAGE:prod
     - docker push $DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA
     - docker push $DOCKER_IMAGE:prod
