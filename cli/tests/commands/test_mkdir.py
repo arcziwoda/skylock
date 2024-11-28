@@ -28,7 +28,11 @@ class TestMKDIRCommand(unittest.TestCase):
     ):
         """Test the mkdir command"""
         mock_get_context.return_value = mock_test_context()
-        mock_send.return_value = {"name": "test_dir", "path": "", "is_public": False}
+        mock_send.return_value = {
+            "name": "test_dir",
+            "path": "/test_dir",
+            "is_public": False,
+        }
 
         result = self.runner.invoke(app, ["mkdir", "test_dir"])
         self.assertEqual(result.exit_code, 0)
@@ -36,7 +40,7 @@ class TestMKDIRCommand(unittest.TestCase):
         mock_send.assert_called_once_with(
             mock_get_context.return_value.token, Path("/test_dir"), False, False
         )
-        self.assertIn("Directory test_dir/ created successfully", result.output)
+        self.assertIn("Directory /test_dir created successfully", result.output)
         self.assertIn("Visibility: private 🔐", result.output)
 
     @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
@@ -48,15 +52,24 @@ class TestMKDIRCommand(unittest.TestCase):
     ):
         """Test the mkdir command"""
         mock_get_context.return_value = mock_test_context()
-        mock_send.return_value = {"name": "test_dir", "path": "", "is_public": False}
+        mock_send.return_value = {
+            "name": "test1_dir",
+            "path": "/test_dir/test1_dir",
+            "is_public": False,
+        }
 
-        result = self.runner.invoke(app, ["mkdir", "test_dir", "--parent"])
+        result = self.runner.invoke(app, ["mkdir", "/test_dir/test1_dir", "--parent"])
         self.assertEqual(result.exit_code, 0)
         self.assertIn("Current working directory: /", result.output)
         mock_send.assert_called_once_with(
-            mock_get_context.return_value.token, Path("/test_dir"), True, False
+            mock_get_context.return_value.token,
+            Path("/test_dir/test1_dir"),
+            True,
+            False,
         )
-        self.assertIn("Directory test_dir/ created successfully", result.output)
+        self.assertIn(
+            "Directory /test_dir/test1_dir created successfully", result.output
+        )
         self.assertIn("Visibility: private 🔐", result.output)
 
     @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
@@ -68,7 +81,11 @@ class TestMKDIRCommand(unittest.TestCase):
     ):
         """Test the mkdir command"""
         mock_get_context.return_value = mock_test_context()
-        mock_send.return_value = {"name": "test_dir", "path": "", "is_public": True}
+        mock_send.return_value = {
+            "name": "test_dir",
+            "path": "/test_dir",
+            "is_public": True,
+        }
 
         result = self.runner.invoke(app, ["mkdir", "test_dir", "--public"])
         self.assertEqual(result.exit_code, 0)
@@ -76,7 +93,7 @@ class TestMKDIRCommand(unittest.TestCase):
         mock_send.assert_called_once_with(
             mock_get_context.return_value.token, Path("/test_dir"), False, True
         )
-        self.assertIn("Directory test_dir/ created successfully", result.output)
+        self.assertIn("Directory /test_dir created successfully", result.output)
         self.assertIn("Visibility: public 🔓", result.output)
 
     @patch("skylock_cli.core.dir_operations.send_mkdir_request")
