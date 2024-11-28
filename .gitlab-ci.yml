@@ -1,5 +1,3 @@
-include: .gitlab-cd.yml
-
 stages:
   - setup
   - lint
@@ -60,8 +58,10 @@ lint_cli:
   needs:
     - setup_cli
   rules:
-    - changes:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
         - cli/**/*
+      when: always
 
 test_cli:
   stage: test
@@ -72,8 +72,10 @@ test_cli:
   needs:
     - setup_cli
   rules:
-    - changes:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
         - cli/**/*
+      when: always
 
 lint_backend:
   stage: lint
@@ -84,8 +86,10 @@ lint_backend:
   needs:
     - setup_backend
   rules:
-    - changes:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
         - backend/**/*
+      when: always
 
 test_backend:
   stage: test
@@ -96,5 +100,31 @@ test_backend:
   needs:
     - setup_backend
   rules:
-    - changes:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
         - backend/**/*
+      when: always
+
+build_backend:
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      changes:
+        - backend/**/*
+      when: always
+
+  variables:
+    DOCKER_REGISTRY: docker.czumpers.com
+    DOCKER_IMAGE: $DOCKER_REGISTRY/skylock
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+
+  image: docker:27.3.1
+  services:
+    - docker:27.3.1-dind
+
+  stage: build_and_push
+  script:
+    - echo "$DOCKER_REGISTRY_PASSWORD" | docker login -u "$DOCKER_REGISTRY_USER" --password-stdin $DOCKER_REGISTRY
+    - docker build -t $DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA ./backend
+    - docker tag $DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA prod
+    - docker push $DOCKER_IMAGE
