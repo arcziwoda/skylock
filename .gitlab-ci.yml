@@ -4,6 +4,7 @@ stages:
   - setup
   - lint
   - test
+  - build_and_push
 
 workflow:
   rules:
