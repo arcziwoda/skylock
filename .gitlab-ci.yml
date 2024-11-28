@@ -6,11 +6,6 @@ stages:
   - test
   - build_and_push
 
-workflow:
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      when: always
-
 default:
   image: python:3.13
 
@@ -28,8 +23,10 @@ setup_cli:
     - poetry config virtualenvs.create false
     - poetry install
   rules:
-    - changes:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
         - cli/**/*
+      when: always
   artifacts:
     paths:
       - cli/.venv
@@ -45,8 +42,10 @@ setup_backend:
     - poetry config virtualenvs.create false
     - poetry install
   rules:
-    - changes:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
         - backend/**/*
+      when: always
   artifacts:
     paths:
       - backend/.venv
