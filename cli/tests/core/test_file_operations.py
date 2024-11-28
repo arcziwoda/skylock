@@ -497,8 +497,12 @@ class TestRemoveFile(unittest.TestCase):
         remove_file("test.txt")
         mock_delete.assert_called_once()
 
+    @patch(
+        "skylock_cli.core.context_manager.ContextManager.get_context",
+        return_value=mock_test_context(),
+    )
     @patch("skylock_cli.api.file_requests.client.delete")
-    def test_remove_file_not_found(self, mock_delete):
+    def test_remove_file_not_found(self, mock_delete, _mock_get_context):
         """Test removal when the file is not found"""
         mock_delete.return_value = mock_response_with_status(HTTPStatus.NOT_FOUND)
 
@@ -576,8 +580,12 @@ class TestMakeFilePublic(unittest.TestCase):
         self.assertEqual(changed_file.type_label, "file")
         self.assertEqual(changed_file.visibility_label, "public 🔓")
 
+    @patch(
+        "skylock_cli.core.context_manager.ContextManager.get_context",
+        return_value=mock_test_context(),
+    )
     @patch("skylock_cli.api.file_requests.client.patch")
-    def test_make_file_public_not_found(self, mock_patch):
+    def test_make_file_public_not_found(self, mock_patch, _mock_get_context):
         """Test making a file public when the file is not found"""
         mock_patch.return_value = mock_response_with_status(HTTPStatus.NOT_FOUND)
 
@@ -634,8 +642,12 @@ class TestMakeFilePrivate(unittest.TestCase):
         self.assertEqual(changed_file.type_label, "file")
         self.assertEqual(changed_file.visibility_label, "private 🔐")
 
+    @patch(
+        "skylock_cli.core.context_manager.ContextManager.get_context",
+        return_value=mock_test_context(),
+    )
     @patch("skylock_cli.api.file_requests.client.patch")
-    def test_make_file_private_not_found(self, mock_patch):
+    def test_make_file_private_not_found(self, mock_patch, _mock_get_context):
         """Test making a file private when the file is not found"""
         mock_patch.return_value = mock_response_with_status(HTTPStatus.NOT_FOUND)
 
