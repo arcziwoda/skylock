@@ -6,11 +6,6 @@ stages:
   - test
   - build_and_push
 
-workflow:
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      when: always
-
 default:
   image: python:3.13
 
@@ -28,8 +23,10 @@ setup_cli:
     - poetry config virtualenvs.create false
     - poetry install
   rules:
-    - changes:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
         - cli/**/*
+      when: always
   artifacts:
     paths:
       - cli/.venv
@@ -45,8 +42,10 @@ setup_backend:
     - poetry config virtualenvs.create false
     - poetry install
   rules:
-    - changes:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
         - backend/**/*
+      when: always
   artifacts:
     paths:
       - backend/.venv
@@ -60,9 +59,6 @@ lint_cli:
     - poetry run pylint skylock_cli tests
   needs:
     - setup_cli
-  rules:
-    - changes:
-        - cli/**/*
 
 test_cli:
   stage: test
@@ -72,9 +68,6 @@ test_cli:
     - poetry run pytest
   needs:
     - setup_cli
-  rules:
-    - changes:
-        - cli/**/*
 
 lint_backend:
   stage: lint
@@ -84,9 +77,6 @@ lint_backend:
     - poetry run pylint skylock
   needs:
     - setup_backend
-  rules:
-    - changes:
-        - backend/**/*
 
 test_backend:
   stage: test
@@ -96,6 +86,3 @@ test_backend:
     - poetry run pytest
   needs:
     - setup_backend
-  rules:
-    - changes:
-        - backend/**/*
