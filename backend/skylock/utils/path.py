@@ -39,6 +39,14 @@ class UserPath:
         return UserPath(path=str(self._parsed_path.parent), owner=self._owner)
 
     @property
+    def parents(self) -> tuple["UserPath", ...]:
+        if self.is_root_folder():
+            raise ForbiddenActionException("You cannot access parent of root folder")
+        return tuple(
+            UserPath(path=str(parent), owner=self._owner) for parent in self._parsed_path.parents
+        )
+
+    @property
     def name(self) -> str:
         return str(self._parsed_path.name)
 
@@ -56,3 +64,8 @@ class UserPath:
             parsed_path = parsed_path.relative_to(parsed_path.root)
 
         return parsed_path
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, UserPath):
+            return NotImplemented
+        return self.owner == other.owner and self.path == other.path

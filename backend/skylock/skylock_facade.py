@@ -1,5 +1,6 @@
 from typing import IO
 
+
 from skylock.service.resource_service import ResourceService
 from skylock.service.user_service import UserService
 from skylock.api import models
@@ -19,8 +20,14 @@ class SkylockFacade:
     def login_user(self, username: str, password: str) -> models.Token:
         return self._user_service.login_user(username, password)
 
-    def create_folder_for_user(self, user_path: UserPath) -> models.Folder:
-        folder_entity = self._resource_service.create_folder(user_path)
+    def create_folder_for_user(
+        self, user_path: UserPath, with_parents: bool = False
+    ) -> models.Folder:
+        if with_parents:
+            folder_entity = self._resource_service.create_folder_with_parents(user_path=user_path)
+        else:
+            folder_entity = self._resource_service.create_folder(user_path=user_path)
+
         return models.Folder(
             name=folder_entity.name,
             path=user_path.parent.path,

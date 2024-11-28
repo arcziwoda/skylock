@@ -73,6 +73,7 @@ def get_folder_contents(
         """
         This endpoint allows the user to create a new folder at the specified path.
         If the folder already exists or the path is invalid, appropriate errors will be raised.
+        If 'parent' parameter is set to true, appropriate parent folders will be created as well.
         """
     ),
     responses={
@@ -109,8 +110,9 @@ def create_folder(
     path: Annotated[str, Depends(validate_path_not_empty)],
     user: Annotated[db_models.UserEntity, Depends(get_current_user)],
     skylock: Annotated[SkylockFacade, Depends(get_skylock_facade)],
+    parent: bool = False,
 ) -> models.Folder:
-    return skylock.create_folder_for_user(UserPath(path=path, owner=user))
+    return skylock.create_folder_for_user(UserPath(path=path, owner=user), with_parents=parent)
 
 
 @router.delete(
