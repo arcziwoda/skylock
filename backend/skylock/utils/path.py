@@ -16,7 +16,9 @@ class UserPath:
 
     @property
     def path(self) -> str:
-        return str(self._parsed_path).replace(".", "")
+        if self.is_root_folder():
+            return ""
+        return str(self._parsed_path)
 
     @property
     def owner(self) -> UserEntity:

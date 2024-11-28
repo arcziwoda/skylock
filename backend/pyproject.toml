@@ -48,6 +48,8 @@ disable = [
     "C0301", # (line-to-long)
     "E1136", # (object-not-subscriptable)
     "W0511", # (TODO)
+    "R0913", # (too-many-arguments)
+    "R0917", # (too-many-positional-arguments)
 ]
 
 [tool.black]

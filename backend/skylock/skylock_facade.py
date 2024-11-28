@@ -79,16 +79,14 @@ class SkylockFacade:
         folder.is_public = is_public
         self._resource_service.update_folder(folder)
         return models.Folder(
-            name=folder.name, path=f"{user_path.path}/{folder.name}", is_public=folder.is_public
+            name=folder.name, path=f"/{user_path.path}", is_public=folder.is_public
         )
 
     def update_file_visability(self, user_path: UserPath, is_public: bool) -> models.File:
         file = self._resource_service.get_file(user_path)
         file.is_public = is_public
         self._resource_service.update_file(file)
-        return models.File(
-            name=file.name, is_public=file.is_public, path=f"{user_path.path}/{file.name}"
-        )
+        return models.File(name=file.name, is_public=file.is_public, path=f"/{user_path.path}")
 
     def upload_file(
         self, user_path: UserPath, file_data: IO[bytes], force: bool = False, public: bool = False
