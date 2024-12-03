@@ -17,6 +17,18 @@ class SkyLockAPIError(Exception):
         self.message = message
 
 
+class InvalidURLError(SkyLockAPIError):
+    """Exception raised when the URL is invalid.
+
+    Args:
+        url (str): The invalid URL.
+    """
+
+    def __init__(self, url: str) -> None:
+        message = f"Invalid URL: `{url}`. Please provide a valid URL."
+        super().__init__(message)
+
+
 class UserAlreadyExistsError(SkyLockAPIError):
     """Exception raised when attempting to register a user that already exists.
 
