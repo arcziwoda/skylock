@@ -7,11 +7,12 @@ from urllib.parse import quote
 from pathlib import Path
 from httpx import Client
 from skylock_cli.config import API_URL, API_HEADERS
+from skylock_cli.core.context_manager import ContextManager
 from skylock_cli.model.token import Token
 from skylock_cli.api import bearer_auth
 from skylock_cli.exceptions import api_exceptions
 
-client = Client(base_url=API_URL)
+client = Client(base_url=ContextManager.get_context().base_url + API_URL)
 
 
 def send_ls_request(token: Token, path: Path):
