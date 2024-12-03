@@ -4,11 +4,12 @@ Module to handle HTTP requests to API
 
 from http import HTTPStatus
 from httpx import Client
-from skylock_cli.config import API_URL, API_HEADERS
+from skylock_cli.core.context_manager import ContextManager
+from skylock_cli.config import API_HEADERS, API_URL
 from skylock_cli.model import user, token
 from skylock_cli.exceptions import api_exceptions
 
-client = Client(base_url=API_URL)
+client = Client(base_url=ContextManager.get_context().base_url + API_URL)
 
 
 def send_register_request(_user: user.User) -> None:

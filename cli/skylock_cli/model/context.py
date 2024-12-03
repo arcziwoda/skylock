@@ -15,3 +15,6 @@ class Context(BaseModel):
     cwd: Annotated[
         Optional[Directory], Field(description="Current working directory")
     ] = None
+    base_url: Annotated[str, Field(description="Base URL of the SkyLock server")] = (
+        "http://localhost:8000"
+    )

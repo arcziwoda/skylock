@@ -20,9 +20,11 @@ class TestContext(unittest.TestCase):
         """
         token = Token(access_token="test_token", token_type="Bearer")
         directory = Directory(path=Path("/home/user"), name="user")
-        context = Context(token=token, cwd=directory)
+        base_url = "http://test.com"
+        context = Context(token=token, cwd=directory, base_url=base_url)
         self.assertEqual(context.token, token)
         self.assertEqual(context.cwd, directory)
+        self.assertEqual(context.base_url, base_url)
 
     def test_context_default_values(self):
         """
@@ -31,6 +33,7 @@ class TestContext(unittest.TestCase):
         context = Context()
         self.assertIsNone(context.token)
         self.assertIsNone(context.cwd)
+        self.assertEqual(context.base_url, "http://localhost:8000")
 
 
 if __name__ == "__main__":

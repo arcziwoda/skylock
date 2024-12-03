@@ -48,6 +48,7 @@ class TestContextManager(unittest.TestCase):
         self.assertEqual(context.token.token_type, "bearer")
         self.assertEqual(context.cwd.path, ROOT_PATH)
         self.assertEqual(context.cwd.name, "/")
+        self.assertEqual(context.base_url, "http://localhost:8000")
 
         mock_ensure_context_file_exists.assert_called_once()
 
@@ -68,7 +69,8 @@ class TestContextManager(unittest.TestCase):
 
         # Create test context object with a test token
         test_token = Token(access_token="test_token", token_type="bearer")
-        test_context = Context(token=test_token)
+        test_dir = Directory()
+        test_context = Context(token=test_token, cwd=test_dir)
 
         # Initialize ContextManager and save context
         context_manager = ContextManager()
@@ -84,6 +86,7 @@ class TestContextManager(unittest.TestCase):
                 context_data.get("token").get("access_token"), "test_token"
             )
             self.assertEqual(context_data.get("token").get("token_type"), "bearer")
+            self.assertEqual(context_data.get("base_url"), "http://localhost:8000")
 
         mock_ensure_context_file_exists.assert_called_once()
 

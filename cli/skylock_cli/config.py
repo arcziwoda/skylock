@@ -5,7 +5,9 @@ This file contains the configuration for the CLI.
 from pathlib import Path
 import appdirs
 
-API_URL = "http://localhost:8000/api/v1"
+LOCAL_HOST = "http://localhost:8000"
+
+API_URL = "/api/v1"
 
 API_HEADERS = {"Content-Type": "application/json"}
 
@@ -26,4 +28,5 @@ EMPTY_CONTEXT = {
         "path": "/",
         "name": "/",
     },
+    "base_url": LOCAL_HOST,
 }

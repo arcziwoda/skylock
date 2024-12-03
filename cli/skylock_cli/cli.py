@@ -9,22 +9,14 @@ import typer
 from rich.console import Console
 from rich.table import Table
 from art import text2art
-from skylock_cli.core.auth import register_user, login_user
-from skylock_cli.core.dir_operations import (
-    create_directory,
-    remove_directory,
-    make_directory_public,
-    make_directory_private,
+from skylock_cli.core import (
+    auth,
+    dir_operations,
+    file_operations,
+    nav,
+    path_parser,
+    url_manager,
 )
-from skylock_cli.core.file_operations import (
-    upload_file,
-    download_file,
-    remove_file,
-    make_file_public,
-    make_file_private,
-)
-from skylock_cli.core.nav import list_directory, change_directory, get_working_directory
-from skylock_cli.core.path_parser import is_directory
 
 app = typer.Typer(pretty_exceptions_show_locals=False)
 console = Console()
@@ -43,7 +35,7 @@ def register(
         typer.secho("Passwords do not match. Please try again.", fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
-    register_user(username, password)
+    auth.register_user(username, password)
     typer.secho("User registered successfully", fg=typer.colors.GREEN)
 
 
@@ -55,7 +47,7 @@ def login(
     Login to the SkyLock as a user
     """
     password = typer.prompt("Password", hide_input=True)
-    context = login_user(username, password)
+    context = auth.login_user(username, password)
 
     typer.secho("User logged in successfully", fg=typer.colors.GREEN)
     typer.secho("Hello, " + username, fg=typer.colors.GREEN)
@@ -83,10 +75,8 @@ def mkdir(
     """
     Create a new directory in the SkyLock
     """
-    new_dir = create_directory(directory_path, parent, public)
-    cwd = get_working_directory()
-
-    typer.secho(f"Current working directory: {cwd.path}", fg=typer.colors.BLUE)
+    new_dir = dir_operations.create_directory(directory_path, parent, public)
+    pwd()
     typer.secho(
         f"Directory {new_dir.path} created successfully",
         fg=typer.colors.GREEN,
@@ -117,10 +107,8 @@ def rmdir(
     """
     Remove a directory from the SkyLock.
     """
-    removed_path = remove_directory(directory_path, recursive)
-    cwd = get_working_directory()
-
-    typer.secho(f"Current working directory: {cwd.path}", fg=typer.colors.BLUE)
+    removed_path = dir_operations.remove_directory(directory_path, recursive)
+    pwd()
     typer.secho(f"Directory {removed_path} removed successfully", fg=typer.colors.GREEN)
 
 
@@ -136,10 +124,8 @@ def rm(
     """
     Remove a file from the SkyLock.
     """
-    removed_path = remove_file(file_path)
-    cwd = get_working_directory()
-
-    typer.secho(f"Current working directory: {cwd.path}", fg=typer.colors.BLUE)
+    removed_path = file_operations.remove_file(file_path)
+    pwd()
     typer.secho(f"File {removed_path} removed successfully", fg=typer.colors.GREEN)
 
 
@@ -155,7 +141,7 @@ def ls(
     """
     List the contents of a directory.
     """
-    contents, path = list_directory(directory_path)
+    contents, path = nav.list_directory(directory_path)
 
     typer.secho(f"Contents of {path}", fg=typer.colors.BLUE)
 
@@ -193,7 +179,7 @@ def cd(
     """
     Change the current working directory.
     """
-    new_cwd = change_directory(directory_path)
+    new_cwd = nav.change_directory(directory_path)
     typer.secho(f"Changed directory to {new_cwd}", fg=typer.colors.GREEN)
 
 
@@ -202,7 +188,7 @@ def pwd() -> None:
     """
     Print the current working directory.
     """
-    cwd = get_working_directory()
+    cwd = nav.get_working_directory()
     typer.secho(f"Current working directory: {cwd.path}", fg=typer.colors.BLUE)
 
 
@@ -234,10 +220,8 @@ def upload(
         typer.secho(f"{file_path} is not a file.", fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
-    new_file = upload_file(file_path, destination_path, force, public)
-    cwd = get_working_directory()
-
-    typer.secho(f"Current working directory: {cwd.path}", fg=typer.colors.BLUE)
+    new_file = file_operations.upload_file(file_path, destination_path, force, public)
+    pwd()
     typer.secho(
         f"File {new_file.name} uploaded to {new_file.path} successfully",
         fg=typer.colors.GREEN,
@@ -255,10 +239,8 @@ def download(
     """
     Download a file from the SkyLock.
     """
-    file_path = download_file(file_path)
-    cwd = get_working_directory()
-
-    typer.secho(f"Current working directory: {cwd.path}", fg=typer.colors.BLUE)
+    file_path = file_operations.download_file(file_path)
+    pwd()
     typer.secho(
         f"File {file_path.name} downloaded successfully to {typer.style(file_path.parent, fg=typer.colors.CYAN, underline=True)}",
         fg=typer.colors.GREEN,
@@ -278,9 +260,9 @@ def make_public(
     Set a resource as public.
     """
     resource = (
-        make_directory_public(resource_path)
-        if is_directory(resource_path)
-        else make_file_public(resource_path)
+        dir_operations.make_directory_public(resource_path)
+        if path_parser.is_directory(resource_path)
+        else file_operations.make_file_public(resource_path)
     )
     pwd()
     typer.secho(
@@ -302,15 +284,28 @@ def make_private(
     Set a resource as private.
     """
     resource = (
-        make_directory_private(resource_path)
-        if is_directory(resource_path)
-        else make_file_private(resource_path)
+        dir_operations.make_directory_private(resource_path)
+        if path_parser.is_directory(resource_path)
+        else file_operations.make_file_private(resource_path)
     )
     pwd()
     typer.secho(
         f"{resource.type_label.capitalize()} {resource.path} is now {resource.visibility_label}",
         fg=resource.visibility_color,
     )
+
+
+@app.command()
+def set_url(
+    base_url: Annotated[
+        Optional[str], typer.Argument(help="The URL of the SkyLock server")
+    ] = None
+) -> None:
+    """
+    Set the URL of the SkyLock server.
+    """
+    new_context = url_manager.set_url(base_url)
+    typer.secho(f"Base URL set to {new_context.base_url}", fg=typer.colors.GREEN)
 
 
 if __name__ == "__main__":

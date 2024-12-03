@@ -27,4 +27,5 @@ def mock_test_context(path=ROOT_PATH):
     return Mock(
         token=Token(access_token="test_token", token_type="bearer"),
         cwd=Mock(path=path, name="/"),
+        base_url="http://localhost:8000",
     )
