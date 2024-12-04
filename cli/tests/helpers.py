@@ -2,7 +2,7 @@
 
 from unittest.mock import Mock
 from skylock_cli.model.token import Token
-from skylock_cli.config import ROOT_PATH
+from skylock_cli.config import ROOT_PATH, LOCAL_HOST
 
 
 def mock_response_with_status(status_code, json_data=None):
@@ -22,10 +22,10 @@ def assert_connect_error(result):
     )
 
 
-def mock_test_context(path=ROOT_PATH):
+def mock_test_context(path=ROOT_PATH, base_url=LOCAL_HOST):
     """Mock the test context with customized validity and expiration settings."""
     return Mock(
         token=Token(access_token="test_token", token_type="bearer"),
         cwd=Mock(path=path, name="/"),
-        base_url="http://localhost:8000",
+        base_url=base_url,
     )
