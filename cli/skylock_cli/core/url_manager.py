@@ -16,7 +16,7 @@ def check_url(url: str) -> bool:
     return True
 
 
-def set_url(base_url: str | None) -> Context:
+def set_url(base_url: str) -> Context:
     """Set the URL of the SkyLock server."""
     if base_url is None:
         base_url = LOCAL_HOST
