@@ -171,3 +171,43 @@ def send_make_private_request(token: Token, virtual_path: Path) -> dict:
         )
 
     return response.json()
+
+
+def send_share_request(token: Token, virtual_path: Path) -> dict:
+    """
+    Send a share request to the SkyLock backend API.
+
+    Args:
+        token (Token): The token object containing authentication token.
+        virtual_path (Path): The path of the file to be shared.
+
+    Returns:
+        dict: The response from the API.
+    """
+    url = "/share/file" + quote(str(virtual_path))
+    auth = bearer_auth.BearerAuth(token)
+
+    response = client.get(url=url, auth=auth, headers=API_HEADERS)
+
+    if response.status_code == HTTPStatus.UNAUTHORIZED:
+        raise api_exceptions.UserUnauthorizedError()
+
+    if response.status_code == HTTPStatus.NOT_FOUND:
+        raise api_exceptions.FileNotFoundError(virtual_path)
+
+    if response.status_code == HTTPStatus.FORBIDDEN:
+        raise api_exceptions.FileNotPublicError(virtual_path)
+
+    if (
+        not response.json()
+        or "location" not in response.json()
+        or not response.json()["location"]
+    ):
+        raise api_exceptions.InvalidResponseFormatError()
+
+    if response.status_code != HTTPStatus.OK:
+        raise api_exceptions.SkyLockAPIError(
+            f"Failed to share file (Error Code: {response.status_code})"
+        )
+
+    return response.json()

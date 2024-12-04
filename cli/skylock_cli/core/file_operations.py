@@ -9,13 +9,8 @@ from pydantic import TypeAdapter
 from skylock_cli.utils.cli_exception_handler import CLIExceptionHandler
 from skylock_cli.core import path_parser, context_manager
 from skylock_cli.model.file import File
-from skylock_cli.api.file_requests import (
-    send_upload_request,
-    send_download_request,
-    send_rm_request,
-    send_make_public_request,
-    send_make_private_request,
-)
+from skylock_cli.model.share_link import ShareLink
+from skylock_cli.api import file_requests
 from skylock_cli.exceptions.core_exceptions import NotAFileError
 from skylock_cli.config import DOWNLOADS_DIR
 from skylock_cli.scripts.setup_config import create_downloads_dir
@@ -37,7 +32,7 @@ def upload_file(
 
         with open(real_file_path, "rb") as file:
             files = {"file": (real_file_path.name, file)}
-            response = send_upload_request(
+            response = file_requests.send_upload_request(
                 current_context.token,
                 joind_path,
                 files,
@@ -56,7 +51,9 @@ def download_file(virtual_file_path: Path) -> Path:
     with CLIExceptionHandler():
         joind_path = path_parser.parse_path(current_context.cwd.path, virtual_file_path)
 
-        file_content = send_download_request(current_context.token, joind_path)
+        file_content = file_requests.send_download_request(
+            current_context.token, joind_path
+        )
 
         if not DOWNLOADS_DIR.exists():
             create_downloads_dir()
@@ -82,7 +79,7 @@ def remove_file(file_path: str) -> Path:
             raise NotAFileError(file_path)
 
         joind_path = path_parser.parse_path(current_context.cwd.path, file_path)
-        send_rm_request(current_context.token, joind_path)
+        file_requests.send_rm_request(current_context.token, joind_path)
     return joind_path
 
 
@@ -91,7 +88,9 @@ def make_file_public(file_path: str) -> File:
     current_context = context_manager.ContextManager.get_context()
     with CLIExceptionHandler():
         joind_path = path_parser.parse_path(current_context.cwd.path, Path(file_path))
-        response = send_make_public_request(current_context.token, joind_path)
+        response = file_requests.send_make_public_request(
+            current_context.token, joind_path
+        )
         changed_file = TypeAdapter(File).validate_python(response)
     return changed_file
 
@@ -101,9 +100,20 @@ def make_file_private(file_path: str) -> File:
     current_context = context_manager.ContextManager.get_context()
     with CLIExceptionHandler():
         joind_path = path_parser.parse_path(current_context.cwd.path, Path(file_path))
-        response = send_make_private_request(current_context.token, joind_path)
+        response = file_requests.send_make_private_request(
+            current_context.token, joind_path
+        )
         changed_file = TypeAdapter(File).validate_python(response)
     return changed_file
+
+
+def share_file(file_path: str) -> ShareLink:
+    """Share a file"""
+    current_context = context_manager.ContextManager.get_context()
+    with CLIExceptionHandler():
+        joind_path = path_parser.parse_path(current_context.cwd.path, Path(file_path))
+        response = file_requests.send_share_request(current_context.token, joind_path)
+    return ShareLink(base_url=current_context.base_url, location=response["location"])
 
 
 def _generate_unique_file_path(directory: Path, file_name: str) -> Path:
