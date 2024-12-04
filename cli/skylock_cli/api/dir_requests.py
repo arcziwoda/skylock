@@ -171,11 +171,7 @@ def send_share_request(token: Token, path: Path) -> dict:
 
     handle_standard_errors(standard_error_dict, response.status_code)
 
-    if (
-        not response.json()
-        or "location" not in response.json()
-        or not response.json()["location"]
-    ):
+    if "location" not in response.json() or not response.json()["location"]:
         raise api_exceptions.InvalidResponseFormatError()
 
     if response.status_code != HTTPStatus.OK:
