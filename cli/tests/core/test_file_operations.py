@@ -689,6 +689,21 @@ class TestShareFile(unittest.TestCase):
     """Test cases for the share_file function from core.file_operations"""
 
     @patch("skylock_cli.api.file_requests.client.get")
+    def test_share_file_empty_location_in_body(self, mock_get):
+        """Test sharing when the response body has an unexpected format"""
+        mock_get.return_value = mock_response_with_status(
+            HTTPStatus.OK, json_data={"location": ""}
+        )
+
+        with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
+            with self.assertRaises(exceptions.Exit):
+                share_file("test.txt")
+            self.assertIn(
+                "Invalid response format!",
+                mock_stderr.getvalue(),
+            )
+
+    @patch("skylock_cli.api.file_requests.client.get")
     def test_share_file_success(self, mock_get):
         """Test successful file sharing"""
         response_json = {"location": "/files/349248263498632"}
@@ -699,6 +714,21 @@ class TestShareFile(unittest.TestCase):
         self.assertEqual(shared_link.location, "/files/349248263498632")
         self.assertEqual(shared_link.base_url, "http://localhost:8000")
         self.assertEqual(shared_link.url, "http://localhost:8000/files/349248263498632")
+
+    @patch("skylock_cli.api.file_requests.client.get")
+    def test_share_file_no_location_in_body(self, mock_get):
+        """Test sharing when the response body has an unexpected format"""
+        mock_get.return_value = mock_response_with_status(
+            HTTPStatus.OK, json_data={"token": "123618246812548152"}
+        )
+
+        with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
+            with self.assertRaises(exceptions.Exit):
+                share_file("test.txt")
+            self.assertIn(
+                "Invalid response format!",
+                mock_stderr.getvalue(),
+            )
 
     @patch("skylock_cli.core.context_manager.ContextManager.get_context")
     @patch("skylock_cli.api.file_requests.client.get")
@@ -713,6 +743,18 @@ class TestShareFile(unittest.TestCase):
         self.assertEqual(share_link.base_url, "http://skylock.com")
         self.assertEqual(share_link.location, "/files/349248263498632")
         self.assertEqual(share_link.url, "http://skylock.com/files/349248263498632")
+
+    @patch("skylock_cli.api.file_requests.client.get")
+    def test_share_file_connection_error(self, mock_get):
+        """Test sharing a file when a ConnectError occurs (backend is offline)"""
+        mock_get.side_effect = ConnectError("Failed to connect to the server")
+        with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
+            with self.assertRaises(exceptions.Exit):
+                share_file("test.txt")
+            self.assertIn(
+                "The server is not reachable at the moment. Please try again later.",
+                mock_stderr.getvalue(),
+            )
 
     @patch("skylock_cli.core.context_manager.ContextManager.get_context")
     @patch("skylock_cli.api.file_requests.client.get")
@@ -767,41 +809,11 @@ class TestShareFile(unittest.TestCase):
             self.assertIn("Invalid response format!", mock_stderr.getvalue())
 
     @patch("skylock_cli.api.file_requests.client.get")
-    def test_share_file_no_location_in_body(self, mock_get):
-        """Test sharing when the response body has an unexpected format"""
-        mock_get.return_value = mock_response_with_status(
-            HTTPStatus.OK, json_data={"token": "123618246812548152"}
-        )
-
-        with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
-            with self.assertRaises(exceptions.Exit):
-                share_file("test.txt")
-            self.assertIn(
-                "Invalid response format!",
-                mock_stderr.getvalue(),
-            )
-
-    @patch("skylock_cli.api.file_requests.client.get")
-    def test_share_file_empty_location_in_body(self, mock_get):
-        """Test sharing when the response body has an unexpected format"""
-        mock_get.return_value = mock_response_with_status(
-            HTTPStatus.OK, json_data={"location": ""}
-        )
-
-        with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
-            with self.assertRaises(exceptions.Exit):
-                share_file("test.txt")
-            self.assertIn(
-                "Invalid response format!",
-                mock_stderr.getvalue(),
-            )
-
-    @patch("skylock_cli.api.file_requests.client.get")
     def test_share_file_skylock_api_error(self, mock_get):
         """Test sharing with a SkyLockAPIError"""
         mock_get.return_value = mock_response_with_status(
             HTTPStatus.INTERNAL_SERVER_ERROR,
-            json_data={"location": "/folders/349248263498632"},
+            json_data={"location": "/folders/11222333"},
         )
 
         with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
@@ -809,18 +821,6 @@ class TestShareFile(unittest.TestCase):
                 share_file("test.txt")
             self.assertIn(
                 "Failed to share file (Error Code: 500)",
-                mock_stderr.getvalue(),
-            )
-
-    @patch("skylock_cli.api.file_requests.client.get")
-    def test_share_file_connection_error(self, mock_get):
-        """Test sharing a file when a ConnectError occurs (backend is offline)"""
-        mock_get.side_effect = ConnectError("Failed to connect to the server")
-        with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
-            with self.assertRaises(exceptions.Exit):
-                share_file("test.txt")
-            self.assertIn(
-                "The server is not reachable at the moment. Please try again later.",
                 mock_stderr.getvalue(),
             )
 

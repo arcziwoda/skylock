@@ -472,6 +472,21 @@ class TestMakeDirectoryPrivate(unittest.TestCase):
 class TestShareDirectory(unittest.TestCase):
     """Test cases for the share_directory function from core.dir_operations"""
 
+    @patch("skylock_cli.api.dir_requests.client.get")
+    def test_share_directory_empty_location_in_body(self, mock_get):
+        """Test sharing when the response body has an unexpected format"""
+        mock_get.return_value = mock_response_with_status(
+            HTTPStatus.OK, json_data={"location": ""}
+        )
+
+        with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
+            with self.assertRaises(exceptions.Exit):
+                share_directory("test_dir/")
+            self.assertIn(
+                "Invalid response format!",
+                mock_stderr.getvalue(),
+            )
+
     @patch("skylock_cli.core.context_manager.ContextManager.get_context")
     @patch("skylock_cli.api.dir_requests.client.get")
     def test_share_directory_success(self, mock_get, mock_context):
@@ -489,6 +504,21 @@ class TestShareDirectory(unittest.TestCase):
         self.assertEqual(
             share_link.url, "http://localhost:8000/folders/349248263498632"
         )
+
+    @patch("skylock_cli.api.dir_requests.client.get")
+    def test_share_directory_no_location_in_body(self, mock_get):
+        """Test sharing when the response body has an unexpected format"""
+        mock_get.return_value = mock_response_with_status(
+            HTTPStatus.OK, json_data={"token": "123618246812548152"}
+        )
+
+        with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
+            with self.assertRaises(exceptions.Exit):
+                share_directory("test_dir/")
+            self.assertIn(
+                "Invalid response format!",
+                mock_stderr.getvalue(),
+            )
 
     @patch("skylock_cli.core.context_manager.ContextManager.get_context")
     @patch("skylock_cli.api.dir_requests.client.get")
@@ -545,49 +575,6 @@ class TestShareDirectory(unittest.TestCase):
             )
 
     @patch("skylock_cli.api.dir_requests.client.get")
-    def test_share_directory_unauthorized(self, mock_get):
-        """Test sharing when the user is unauthorized"""
-        mock_get.return_value = mock_response_with_status(HTTPStatus.UNAUTHORIZED)
-
-        with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
-            with self.assertRaises(exceptions.Exit):
-                share_directory("test_dir/")
-            self.assertIn(
-                "User is unauthorized. Please login to use this command.",
-                mock_stderr.getvalue(),
-            )
-
-    @patch("skylock_cli.api.dir_requests.client.get")
-    def test_share_directory_no_location_in_body(self, mock_get):
-        """Test sharing when the response body has an unexpected format"""
-        mock_get.return_value = mock_response_with_status(
-            HTTPStatus.OK, json_data={"token": "123618246812548152"}
-        )
-
-        with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
-            with self.assertRaises(exceptions.Exit):
-                share_directory("test_dir/")
-            self.assertIn(
-                "Invalid response format!",
-                mock_stderr.getvalue(),
-            )
-
-    @patch("skylock_cli.api.dir_requests.client.get")
-    def test_share_directory_empty_location_in_body(self, mock_get):
-        """Test sharing when the response body has an unexpected format"""
-        mock_get.return_value = mock_response_with_status(
-            HTTPStatus.OK, json_data={"location": ""}
-        )
-
-        with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
-            with self.assertRaises(exceptions.Exit):
-                share_directory("test_dir/")
-            self.assertIn(
-                "Invalid response format!",
-                mock_stderr.getvalue(),
-            )
-
-    @patch("skylock_cli.api.dir_requests.client.get")
     def test_share_directory_skylock_api_error(self, mock_get):
         """Test sharing with a SkyLockAPIError"""
         mock_get.return_value = mock_response_with_status(
@@ -613,6 +600,19 @@ class TestShareDirectory(unittest.TestCase):
                 share_directory("test_dir/")
             self.assertIn(
                 "The server is not reachable at the moment. Please try again later.",
+                mock_stderr.getvalue(),
+            )
+
+    @patch("skylock_cli.api.dir_requests.client.get")
+    def test_share_directory_unauthorized(self, mock_get):
+        """Test sharing when the user is unauthorized"""
+        mock_get.return_value = mock_response_with_status(HTTPStatus.UNAUTHORIZED)
+
+        with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
+            with self.assertRaises(exceptions.Exit):
+                share_directory("test_dir/")
+            self.assertIn(
+                "User is unauthorized. Please login to use this command.",
                 mock_stderr.getvalue(),
             )
 
