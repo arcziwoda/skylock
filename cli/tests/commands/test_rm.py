@@ -21,7 +21,7 @@ class TestRMCommand(unittest.TestCase):
 
     @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
     @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
-    @patch("skylock_cli.core.file_operations.send_rm_request")
+    @patch("skylock_cli.core.file_operations.file_requests.send_rm_request")
     @patch("skylock_cli.core.context_manager.ContextManager.get_context")
     def test_rm_success(
         self, mock_get_context, mock_send, _mock_is_valid, _mock_is_expired
@@ -43,7 +43,7 @@ class TestRMCommand(unittest.TestCase):
         self.assertEqual(result.exit_code, 1)
         self.assertIn("test/ is not a file", result.output)
 
-    @patch("skylock_cli.core.file_operations.send_rm_request")
+    @patch("skylock_cli.core.file_operations.file_requests.send_rm_request")
     def test_rm_token_expired(self, mock_send):
         """Test the rm command when the token has expired"""
         mock_send.side_effect = api_exceptions.UserUnauthorizedError()
@@ -54,7 +54,7 @@ class TestRMCommand(unittest.TestCase):
             "User is unauthorized. Please login to use this command.", result.output
         )
 
-    @patch("skylock_cli.core.file_operations.send_rm_request")
+    @patch("skylock_cli.core.file_operations.file_requests.send_rm_request")
     def test_rm_file_not_found_error(self, mock_send):
         """Test the rm command when a FileNotFoundError occurs"""
         mock_send.side_effect = api_exceptions.FileNotFoundError("test.txt")
@@ -63,7 +63,7 @@ class TestRMCommand(unittest.TestCase):
         self.assertEqual(result.exit_code, 1)
         self.assertIn("File `test.txt` does not exist!", result.output)
 
-    @patch("skylock_cli.core.file_operations.send_rm_request")
+    @patch("skylock_cli.core.file_operations.file_requests.send_rm_request")
     def test_rm_skylock_api_error(self, mock_send):
         """Test the rm command when a SkyLockAPIError occurs"""
         mock_send.side_effect = api_exceptions.SkyLockAPIError(
@@ -74,7 +74,7 @@ class TestRMCommand(unittest.TestCase):
         self.assertEqual(result.exit_code, 1)
         self.assertIn("Failed to delete file (Internal Server Error)", result.output)
 
-    @patch("skylock_cli.core.file_operations.send_rm_request")
+    @patch("skylock_cli.core.file_operations.file_requests.send_rm_request")
     def test_rm_connection_error(self, mock_send):
         """Test the rm command when a ConnectError occurs (backend is offline)"""
         mock_send.side_effect = ConnectError("Failed to connect to the server")

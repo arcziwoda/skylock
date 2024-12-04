@@ -85,7 +85,7 @@ class TestUploadFile(unittest.TestCase):
         "skylock_cli.core.context_manager.ContextManager.get_context",
         return_value=mock_test_context(),
     )
-    @patch("skylock_cli.core.file_operations.send_upload_request")
+    @patch("skylock_cli.core.file_operations.file_requests.send_upload_request")
     def test_upload_file_success(self, mock_send, _mock_get_context):
         """Test the upload_file function with a successful upload"""
         force_flag = False
@@ -113,7 +113,7 @@ class TestUploadFile(unittest.TestCase):
         "skylock_cli.core.context_manager.ContextManager.get_context",
         return_value=mock_test_context(),
     )
-    @patch("skylock_cli.core.file_operations.send_upload_request")
+    @patch("skylock_cli.core.file_operations.file_requests.send_upload_request")
     def test_upload_file_success_public(self, mock_send, _mock_get_context):
         """Test the upload_file function with a successful upload"""
         force_flag = False
@@ -141,7 +141,7 @@ class TestUploadFile(unittest.TestCase):
         "skylock_cli.core.context_manager.ContextManager.get_context",
         return_value=mock_test_context(Path("/test")),
     )
-    @patch("skylock_cli.core.file_operations.send_upload_request")
+    @patch("skylock_cli.core.file_operations.file_requests.send_upload_request")
     def test_upload_file_with_different_cwd(self, mock_send, _mock_get_context):
         """Test the upload_file function with a different current working directory"""
         force_flag = False
@@ -339,7 +339,7 @@ class TestDownloadFile(unittest.TestCase):
         return_value=mock_test_context(),
     )
     @patch(
-        "skylock_cli.core.file_operations.send_download_request",
+        "skylock_cli.core.file_operations.file_requests.send_download_request",
         return_value=b"123\nabc",
     )
     @patch("skylock_cli.core.file_operations.Path.exists", return_value=True)
@@ -368,7 +368,7 @@ class TestDownloadFile(unittest.TestCase):
         return_value=mock_test_context(),
     )
     @patch(
-        "skylock_cli.core.file_operations.send_download_request",
+        "skylock_cli.core.file_operations.file_requests.send_download_request",
         return_value=b"123\nabc",
     )
     @patch("skylock_cli.core.file_operations.Path.exists", return_value=False)
