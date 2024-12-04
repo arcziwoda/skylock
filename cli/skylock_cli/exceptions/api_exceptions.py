@@ -113,6 +113,18 @@ class DirectoryNotEmptyError(SkyLockAPIError):
         super().__init__(message)
 
 
+class DirectoryNotPublicError(SkyLockAPIError):
+    """Exception raised when a directory is not public.
+
+    Args:
+        directory_path (str): The path of the non-public directory.
+    """
+
+    def __init__(self, directory_path: Path) -> None:
+        message = f"Directory `{directory_path}` is not public!"
+        super().__init__(message)
+
+
 class InvalidPathError(SkyLockAPIError):
     """Exception raised when the path is invalid.
 
@@ -156,4 +168,16 @@ class FileNotFoundError(SkyLockAPIError):
 
     def __init__(self, file_path: Path) -> None:
         message = f"File `{file_path}` does not exist!"
+        super().__init__(message)
+
+
+class FileNotPublicError(SkyLockAPIError):
+    """Exception raised when a file is not public.
+
+    Args:
+        file_path (str): The path of the non-public file.
+    """
+
+    def __init__(self, file_path: Path) -> None:
+        message = f"File `{file_path}` is not public!"
         super().__init__(message)

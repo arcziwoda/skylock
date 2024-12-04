@@ -17,6 +17,19 @@ from tests.helpers import mock_response_with_status
 class TestListDirectory(unittest.TestCase):
     """Test the list_directory function"""
 
+    @patch("skylock_cli.api.nav_requests.client.get")
+    def test_list_directory_user_unathorized(self, mock_get):
+        """Test successful directory listing"""
+        mock_get.return_value = mock_response_with_status(HTTPStatus.UNAUTHORIZED)
+
+        with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
+            with self.assertRaises(exceptions.Exit):
+                list_directory("/test")
+            self.assertIn(
+                "User is unauthorized. Please login to use this command.",
+                mock_stderr.getvalue(),
+            )
+
     @patch("skylock_cli.core.nav.send_ls_request")
     def test_list_directory_success(self, mock_send_ls_request):
         """Test successful directory listing"""
@@ -65,6 +78,19 @@ class TestListDirectory(unittest.TestCase):
 
         self.assertEqual(result, expected_result)
         self.assertEqual(path, Path("/test"))
+
+    @patch("skylock_cli.api.nav_requests.client.get")
+    def test_change_directory_user_unathorized(self, mock_get):
+        """Test successful directory change"""
+        mock_get.return_value = mock_response_with_status(HTTPStatus.UNAUTHORIZED)
+
+        with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
+            with self.assertRaises(exceptions.Exit):
+                change_directory("/test")
+            self.assertIn(
+                "User is unauthorized. Please login to use this command.",
+                mock_stderr.getvalue(),
+            )
 
     @patch("skylock_cli.core.nav.send_ls_request")
     def test_list_directory_success_only_files(self, mock_send_ls_request):
@@ -125,19 +151,6 @@ class TestListDirectory(unittest.TestCase):
         self.assertEqual(path, Path("/test"))
 
     @patch("skylock_cli.api.nav_requests.client.get")
-    def test_list_directory_user_unathorized(self, mock_get):
-        """Test successful directory listing"""
-        mock_get.return_value = mock_response_with_status(HTTPStatus.UNAUTHORIZED)
-
-        with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
-            with self.assertRaises(exceptions.Exit):
-                list_directory("/test")
-            self.assertIn(
-                "User is unauthorized. Please login to use this command.",
-                mock_stderr.getvalue(),
-            )
-
-    @patch("skylock_cli.api.nav_requests.client.get")
     def test_list_directory_not_found(self, mock_get):
         """Test successful directory listing"""
         mock_get.return_value = mock_response_with_status(HTTPStatus.NOT_FOUND)
@@ -196,19 +209,6 @@ class TestChangeDirectory(unittest.TestCase):
 
             self.assertEqual(result, Path("/test"))
             mock_save_context.assert_called_once()
-
-    @patch("skylock_cli.api.nav_requests.client.get")
-    def test_change_directory_user_unathorized(self, mock_get):
-        """Test successful directory change"""
-        mock_get.return_value = mock_response_with_status(HTTPStatus.UNAUTHORIZED)
-
-        with patch("sys.stderr", new_callable=StringIO) as mock_stderr:
-            with self.assertRaises(exceptions.Exit):
-                change_directory("/test")
-            self.assertIn(
-                "User is unauthorized. Please login to use this command.",
-                mock_stderr.getvalue(),
-            )
 
     @patch("skylock_cli.api.nav_requests.client.get")
     def test_change_directory_not_found(self, mock_get):

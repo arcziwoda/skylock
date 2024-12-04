@@ -305,7 +305,34 @@ def set_url(
     Set the URL of the SkyLock server.
     """
     new_context = url_manager.set_url(base_url)
-    typer.secho(f"Base URL set to {new_context.base_url}", fg=typer.colors.GREEN)
+    typer.secho(
+        f"Base URL set to {typer.style(new_context.base_url, fg=typer.colors.CYAN, underline=True)}",
+        fg=typer.colors.GREEN,
+    )
+
+
+@app.command()
+def share(
+    resource_path: Annotated[
+        str,
+        typer.Argument(
+            help="The path of the resource to share. If you want to share a directory, the path must end with /"
+        ),
+    ]
+) -> None:
+    """
+    Share a resource.
+    """
+    share_link = (
+        dir_operations.share_directory(resource_path)
+        if path_parser.is_directory(resource_path)
+        else file_operations.share_file(resource_path)
+    )
+    pwd()
+    typer.secho(
+        f"URL to shared resource: {typer.style(share_link.url, fg=typer.colors.CYAN, underline=True)}",
+        fg=typer.colors.GREEN,
+    )
 
 
 if __name__ == "__main__":

@@ -21,7 +21,7 @@ class TestMKDIRCommand(unittest.TestCase):
 
     @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
     @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
-    @patch("skylock_cli.core.dir_operations.send_mkdir_request")
+    @patch("skylock_cli.core.dir_operations.dir_requests.send_mkdir_request")
     @patch("skylock_cli.core.context_manager.ContextManager.get_context")
     def test_mkdir_success(
         self, mock_get_context, mock_send, _mock_is_valid, _mock_is_expired
@@ -45,7 +45,7 @@ class TestMKDIRCommand(unittest.TestCase):
 
     @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
     @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
-    @patch("skylock_cli.core.dir_operations.send_mkdir_request")
+    @patch("skylock_cli.core.dir_operations.dir_requests.send_mkdir_request")
     @patch("skylock_cli.core.context_manager.ContextManager.get_context")
     def test_mkdir_success_parent_flag(
         self, mock_get_context, mock_send, _mock_is_valid, _mock_is_expired
@@ -74,7 +74,7 @@ class TestMKDIRCommand(unittest.TestCase):
 
     @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
     @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
-    @patch("skylock_cli.core.dir_operations.send_mkdir_request")
+    @patch("skylock_cli.core.dir_operations.dir_requests.send_mkdir_request")
     @patch("skylock_cli.core.context_manager.ContextManager.get_context")
     def test_mkdir_success_public_flag(
         self, mock_get_context, mock_send, _mock_is_valid, _mock_is_expired
@@ -96,7 +96,7 @@ class TestMKDIRCommand(unittest.TestCase):
         self.assertIn("Directory /test_dir created successfully", result.output)
         self.assertIn("Visibility: public 🔓", result.output)
 
-    @patch("skylock_cli.core.dir_operations.send_mkdir_request")
+    @patch("skylock_cli.core.dir_operations.dir_requests.send_mkdir_request")
     def test_mdkir_token_expired(self, mock_send):
         """Test the mkdir command when the token has expired"""
         mock_send.side_effect = api_exceptions.UserUnauthorizedError()
@@ -107,7 +107,7 @@ class TestMKDIRCommand(unittest.TestCase):
             "User is unauthorized. Please login to use this command.", result.output
         )
 
-    @patch("skylock_cli.core.dir_operations.send_mkdir_request")
+    @patch("skylock_cli.core.dir_operations.dir_requests.send_mkdir_request")
     def test_mkdir_directory_already_exists(self, mock_send):
         """Test the mkdir command when the directory already exists"""
         mock_send.side_effect = api_exceptions.DirectoryAlreadyExistsError("test_dir")
@@ -116,7 +116,7 @@ class TestMKDIRCommand(unittest.TestCase):
         self.assertEqual(result.exit_code, 1)
         self.assertIn("Directory `test_dir` already exists!", result.output)
 
-    @patch("skylock_cli.core.dir_operations.send_mkdir_request")
+    @patch("skylock_cli.core.dir_operations.dir_requests.send_mkdir_request")
     def test_mkdir_skylock_api_error(self, mock_send):
         """Test the mkdir command when a SkyLockAPIError occurs"""
         mock_send.side_effect = api_exceptions.SkyLockAPIError(
@@ -129,14 +129,14 @@ class TestMKDIRCommand(unittest.TestCase):
             "Failed to create directory (Internal Server Error)", result.output
         )
 
-    @patch("skylock_cli.core.dir_operations.send_mkdir_request")
+    @patch("skylock_cli.core.dir_operations.dir_requests.send_mkdir_request")
     def test_mkdir_connection_error(self, mock_send):
         """Test the mkdir command when a ConnectError occurs (backend is offline)"""
         mock_send.side_effect = ConnectError("Failed to connect to the server")
         result = self.runner.invoke(app, ["mkdir", "test_dir"])
         assert_connect_error(result)
 
-    @patch("skylock_cli.core.dir_operations.send_mkdir_request")
+    @patch("skylock_cli.core.dir_operations.dir_requests.send_mkdir_request")
     def test_mkdir_invalid_path_error(self, mock_send):
         """Test the mkdir command when an InvalidPathError occurs"""
         mock_send.side_effect = api_exceptions.InvalidPathError("Invalid path")
@@ -145,7 +145,7 @@ class TestMKDIRCommand(unittest.TestCase):
         self.assertEqual(result.exit_code, 1)
         self.assertIn("Invalid path `Invalid path`!", result.output)
 
-    @patch("skylock_cli.core.dir_operations.send_mkdir_request")
+    @patch("skylock_cli.core.dir_operations.dir_requests.send_mkdir_request")
     def test_mkdir_directory_missing_error(self, mock_send):
         """Test the mkdir command when a DirectoryMissingError occurs"""
         mock_send.side_effect = api_exceptions.DirectoryMissingError("/child_dir")

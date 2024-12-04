@@ -21,7 +21,7 @@ class TestRMDIRCommand(unittest.TestCase):
 
     @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
     @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
-    @patch("skylock_cli.core.dir_operations.send_rmdir_request")
+    @patch("skylock_cli.core.dir_operations.dir_requests.send_rmdir_request")
     @patch("skylock_cli.core.context_manager.ContextManager.get_context")
     def test_rmdir_success(
         self, mock_get_context, mock_send, _mock_is_valid, _mock_is_expired
@@ -44,7 +44,7 @@ class TestRMDIRCommand(unittest.TestCase):
         return_value=None,
     )
     @patch("skylock_cli.core.nav.send_cd_request")
-    @patch("skylock_cli.core.dir_operations.send_rmdir_request")
+    @patch("skylock_cli.core.dir_operations.dir_requests.send_rmdir_request")
     @patch("skylock_cli.core.context_manager.ContextManager.get_context")
     def test_rmdir_success_change_dir(
         self,
@@ -69,7 +69,7 @@ class TestRMDIRCommand(unittest.TestCase):
 
     @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
     @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
-    @patch("skylock_cli.core.dir_operations.send_rmdir_request")
+    @patch("skylock_cli.core.dir_operations.dir_requests.send_rmdir_request")
     @patch("skylock_cli.core.context_manager.ContextManager.get_context")
     def test_rmdir_success_recursive_long(
         self, mock_get_context, mock_send, _mock_is_valid, _mock_is_expired
@@ -87,7 +87,7 @@ class TestRMDIRCommand(unittest.TestCase):
 
     @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
     @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
-    @patch("skylock_cli.core.dir_operations.send_rmdir_request")
+    @patch("skylock_cli.core.dir_operations.dir_requests.send_rmdir_request")
     @patch("skylock_cli.core.context_manager.ContextManager.get_context")
     def test_rmdir_success_recursive_short(
         self, mock_get_context, mock_send, _mock_is_valid, _mock_is_expired
@@ -115,7 +115,7 @@ class TestRMDIRCommand(unittest.TestCase):
         self.assertEqual(result.exit_code, 1)
         self.assertIn("Cannot delete the root directory", result.output)
 
-    @patch("skylock_cli.core.dir_operations.send_rmdir_request")
+    @patch("skylock_cli.core.dir_operations.dir_requests.send_rmdir_request")
     def test_rmdir_token_expired(self, mock_send):
         """Test the rmdir command when the token has expired"""
         mock_send.side_effect = api_exceptions.UserUnauthorizedError()
@@ -126,7 +126,7 @@ class TestRMDIRCommand(unittest.TestCase):
             "User is unauthorized. Please login to use this command.", result.output
         )
 
-    @patch("skylock_cli.core.dir_operations.send_rmdir_request")
+    @patch("skylock_cli.core.dir_operations.dir_requests.send_rmdir_request")
     def test_rmdir_directory_not_found_error(self, mock_send):
         """Test the rmdir command when a DirectoryNotFoundError occurs"""
         mock_send.side_effect = api_exceptions.DirectoryNotFoundError("/test1/test2/")
@@ -135,7 +135,7 @@ class TestRMDIRCommand(unittest.TestCase):
         self.assertEqual(result.exit_code, 1)
         self.assertIn("Directory `/test1/test2/` does not exist!", result.output)
 
-    @patch("skylock_cli.core.dir_operations.send_rmdir_request")
+    @patch("skylock_cli.core.dir_operations.dir_requests.send_rmdir_request")
     def test_rmdir_directory_not_empty_error(self, mock_send):
         """Test the rmdir command when a DirectoryNotEmptyError occurs"""
         mock_send.side_effect = api_exceptions.DirectoryNotEmptyError("/test_dir")
@@ -150,7 +150,7 @@ class TestRMDIRCommand(unittest.TestCase):
             ),
         )
 
-    @patch("skylock_cli.core.dir_operations.send_rmdir_request")
+    @patch("skylock_cli.core.dir_operations.dir_requests.send_rmdir_request")
     def test_rmdir_skylock_api_error(self, mock_send):
         """Test the rmdir command when a SkyLockAPIError occurs"""
         mock_send.side_effect = api_exceptions.SkyLockAPIError(
@@ -163,7 +163,7 @@ class TestRMDIRCommand(unittest.TestCase):
             "Failed to delete directory (Internal Server Error)", result.output
         )
 
-    @patch("skylock_cli.core.dir_operations.send_rmdir_request")
+    @patch("skylock_cli.core.dir_operations.dir_requests.send_rmdir_request")
     def test_rmdir_connection_error(self, mock_send):
         """Test the rmdir command when a ConnectError occurs (backend is offline)"""
         mock_send.side_effect = ConnectError("Failed to connect to the server")

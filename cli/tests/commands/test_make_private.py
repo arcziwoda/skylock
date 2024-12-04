@@ -19,7 +19,7 @@ class TestMakeprivateCommand(unittest.TestCase):
 
     @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
     @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
-    @patch("skylock_cli.core.dir_operations.send_make_private_request")
+    @patch("skylock_cli.core.dir_operations.dir_requests.send_make_private_request")
     @patch("skylock_cli.core.context_manager.ContextManager.get_context")
     def test_make_private_directory_success(
         self, mock_get_context, mock_send, _mock_is_valid, _mock_is_expired
@@ -39,7 +39,7 @@ class TestMakeprivateCommand(unittest.TestCase):
 
     @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
     @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
-    @patch("skylock_cli.core.file_operations.send_make_private_request")
+    @patch("skylock_cli.core.file_operations.file_requests.send_make_private_request")
     @patch("skylock_cli.core.context_manager.ContextManager.get_context")
     def test_make_private_file_success(
         self, mock_get_context, mock_send, _mock_is_valid, _mock_is_expired
@@ -57,7 +57,7 @@ class TestMakeprivateCommand(unittest.TestCase):
         self.assertIn("Current working directory: /", result.output)
         self.assertIn("File /test_file.txt is now private 🔐", result.output)
 
-    @patch("skylock_cli.core.dir_operations.send_make_private_request")
+    @patch("skylock_cli.core.dir_operations.dir_requests.send_make_private_request")
     def test_make_private_directory_token_expired(self, mock_send):
         """Test the make-private command of directory when the token has expired"""
         mock_send.side_effect = api_exceptions.UserUnauthorizedError()
@@ -68,7 +68,7 @@ class TestMakeprivateCommand(unittest.TestCase):
             "User is unauthorized. Please login to use this command.", result.output
         )
 
-    @patch("skylock_cli.core.dir_operations.send_make_private_request")
+    @patch("skylock_cli.core.dir_operations.dir_requests.send_make_private_request")
     def test_make_private_directory_not_found_error(self, mock_send):
         """Test the make-private command of directory when a DirectoryNotFoundError occurs"""
         mock_send.side_effect = api_exceptions.DirectoryNotFoundError("/test_dir")
@@ -77,7 +77,7 @@ class TestMakeprivateCommand(unittest.TestCase):
         self.assertEqual(result.exit_code, 1)
         self.assertIn("Directory `/test_dir` does not exist!", result.output)
 
-    @patch("skylock_cli.core.dir_operations.send_make_private_request")
+    @patch("skylock_cli.core.dir_operations.dir_requests.send_make_private_request")
     def test_make_private_directory_skylock_api_error(self, mock_send):
         """Test the make-private command of directory when a SkyLockAPIError occurs"""
         mock_send.side_effect = api_exceptions.SkyLockAPIError(
@@ -88,14 +88,14 @@ class TestMakeprivateCommand(unittest.TestCase):
         self.assertEqual(result.exit_code, 1)
         self.assertIn("Failed to delete file (Internal Server Error)", result.output)
 
-    @patch("skylock_cli.core.dir_operations.send_make_private_request")
+    @patch("skylock_cli.core.dir_operations.dir_requests.send_make_private_request")
     def test_make_private_directory_connection_error(self, mock_send):
         """Test the make-private command of directory when a ConnectError occurs (backend is offline)"""
         mock_send.side_effect = ConnectError("Failed to connect to the server")
         result = self.runner.invoke(app, ["make-private", "test_dir/"])
         assert_connect_error(result)
 
-    @patch("skylock_cli.core.file_operations.send_make_private_request")
+    @patch("skylock_cli.core.file_operations.file_requests.send_make_private_request")
     def test_make_private_file_token_expired(self, mock_send):
         """Test the make-private command for a file when the token has expired"""
         mock_send.side_effect = api_exceptions.UserUnauthorizedError()
@@ -106,7 +106,7 @@ class TestMakeprivateCommand(unittest.TestCase):
             "User is unauthorized. Please login to use this command.", result.output
         )
 
-    @patch("skylock_cli.core.file_operations.send_make_private_request")
+    @patch("skylock_cli.core.file_operations.file_requests.send_make_private_request")
     def test_make_private_file_not_found_error(self, mock_send):
         """Test the make-private command for a file when a FileNotFoundError occurs"""
         mock_send.side_effect = api_exceptions.FileNotFoundError("/test_file.txt")
@@ -115,7 +115,7 @@ class TestMakeprivateCommand(unittest.TestCase):
         self.assertEqual(result.exit_code, 1)
         self.assertIn("File `/test_file.txt` does not exist!", result.output)
 
-    @patch("skylock_cli.core.file_operations.send_make_private_request")
+    @patch("skylock_cli.core.file_operations.file_requests.send_make_private_request")
     def test_make_private_file_skylock_api_error(self, mock_send):
         """Test the make-private command for a file when a SkyLockAPIError occurs"""
         mock_send.side_effect = api_exceptions.SkyLockAPIError(
@@ -128,7 +128,7 @@ class TestMakeprivateCommand(unittest.TestCase):
             "Failed to make file private (Internal Server Error)", result.output
         )
 
-    @patch("skylock_cli.core.file_operations.send_make_private_request")
+    @patch("skylock_cli.core.file_operations.file_requests.send_make_private_request")
     def test_make_private_file_connection_error(self, mock_send):
         """Test the make-private command for a file when a ConnectError occurs (backend is offline)"""
         mock_send.side_effect = ConnectError("Failed to connect to the server")
