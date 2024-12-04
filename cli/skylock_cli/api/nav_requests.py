@@ -11,6 +11,7 @@ from skylock_cli.core.context_manager import ContextManager
 from skylock_cli.model.token import Token
 from skylock_cli.api import bearer_auth
 from skylock_cli.exceptions import api_exceptions
+from skylock_cli.utils.cli_exception_handler import handle_standard_errors
 
 client = Client(base_url=ContextManager.get_context().base_url + API_URL)
 
@@ -22,11 +23,12 @@ def send_ls_request(token: Token, path: Path):
 
     response = client.get(url=url, auth=auth, headers=API_HEADERS)
 
-    if response.status_code == HTTPStatus.UNAUTHORIZED:
-        raise api_exceptions.UserUnauthorizedError()
+    standard_error_dict = {
+        HTTPStatus.NOT_FOUND: api_exceptions.DirectoryNotFoundError(path),
+        HTTPStatus.UNAUTHORIZED: api_exceptions.UserUnauthorizedError(),
+    }
 
-    if response.status_code == HTTPStatus.NOT_FOUND:
-        raise api_exceptions.DirectoryNotFoundError(path)
+    handle_standard_errors(standard_error_dict, response.status_code)
 
     if response.status_code != HTTPStatus.OK:
         raise api_exceptions.SkyLockAPIError(
@@ -50,11 +52,12 @@ def send_cd_request(token: Token, path: Path) -> None:
 
     response = client.get(url=url, auth=auth, headers=API_HEADERS)
 
-    if response.status_code == HTTPStatus.UNAUTHORIZED:
-        raise api_exceptions.UserUnauthorizedError()
+    standard_error_dict = {
+        HTTPStatus.NOT_FOUND: api_exceptions.DirectoryNotFoundError(path),
+        HTTPStatus.UNAUTHORIZED: api_exceptions.UserUnauthorizedError(),
+    }
 
-    if response.status_code == HTTPStatus.NOT_FOUND:
-        raise api_exceptions.DirectoryNotFoundError(path)
+    handle_standard_errors(standard_error_dict, response.status_code)
 
     if response.status_code != HTTPStatus.OK:
         raise api_exceptions.SkyLockAPIError(

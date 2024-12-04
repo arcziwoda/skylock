@@ -11,6 +11,12 @@ from skylock_cli.exceptions import api_exceptions, core_exceptions
 err_console = Console(stderr=True)
 
 
+def handle_standard_errors(error_dict: dict, status_code: int) -> None:
+    """A function to handle standard API errors and raise the appropriate exception."""
+    if status_code in error_dict:
+        raise error_dict[status_code]
+
+
 class CLIExceptionHandler:
     """A context manager to handle exceptions and display them to the user using typer"""
 

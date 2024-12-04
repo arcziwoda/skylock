@@ -11,6 +11,7 @@ from skylock_cli.core.context_manager import ContextManager
 from skylock_cli.model.token import Token
 from skylock_cli.api import bearer_auth
 from skylock_cli.exceptions import api_exceptions
+from skylock_cli.utils.cli_exception_handler import handle_standard_errors
 
 client = Client(base_url=ContextManager.get_context().base_url + API_URL)
 
@@ -32,18 +33,19 @@ def send_upload_request(
 
     response = client.post(url=url, auth=auth, files=files, params=params)
 
-    if response.status_code == HTTPStatus.UNAUTHORIZED:
-        raise api_exceptions.UserUnauthorizedError()
+    standard_error_dict = {
+        HTTPStatus.UNAUTHORIZED: api_exceptions.UserUnauthorizedError(),
+        HTTPStatus.NOT_FOUND: api_exceptions.DirectoryNotFoundError(
+            virtual_path.parent
+        ),
+        HTTPStatus.BAD_REQUEST: api_exceptions.InvalidPathError(virtual_path),
+    }
 
-    if response.status_code == HTTPStatus.NOT_FOUND:
-        raise api_exceptions.DirectoryNotFoundError(virtual_path.parent)
+    handle_standard_errors(standard_error_dict, response.status_code)
 
     if response.status_code == HTTPStatus.CONFLICT:
         if not force:
             raise api_exceptions.FileAlreadyExistsError(virtual_path)
-
-    if response.status_code == HTTPStatus.BAD_REQUEST:
-        raise api_exceptions.InvalidPathError(virtual_path)
 
     if response.status_code != HTTPStatus.CREATED:
         raise api_exceptions.SkyLockAPIError(
@@ -69,14 +71,13 @@ def send_download_request(token: Token, virtual_path: Path) -> bytes:
 
     response = client.get(url=url, auth=auth, headers=API_HEADERS)
 
-    if response.status_code == HTTPStatus.UNAUTHORIZED:
-        raise api_exceptions.UserUnauthorizedError()
+    standard_error_dict = {
+        HTTPStatus.UNAUTHORIZED: api_exceptions.UserUnauthorizedError(),
+        HTTPStatus.NOT_FOUND: api_exceptions.FileNotFoundError(virtual_path),
+        HTTPStatus.BAD_REQUEST: api_exceptions.InvalidPathError(virtual_path),
+    }
 
-    if response.status_code == HTTPStatus.BAD_REQUEST:
-        raise api_exceptions.InvalidPathError(virtual_path)
-
-    if response.status_code == HTTPStatus.NOT_FOUND:
-        raise api_exceptions.FileNotFoundError(virtual_path)
+    handle_standard_errors(standard_error_dict, response.status_code)
 
     if response.status_code != HTTPStatus.OK:
         raise api_exceptions.SkyLockAPIError(
@@ -102,14 +103,13 @@ def send_rm_request(token: Token, virtual_path: Path) -> None:
 
     response = client.delete(url=url, auth=auth, headers=API_HEADERS)
 
-    if response.status_code == HTTPStatus.UNAUTHORIZED:
-        raise api_exceptions.UserUnauthorizedError()
+    standard_error_dict = {
+        HTTPStatus.UNAUTHORIZED: api_exceptions.UserUnauthorizedError(),
+        HTTPStatus.NOT_FOUND: api_exceptions.FileNotFoundError(virtual_path),
+        HTTPStatus.BAD_REQUEST: api_exceptions.InvalidPathError(virtual_path),
+    }
 
-    if response.status_code == HTTPStatus.BAD_REQUEST:
-        raise api_exceptions.InvalidPathError(virtual_path)
-
-    if response.status_code == HTTPStatus.NOT_FOUND:
-        raise api_exceptions.FileNotFoundError(virtual_path)
+    handle_standard_errors(standard_error_dict, response.status_code)
 
     if response.status_code != HTTPStatus.NO_CONTENT:
         raise api_exceptions.SkyLockAPIError(
@@ -131,11 +131,12 @@ def send_make_public_request(token: Token, virtual_path: Path) -> dict:
 
     response = client.patch(url=url, auth=auth, headers=API_HEADERS, json=body)
 
-    if response.status_code == HTTPStatus.UNAUTHORIZED:
-        raise api_exceptions.UserUnauthorizedError()
+    standard_error_dict = {
+        HTTPStatus.UNAUTHORIZED: api_exceptions.UserUnauthorizedError(),
+        HTTPStatus.NOT_FOUND: api_exceptions.FileNotFoundError(virtual_path),
+    }
 
-    if response.status_code == HTTPStatus.NOT_FOUND:
-        raise api_exceptions.FileNotFoundError(virtual_path)
+    handle_standard_errors(standard_error_dict, response.status_code)
 
     if response.status_code != HTTPStatus.OK:
         raise api_exceptions.SkyLockAPIError(
@@ -159,11 +160,12 @@ def send_make_private_request(token: Token, virtual_path: Path) -> dict:
 
     response = client.patch(url=url, auth=auth, headers=API_HEADERS, json=body)
 
-    if response.status_code == HTTPStatus.UNAUTHORIZED:
-        raise api_exceptions.UserUnauthorizedError()
+    standard_error_dict = {
+        HTTPStatus.UNAUTHORIZED: api_exceptions.UserUnauthorizedError(),
+        HTTPStatus.NOT_FOUND: api_exceptions.FileNotFoundError(virtual_path),
+    }
 
-    if response.status_code == HTTPStatus.NOT_FOUND:
-        raise api_exceptions.FileNotFoundError(virtual_path)
+    handle_standard_errors(standard_error_dict, response.status_code)
 
     if response.status_code != HTTPStatus.OK:
         raise api_exceptions.SkyLockAPIError(
@@ -189,14 +191,13 @@ def send_share_request(token: Token, virtual_path: Path) -> dict:
 
     response = client.get(url=url, auth=auth, headers=API_HEADERS)
 
-    if response.status_code == HTTPStatus.UNAUTHORIZED:
-        raise api_exceptions.UserUnauthorizedError()
+    standard_error_dict = {
+        HTTPStatus.UNAUTHORIZED: api_exceptions.UserUnauthorizedError(),
+        HTTPStatus.NOT_FOUND: api_exceptions.FileNotFoundError(virtual_path),
+        HTTPStatus.FORBIDDEN: api_exceptions.FileNotPublicError(virtual_path),
+    }
 
-    if response.status_code == HTTPStatus.NOT_FOUND:
-        raise api_exceptions.FileNotFoundError(virtual_path)
-
-    if response.status_code == HTTPStatus.FORBIDDEN:
-        raise api_exceptions.FileNotPublicError(virtual_path)
+    handle_standard_errors(standard_error_dict, response.status_code)
 
     if (
         not response.json()
