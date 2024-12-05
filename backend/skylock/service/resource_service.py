@@ -27,7 +27,7 @@ class ResourceService:
 
     def get_folder(self, user_path: UserPath) -> db_models.FolderEntity:
         # TODO: check access rules
-        return self._path_resolver.resolve_for_folder(user_path)
+        return self._path_resolver.folder_from_path(user_path)
 
     def get_folder_by_id(self, folder_id: str) -> db_models.FolderEntity:
         current_folder = self._folder_repository.get_by_id(folder_id)
@@ -81,8 +81,12 @@ class ResourceService:
         folder = self.get_folder(user_path)
         self._delete_folder(folder, is_recursively=is_recursively)
 
-    def update_folder(self, folder: db_models.FolderEntity):
-        self._folder_repository.save(folder)
+    def update_folder_visibility(
+        self, user_path: UserPath, is_public: bool
+    ) -> db_models.FolderEntity:
+        folder = self._path_resolver.folder_from_path(user_path)
+        folder.is_public = is_public
+        return self._folder_repository.save(folder)
 
     def _delete_folder(self, folder: db_models.FolderEntity, is_recursively: bool = False):
         if folder.is_root():
@@ -102,7 +106,7 @@ class ResourceService:
 
     def get_file(self, user_path: UserPath) -> db_models.FileEntity:
         # TODO: check access rules
-        return self._path_resolver.resolve_for_file(user_path)
+        return self._path_resolver.file_from_path(user_path)
 
     def get_file_by_id(self, file_id: str) -> db_models.FileEntity:
         file = self._file_repository.get_by_id(file_id)
@@ -140,8 +144,10 @@ class ResourceService:
 
         return new_file
 
-    def update_file(self, file: db_models.FileEntity):
-        self._file_repository.save(file)
+    def update_file_visibility(self, user_path: UserPath, is_public: bool) -> db_models.FileEntity:
+        file = self._path_resolver.file_from_path(user_path)
+        file.is_public = is_public
+        return self._file_repository.save(file)
 
     def delete_file(self, user_path: UserPath):
         file = self.get_file(user_path)

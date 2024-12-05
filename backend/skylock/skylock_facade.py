@@ -1,7 +1,9 @@
 from typing import IO
 
 
+from skylock.service.path_resolver import PathResolver
 from skylock.service.resource_service import ResourceService
+from skylock.service.response_builder import ResponseBuilder
 from skylock.service.user_service import UserService
 from skylock.api import models
 from skylock.utils.exceptions import ForbiddenActionException
@@ -14,11 +16,15 @@ class SkylockFacade:
         self,
         user_service: UserService,
         resource_service: ResourceService,
+        path_resolver: PathResolver,
         url_generator: UrlGenerator,
+        response_builder: ResponseBuilder,
     ):
         self._user_service = user_service
         self._resource_service = resource_service
+        self._path_resolver = path_resolver
         self._url_generator = url_generator
+        self._response_builder = response_builder
 
     def register_user(self, username: str, password: str):
         user = self._user_service.register_user(username, password)
@@ -31,57 +37,22 @@ class SkylockFacade:
         self, user_path: UserPath, with_parents: bool = False
     ) -> models.Folder:
         if with_parents:
-            folder_entity = self._resource_service.create_folder_with_parents(user_path=user_path)
+            folder = self._resource_service.create_folder_with_parents(user_path=user_path)
         else:
-            folder_entity = self._resource_service.create_folder(user_path=user_path)
+            folder = self._resource_service.create_folder(user_path=user_path)
 
-        return models.Folder(
-            name=folder_entity.name,
-            path=user_path.path,
-            is_public=folder_entity.is_public,
-        )
+        return self._response_builder.get_folder_response(folder=folder, user_path=user_path)
 
     def get_folder_contents(self, user_path: UserPath) -> models.FolderContents:
         folder = self._resource_service.get_folder(user_path)
-        parent_path = f"/{user_path.path}" if user_path.path else ""
-        children_files = [
-            models.File(
-                name=file.name,
-                is_public=file.is_public,
-                path=f"{parent_path}/{file.name}",
-            )
-            for file in folder.files
-        ]
-        children_folders = [
-            models.Folder(
-                name=folder.name,
-                is_public=folder.is_public,
-                path=f"{parent_path}/{folder.name}",
-            )
-            for folder in folder.subfolders
-        ]
-        return models.FolderContents(files=children_files, folders=children_folders)
+        return self._response_builder.get_folder_contents_response(
+            folder=folder, user_path=user_path
+        )
 
     def get_public_folder_contents(self, folder_id: str) -> models.FolderContents:
-        current_folder = self._resource_service.get_public_folder(folder_id)
-
-        children_files = [
-            models.File(
-                name=file.name,
-                is_public=file.is_public,
-                path=f"{current_folder.name}/{file.name}",
-            )
-            for file in current_folder.files
-        ]
-        children_folders = [
-            models.Folder(
-                name=folder.name,
-                is_public=folder.is_public,
-                path=f"{current_folder.name}/{folder.name}",
-            )
-            for folder in current_folder.subfolders
-        ]
-        return models.FolderContents(files=children_files, folders=children_folders)
+        folder = self._resource_service.get_public_folder(folder_id)
+        path = self._path_resolver.path_from_folder(folder)
+        return self._response_builder.get_folder_contents_response(folder=folder, user_path=path)
 
     def delete_folder(self, user_path: UserPath, is_recursively: bool = False):
         if user_path.is_root_folder():
@@ -89,28 +60,18 @@ class SkylockFacade:
         self._resource_service.delete_folder(user_path, is_recursively=is_recursively)
 
     def update_folder_visability(self, user_path: UserPath, is_public: bool) -> models.Folder:
-        folder = self._resource_service.get_folder(user_path)
-        folder.is_public = is_public
-        self._resource_service.update_folder(folder)
-        return models.Folder(
-            name=folder.name, path=f"/{user_path.path}", is_public=folder.is_public
-        )
+        folder = self._resource_service.update_folder_visibility(user_path, is_public)
+        return self._response_builder.get_folder_response(folder=folder, user_path=user_path)
 
     def update_file_visability(self, user_path: UserPath, is_public: bool) -> models.File:
-        file = self._resource_service.get_file(user_path)
-        file.is_public = is_public
-        self._resource_service.update_file(file)
-        return models.File(name=file.name, is_public=file.is_public, path=f"/{user_path.path}")
+        file = self._resource_service.update_file_visibility(user_path, is_public)
+        return self._response_builder.get_file_response(file=file, user_path=user_path)
 
     def upload_file(
         self, user_path: UserPath, file_data: IO[bytes], force: bool = False, public: bool = False
     ) -> models.File:
-        file_entity = self._resource_service.create_file(user_path, file_data, force, public)
-        return models.File(
-            name=file_entity.name,
-            path=user_path.parent.path,
-            is_public=file_entity.is_public,
-        )
+        file = self._resource_service.create_file(user_path, file_data, force, public)
+        return self._response_builder.get_file_response(file=file, user_path=user_path)
 
     def download_file(self, user_path: UserPath) -> IO[bytes]:
         return self._resource_service.get_file_data(user_path)

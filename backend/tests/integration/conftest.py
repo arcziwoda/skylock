@@ -2,20 +2,19 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import StaticPool, create_engine
 from sqlalchemy.orm import sessionmaker
+
+from skylock.api.dependencies import get_current_user, get_skylock_facade
 from skylock.app import app
-from skylock.database.models import Base
+from skylock.database.models import Base, UserEntity
 from skylock.database.repository import FileRepository, FolderRepository, UserRepository
 from skylock.database.session import get_db_session
 from skylock.service.path_resolver import PathResolver
-from skylock.utils.url_generator import UrlGenerator
 from skylock.service.resource_service import ResourceService
+from skylock.service.response_builder import ResponseBuilder
 from skylock.service.user_service import UserService
-from skylock.api.dependencies import get_current_user, get_skylock_facade
 from skylock.skylock_facade import SkylockFacade
-from skylock.database.models import UserEntity
-from skylock.utils import url_generator
 from skylock.utils.path import UserPath
-
+from skylock.utils.url_generator import UrlGenerator
 
 TEST_DATABASE_URL = "sqlite://"
 
@@ -64,8 +63,12 @@ def file_repository(db_session):
 
 
 @pytest.fixture
-def path_resolver(file_repository, folder_repository):
-    return PathResolver(file_repository=file_repository, folder_repository=folder_repository)
+def path_resolver(file_repository, folder_repository, user_repository):
+    return PathResolver(
+        file_repository=file_repository,
+        folder_repository=folder_repository,
+        user_repository=user_repository,
+    )
 
 
 @pytest.fixture
@@ -78,9 +81,13 @@ def resource_service(file_repository, folder_repository, path_resolver):
 
 
 @pytest.fixture
-def skylock(user_service, resource_service):
+def skylock(user_service, resource_service, path_resolver):
     return SkylockFacade(
-        user_service=user_service, resource_service=resource_service, url_generator=UrlGenerator()
+        user_service=user_service,
+        resource_service=resource_service,
+        url_generator=UrlGenerator(),
+        path_resolver=path_resolver,
+        response_builder=ResponseBuilder(),
     )
 
 

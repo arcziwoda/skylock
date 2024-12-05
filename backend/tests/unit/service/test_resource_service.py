@@ -11,6 +11,7 @@ from skylock.utils.exceptions import (
 from skylock.database.models import FileEntity, FolderEntity, UserEntity
 from skylock.service.resource_service import ResourceService
 from skylock.utils.path import UserPath
+from tests.integration.conftest import user_repository
 
 
 @pytest.fixture
@@ -24,10 +25,16 @@ def mock_folder_repository():
 
 
 @pytest.fixture
-def path_resolver(mock_file_repository, mock_folder_repository):
+def mock_user_repository():
+    return MagicMock()
+
+
+@pytest.fixture
+def path_resolver(mock_file_repository, mock_folder_repository, mock_user_repository):
     return PathResolver(
         file_repository=mock_file_repository,
         folder_repository=mock_folder_repository,
+        user_repository=mock_user_repository,
     )
 
 
