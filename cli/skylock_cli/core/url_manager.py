@@ -26,3 +26,9 @@ def set_url(base_url: str) -> Context:
         context.base_url = base_url
         ContextManager.save_context(context)
     return context
+
+
+def get_url() -> str:
+    """Get the URL of the SkyLock server."""
+    context = ContextManager.get_context()
+    return context.base_url

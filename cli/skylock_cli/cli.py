@@ -312,6 +312,18 @@ def set_url(
 
 
 @app.command()
+def get_url() -> None:
+    """
+    Get the URL of the SkyLock server.
+    """
+    base_url = url_manager.get_url()
+    typer.secho(
+        f"SkyLock API base URL: {typer.style(base_url, fg=typer.colors.CYAN, underline=True)}",
+        fg=typer.colors.GREEN,
+    )
+
+
+@app.command()
 def share(
     resource_path: Annotated[
         str,

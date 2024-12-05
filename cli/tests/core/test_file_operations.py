@@ -703,11 +703,13 @@ class TestShareFile(unittest.TestCase):
                 mock_stderr.getvalue(),
             )
 
+    @patch("skylock_cli.core.context_manager.ContextManager.get_context")
     @patch("skylock_cli.api.file_requests.client.get")
-    def test_share_file_success(self, mock_get):
+    def test_share_file_success(self, mock_get, mock_context):
         """Test successful file sharing"""
         response_json = {"location": "/files/349248263498632"}
         mock_get.return_value = mock_response_with_status(HTTPStatus.OK, response_json)
+        mock_context.return_value = mock_test_context()
 
         shared_link = share_file("test.txt")
         mock_get.assert_called_once()
