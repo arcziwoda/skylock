@@ -37,12 +37,14 @@ def login_user(login: str, password: str) -> context.Context:
         Token: The token object containing the authentication token.
     """
     _user = user.User(username=login, password=password)
+    old_context = ContextManager.get_context()
     with CLIExceptionHandler():
-        token = send_login_request(_user)
+        new_token = send_login_request(_user)
 
     new_context = context.Context(
-        token=token,
-        cwd=directory.Directory(path=ROOT_PATH),
+        token=new_token,
+        cwd=old_context.cwd if old_context.cwd else directory.Directory(path=ROOT_PATH),
+        base_url=old_context.base_url,
     )
     ContextManager.save_context(new_context)
     return new_context
