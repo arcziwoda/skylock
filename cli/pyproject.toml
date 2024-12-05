@@ -24,7 +24,7 @@ pygments = "^2.18.0"
 pylint = "^3.3.1"
 pymdown-extensions = "^10.11.2"
 pytest = "^8.3.3"
-python = ">=3.9.0,<=3.13"
+python = ">=3.9.0"
 python-jose = "^3.3.0"
 pyyaml = "^6.0.2"
 typer = "^0.12.5"
@@ -41,18 +41,16 @@ slock = "skylock_cli.cli:app"
 
 [tool.pylint]
 disable = [
-  "C0301", # Line too long
-  "W0511", # TODO
-  "E1101", # Instance of '...' has no '...' member -> Pydantic models for pytests
-  "W0622", # Redefining built-in 'id' -> For custom errors
-  "E0213", # Method should have "self" as first argument -> For field validators
-  "W0621", # Redefining name from outer scope -> For pytest fixtures
+    "C0301", # Line too long
+    "W0511", # TODO
+    "E1101", # Instance of '...' has no '...' member -> Pydantic models for pytests
+    "W0622", # Redefining built-in 'id' -> For custom errors
+    "E0213", # Method should have "self" as first argument -> For field validators
+    "W0621", # Redefining name from outer scope -> For pytest fixtures
 ]
 
 [tool.pytest.ini_options]
-filterwarnings = [
-  "ignore::DeprecationWarning:.*jose.jwt.*"
-]
+filterwarnings = ["ignore::DeprecationWarning:.*jose.jwt.*"]
 
 [tool.tox]
 legacy_tox_ini = """
@@ -69,13 +67,8 @@ commands =
 
 [tool.coverage.run]
 branch = true
-source = [
-  "skylock_cli"
-]
+source = ["skylock_cli"]
 
 [tool.coverage.report]
-exclude_lines = [
-  "def __init__",
-  "if __name__ == .__main__.:",
-  "tests/*"
-]
+exclude_lines = ["def __init__", "if __name__ == .__main__.:", "tests/*"]
+
