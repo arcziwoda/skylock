@@ -6,11 +6,14 @@ from skylock.app import app
 from skylock.database.models import Base
 from skylock.database.repository import FileRepository, FolderRepository, UserRepository
 from skylock.database.session import get_db_session
+from skylock.service.path_resolver import PathResolver
+from skylock.utils.url_generator import UrlGenerator
 from skylock.service.resource_service import ResourceService
 from skylock.service.user_service import UserService
 from skylock.api.dependencies import get_current_user, get_skylock_facade
 from skylock.skylock_facade import SkylockFacade
 from skylock.database.models import UserEntity
+from skylock.utils import url_generator
 from skylock.utils.path import UserPath
 
 
@@ -61,13 +64,24 @@ def file_repository(db_session):
 
 
 @pytest.fixture
-def resource_service(file_repository, folder_repository):
-    return ResourceService(file_repository=file_repository, folder_repository=folder_repository)
+def path_resolver(file_repository, folder_repository):
+    return PathResolver(file_repository=file_repository, folder_repository=folder_repository)
+
+
+@pytest.fixture
+def resource_service(file_repository, folder_repository, path_resolver):
+    return ResourceService(
+        file_repository=file_repository,
+        folder_repository=folder_repository,
+        path_resolver=path_resolver,
+    )
 
 
 @pytest.fixture
 def skylock(user_service, resource_service):
-    return SkylockFacade(user_service=user_service, resource_service=resource_service)
+    return SkylockFacade(
+        user_service=user_service, resource_service=resource_service, url_generator=UrlGenerator()
+    )
 
 
 @pytest.fixture
@@ -93,5 +107,5 @@ def test_app(skylock, db_session, mock_user):
 
 @pytest.fixture
 def client(test_app):
-    with TestClient(test_app) as c:
+    with TestClient(test_app, base_url="http://test_server/api/v1") as c:
         yield c

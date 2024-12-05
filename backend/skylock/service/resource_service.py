@@ -2,6 +2,7 @@ from typing import IO, Optional
 
 from skylock.database import models as db_models
 from skylock.database.repository import FileRepository, FolderRepository
+from skylock.service.path_resolver import PathResolver
 from skylock.utils.exceptions import (
     FolderNotEmptyException,
     ForbiddenActionException,
@@ -14,24 +15,19 @@ from skylock.utils.storage import delete_file_data, get_file_data, save_file_dat
 
 
 class ResourceService:
-    def __init__(self, file_repository: FileRepository, folder_repository: FolderRepository):
+    def __init__(
+        self,
+        file_repository: FileRepository,
+        folder_repository: FolderRepository,
+        path_resolver: PathResolver,
+    ):
         self._file_repository = file_repository
         self._folder_repository = folder_repository
+        self._path_resolver = path_resolver
 
     def get_folder(self, user_path: UserPath) -> db_models.FolderEntity:
-        current_folder = self._get_root_folder_by_name(user_path.root_folder_name)
-
-        if current_folder is None:
-            raise LookupError(f"Root folder: {user_path.root_folder_name} does not exist")
-
-        for folder_name in user_path.parts:
-            current_folder = self._folder_repository.get_by_name_and_parent_id(
-                folder_name, current_folder.id
-            )
-            if current_folder is None:
-                raise ResourceNotFoundException(missing_resource_name=folder_name)
-
-        return current_folder
+        # TODO: check access rules
+        return self._path_resolver.resolve_for_folder(user_path)
 
     def get_folder_by_id(self, folder_id: str) -> db_models.FolderEntity:
         current_folder = self._folder_repository.get_by_id(folder_id)
@@ -105,18 +101,8 @@ class ResourceService:
         self._folder_repository.delete(folder)
 
     def get_file(self, user_path: UserPath) -> db_models.FileEntity:
-        parent_folder = self.get_folder(user_path.parent)
-        file = self._file_repository.get_by_name_and_parent(
-            name=user_path.name, parent=parent_folder
-        )
-
-        if file is None:
-            raise ResourceNotFoundException(missing_resource_name=user_path.name)
-
-        if file.owner_id != user_path.owner.id:
-            raise ForbiddenActionException("You do not have access to ths file")
-
-        return file
+        # TODO: check access rules
+        return self._path_resolver.resolve_for_file(user_path)
 
     def get_file_by_id(self, file_id: str) -> db_models.FileEntity:
         file = self._file_repository.get_by_id(file_id)
