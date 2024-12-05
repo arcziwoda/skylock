@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import MagicMock, patch
+from skylock.service.path_resolver import PathResolver
 from skylock.utils.exceptions import (
     FolderNotEmptyException,
     ForbiddenActionException,
@@ -23,10 +24,19 @@ def mock_folder_repository():
 
 
 @pytest.fixture
-def resource_service(mock_file_repository, mock_folder_repository):
+def path_resolver(mock_file_repository, mock_folder_repository):
+    return PathResolver(
+        file_repository=mock_file_repository,
+        folder_repository=mock_folder_repository,
+    )
+
+
+@pytest.fixture
+def resource_service(mock_file_repository, mock_folder_repository, path_resolver):
     return ResourceService(
         file_repository=mock_file_repository,
         folder_repository=mock_folder_repository,
+        path_resolver=path_resolver,
     )
 
 
@@ -39,7 +49,9 @@ def test_get_root_folder_success(resource_service, mock_folder_repository):
 
     result = resource_service.get_folder(user_path)
     assert result == root_folder
-    mock_folder_repository.get_by_name_and_parent_id.assert_called_once_with(root_folder.name, None)
+    mock_folder_repository.get_by_name_and_parent_id.assert_called_once_with(
+        name=root_folder.name, parent_id=None
+    )
 
 
 def test_get_subfolder_success(resource_service, mock_folder_repository):

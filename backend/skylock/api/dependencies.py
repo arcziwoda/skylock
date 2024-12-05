@@ -3,6 +3,7 @@ from fastapi import Depends
 from skylock.database.models import UserEntity
 from skylock.database.repository import FileRepository, FolderRepository, UserRepository
 from skylock.database.session import get_db_session
+from skylock.service.path_resolver import PathResolver
 from skylock.service.resource_service import ResourceService
 from skylock.service.user_service import UserService
 from skylock.skylock_facade import SkylockFacade
@@ -26,11 +27,23 @@ def get_user_service(user_repository=Depends(get_user_repository)) -> UserServic
     return UserService(user_repository)
 
 
+def get_path_resolver(
+    file_repository=Depends(get_file_repository),
+    folder_repository=Depends(get_folder_repository),
+) -> PathResolver:
+    return PathResolver(file_repository=file_repository, folder_repository=folder_repository)
+
+
 def get_resource_service(
     file_repository=Depends(get_file_repository),
     folder_repository=Depends(get_folder_repository),
+    path_resolver=Depends(get_path_resolver),
 ) -> ResourceService:
-    return ResourceService(file_repository=file_repository, folder_repository=folder_repository)
+    return ResourceService(
+        file_repository=file_repository,
+        folder_repository=folder_repository,
+        path_resolver=path_resolver,
+    )
 
 
 def get_skylock_facade(
