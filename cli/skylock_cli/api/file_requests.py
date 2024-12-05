@@ -186,7 +186,7 @@ def send_share_request(token: Token, virtual_path: Path) -> dict:
     Returns:
         dict: The response from the API.
     """
-    url = "/share/file" + quote(str(virtual_path))
+    url = "/share/files" + quote(str(virtual_path))
     auth = bearer_auth.BearerAuth(token)
 
     response = client.get(url=url, auth=auth, headers=API_HEADERS)
