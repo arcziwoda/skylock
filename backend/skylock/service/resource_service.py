@@ -72,12 +72,14 @@ class ResourceService:
 
     def _folder_exists(self, user_path: UserPath) -> bool:
         try:
-            self.get_folder(user_path)
+            self._path_resolver.folder_from_path(user_path)
             return True
         except ResourceNotFoundException:
             return False
 
     def delete_folder(self, user_path: UserPath, is_recursively: bool = False):
+        if user_path.is_root_folder():
+            raise ForbiddenActionException("Deletion of root folder is forbidden")
         folder = self.get_folder(user_path)
         self._delete_folder(folder, is_recursively=is_recursively)
 
