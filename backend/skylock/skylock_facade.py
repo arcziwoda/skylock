@@ -55,8 +55,6 @@ class SkylockFacade:
         return self._response_builder.get_folder_contents_response(folder=folder, user_path=path)
 
     def delete_folder(self, user_path: UserPath, is_recursively: bool = False):
-        if user_path.is_root_folder():
-            raise ForbiddenActionException("Deletion of root folder is forbidden")
         self._resource_service.delete_folder(user_path, is_recursively=is_recursively)
 
     def update_folder_visability(self, user_path: UserPath, is_public: bool) -> models.Folder:
@@ -84,8 +82,16 @@ class SkylockFacade:
 
     def get_folder_url(self, user_path: UserPath) -> str:
         folder = self._resource_service.get_folder(user_path)
+
+        if not folder.is_public:
+            raise ForbiddenActionException(f"Folder {folder.name} is not public, cannot be shared")
+
         return self._url_generator.generate_url_for_folder(folder.id)
 
     def get_file_url(self, user_path: UserPath) -> str:
         file = self._resource_service.get_file(user_path)
+
+        if not file.is_public:
+            raise ForbiddenActionException(f"File {file.name} is not public, cannot be shared")
+
         return self._url_generator.generate_url_for_file(file.id)
