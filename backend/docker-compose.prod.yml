@@ -5,6 +5,7 @@ services:
     env_file:
       - path: .env
     entrypoint: ["./entrypoint_prod.sh"]
+    restart: unless-stopped
     networks:
       - traefik-public
     volumes:

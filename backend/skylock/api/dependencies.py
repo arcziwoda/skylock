@@ -6,6 +6,7 @@ from skylock.database.session import get_db_session
 from skylock.service.resource_service import ResourceService
 from skylock.service.user_service import UserService
 from skylock.skylock_facade import SkylockFacade
+from skylock.utils.url_generator import UrlGenerator
 from skylock.utils.security import get_user_from_jwt, oauth2_scheme
 
 
@@ -36,7 +37,11 @@ def get_skylock_facade(
     user_service: UserService = Depends(get_user_service),
     resource_service: ResourceService = Depends(get_resource_service),
 ) -> SkylockFacade:
-    return SkylockFacade(user_service=user_service, resource_service=resource_service)
+    return SkylockFacade(
+        user_service=user_service,
+        resource_service=resource_service,
+        url_generator=UrlGenerator(),
+    )
 
 
 def get_current_user(

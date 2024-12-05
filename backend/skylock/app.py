@@ -8,7 +8,7 @@ from skylock.utils.exception_handlers import (
     invalid_credentials_handler,
 )
 
-from skylock.api import auth_routes, folder_routes, file_routes, shared_routes
+from skylock.api.routes import auth_routes, folder_routes, file_routes, public_routes, share_routes
 from skylock.utils.exceptions import (
     FolderNotEmptyException,
     InvalidCredentialsException,
@@ -17,8 +17,9 @@ from skylock.utils.exceptions import (
     UserAlreadyExists,
     ForbiddenActionException,
 )
+from skylock.pages import page_router
 
-app = FastAPI(title="File Sharing API", version="1.0.0", root_path="/api/v1")
+app = FastAPI(title="File Sharing API", version="1.0.0")
 
 
 app.add_exception_handler(UserAlreadyExists, user_already_exists_handler)
@@ -29,7 +30,9 @@ app.add_exception_handler(FolderNotEmptyException, folder_not_empty_handler)
 app.add_exception_handler(ForbiddenActionException, forbidden_action_handler)
 
 
-app.include_router(auth_routes.router)
-app.include_router(folder_routes.router)
-app.include_router(file_routes.router)
-app.include_router(shared_routes.router)
+app.include_router(auth_routes.router, prefix="/api/v1")
+app.include_router(folder_routes.router, prefix="/api/v1")
+app.include_router(file_routes.router, prefix="/api/v1")
+app.include_router(public_routes.router, prefix="/api/v1")
+app.include_router(share_routes.router, prefix="/api/v1")
+app.include_router(page_router.router)

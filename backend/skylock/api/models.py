@@ -40,3 +40,7 @@ class VisabilityRequest(BaseModel):
 class UploadOptions(BaseModel):
     force: bool
     public: bool
+
+
+class ResourceLocationResponse(BaseModel):
+    location: str

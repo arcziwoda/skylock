@@ -6,12 +6,19 @@ from skylock.service.user_service import UserService
 from skylock.api import models
 from skylock.utils.exceptions import ForbiddenActionException
 from skylock.utils.path import UserPath
+from skylock.utils.url_generator import UrlGenerator
 
 
 class SkylockFacade:
-    def __init__(self, user_service: UserService, resource_service: ResourceService):
+    def __init__(
+        self,
+        user_service: UserService,
+        resource_service: ResourceService,
+        url_generator: UrlGenerator,
+    ):
         self._user_service = user_service
         self._resource_service = resource_service
+        self._url_generator = url_generator
 
     def register_user(self, username: str, password: str):
         user = self._user_service.register_user(username, password)
@@ -113,3 +120,11 @@ class SkylockFacade:
 
     def delete_file(self, user_path: UserPath):
         self._resource_service.delete_file(user_path)
+
+    def get_folder_url(self, user_path: UserPath) -> str:
+        folder = self._resource_service.get_folder(user_path)
+        return self._url_generator.generate_url_for_folder(folder.id)
+
+    def get_file_url(self, user_path: UserPath) -> str:
+        file = self._resource_service.get_file(user_path)
+        return self._url_generator.generate_url_for_file(file.id)
