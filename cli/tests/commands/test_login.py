@@ -4,7 +4,7 @@ Tests for the login command
 
 import unittest
 import json
-from pathlib import Path
+from pathlib import Path, PosixPath
 from unittest.mock import patch
 from typer.testing import CliRunner
 from art import text2art
@@ -14,7 +14,6 @@ from skylock_cli.model.context import Context
 from skylock_cli.model.directory import Directory
 from skylock_cli.cli import app
 from skylock_cli.exceptions import api_exceptions
-from skylock_cli.config import ROOT_PATH
 from tests.helpers import assert_connect_error
 
 
@@ -39,7 +38,8 @@ class TestLoginCommand(unittest.TestCase):
 
         old_token = Token(access_token="old_token", token_type="bearer")
         old_cwd = Directory(path=Path("/old_cwd"), name="old_cwd/")
-        old_context = Context(token=old_token, cwd=old_cwd)
+        old_base_url = "https://skylock.com"
+        old_context = Context(token=old_token, cwd=old_cwd, base_url=old_base_url)
         with open(config_file_path, "w", encoding="utf-8") as file:
             json.dump({"context": old_context.model_dump()}, file, indent=4)
 
@@ -57,8 +57,9 @@ class TestLoginCommand(unittest.TestCase):
         with open(config_file_path, "r", encoding="utf-8") as file:
             data = json.load(file)
             new_context = Context(**data.get("context", {}))
-            self.assertEqual(new_context.cwd.path, ROOT_PATH)
+            self.assertEqual(new_context.cwd.path, PosixPath("/old_cwd"))
             self.assertEqual(new_context.token.access_token, "new_token")
+            self.assertEqual(new_context.base_url, "https://skylock.com")
 
         # Clean up: delete the created file and directory
         config_file_path.unlink()
