@@ -1,4 +1,7 @@
+from typing import Annotated
+
 from fastapi import Depends
+from sqlalchemy.orm import Session
 
 from skylock.database.models import UserEntity
 from skylock.database.repository import FileRepository, FolderRepository, UserRepository
@@ -12,26 +15,28 @@ from skylock.utils.security import get_user_from_jwt, oauth2_scheme
 from skylock.utils.url_generator import UrlGenerator
 
 
-def get_user_repository(db=Depends(get_db_session)) -> UserRepository:
+def get_user_repository(db: Annotated[Session, Depends(get_db_session)]) -> UserRepository:
     return UserRepository(db)
 
 
-def get_folder_repository(db=Depends(get_db_session)) -> FolderRepository:
+def get_folder_repository(db: Annotated[Session, Depends(get_db_session)]) -> FolderRepository:
     return FolderRepository(db)
 
 
-def get_file_repository(db=Depends(get_db_session)) -> FileRepository:
+def get_file_repository(db: Annotated[Session, Depends(get_db_session)]) -> FileRepository:
     return FileRepository(db)
 
 
-def get_user_service(user_repository=Depends(get_user_repository)) -> UserService:
+def get_user_service(
+    user_repository: Annotated[UserRepository, Depends(get_user_repository)]
+) -> UserService:
     return UserService(user_repository)
 
 
 def get_path_resolver(
-    file_repository=Depends(get_file_repository),
-    folder_repository=Depends(get_folder_repository),
-    user_repository=Depends(get_user_repository),
+    file_repository: Annotated[FileRepository, Depends(get_file_repository)],
+    folder_repository: Annotated[FolderRepository, Depends(get_folder_repository)],
+    user_repository: Annotated[UserRepository, Depends(get_user_repository)],
 ) -> PathResolver:
     return PathResolver(
         file_repository=file_repository,
@@ -41,9 +46,9 @@ def get_path_resolver(
 
 
 def get_resource_service(
-    file_repository=Depends(get_file_repository),
-    folder_repository=Depends(get_folder_repository),
-    path_resolver=Depends(get_path_resolver),
+    file_repository: Annotated[FileRepository, Depends(get_file_repository)],
+    folder_repository: Annotated[FolderRepository, Depends(get_folder_repository)],
+    path_resolver: Annotated[PathResolver, Depends(get_path_resolver)],
 ) -> ResourceService:
     return ResourceService(
         file_repository=file_repository,
@@ -52,21 +57,32 @@ def get_resource_service(
     )
 
 
+def get_response_builder() -> ResponseBuilder:
+    return ResponseBuilder()
+
+
+def get_url_generator() -> UrlGenerator:
+    return UrlGenerator()
+
+
 def get_skylock_facade(
-    user_service=Depends(get_user_service),
-    resource_service=Depends(get_resource_service),
-    path_resolver=Depends(get_path_resolver),
+    user_service: Annotated[UserService, Depends(get_user_service)],
+    resource_service: Annotated[ResourceService, Depends(get_resource_service)],
+    path_resolver: Annotated[PathResolver, Depends(get_path_resolver)],
+    response_builder: Annotated[ResponseBuilder, Depends(get_response_builder)],
+    url_generator: Annotated[UrlGenerator, Depends(get_url_generator)],
 ) -> SkylockFacade:
     return SkylockFacade(
         user_service=user_service,
         resource_service=resource_service,
-        url_generator=UrlGenerator(),
+        url_generator=url_generator,
         path_resolver=path_resolver,
-        response_builder=ResponseBuilder(),
+        response_builder=response_builder,
     )
 
 
 def get_current_user(
-    token: str = Depends(oauth2_scheme), user_repository=Depends(get_user_repository)
+    token: Annotated[str, Depends(oauth2_scheme)],
+    user_repository: Annotated[UserRepository, Depends(get_user_repository)],
 ) -> UserEntity:
     return get_user_from_jwt(token=token, user_repository=user_repository)

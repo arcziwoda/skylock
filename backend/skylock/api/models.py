@@ -7,18 +7,22 @@ class Token(BaseModel):
 
 
 class Folder(BaseModel):
+    id: str
     name: str
     path: str
     is_public: bool
 
 
 class File(BaseModel):
+    id: str
     name: str
     path: str
     is_public: bool
 
 
 class FolderContents(BaseModel):
+    folder_name: str
+    folder_path: str
     files: list[File]
     folders: list[Folder]
 

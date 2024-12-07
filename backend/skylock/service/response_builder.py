@@ -10,6 +10,7 @@ class ResponseBuilder:
         parent_path = f"/{user_path.path}" if user_path.path else ""
         children_files = [
             models.File(
+                id=file.id,
                 name=file.name,
                 is_public=file.is_public,
                 path=f"{parent_path}/{file.name}",
@@ -18,20 +19,28 @@ class ResponseBuilder:
         ]
         children_folders = [
             models.Folder(
+                id=folder.id,
                 name=folder.name,
                 is_public=folder.is_public,
                 path=f"{parent_path}/{folder.name}",
             )
             for folder in folder.subfolders
         ]
-        return models.FolderContents(files=children_files, folders=children_folders)
+        return models.FolderContents(
+            folder_name=folder.name,
+            folder_path=f"/{user_path.path}",
+            files=children_files,
+            folders=children_folders,
+        )
 
     def get_folder_response(
         self, folder: db_models.FolderEntity, user_path: UserPath
     ) -> models.Folder:
         return models.Folder(
-            name=folder.name, path=f"/{user_path.path}", is_public=folder.is_public
+            id=folder.id, name=folder.name, path=f"/{user_path.path}", is_public=folder.is_public
         )
 
     def get_file_response(self, file: db_models.FileEntity, user_path: UserPath) -> models.File:
-        return models.File(name=file.name, path=f"/{user_path.path}", is_public=file.is_public)
+        return models.File(
+            id=file.id, name=file.name, path=f"/{user_path.path}", is_public=file.is_public
+        )

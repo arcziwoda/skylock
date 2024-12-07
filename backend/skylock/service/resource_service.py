@@ -51,7 +51,7 @@ class ResourceService:
 
         folder_name = user_path.name
         parent_path = user_path.parent
-        parent = self.get_folder(parent_path)
+        parent = self._path_resolver.folder_from_path(parent_path)
 
         self._assert_no_children_matching_name(parent, folder_name)
 
@@ -78,9 +78,7 @@ class ResourceService:
             return False
 
     def delete_folder(self, user_path: UserPath, is_recursively: bool = False):
-        if user_path.is_root_folder():
-            raise ForbiddenActionException("Deletion of root folder is forbidden")
-        folder = self.get_folder(user_path)
+        folder = self._path_resolver.folder_from_path(user_path)
         self._delete_folder(folder, is_recursively=is_recursively)
 
     def update_folder_visibility(
@@ -126,7 +124,7 @@ class ResourceService:
 
         file_name = user_path.name
         parent_path = user_path.parent
-        parent = self.get_folder(parent_path)
+        parent = self._path_resolver.folder_from_path(parent_path)
 
         if force:
             try:

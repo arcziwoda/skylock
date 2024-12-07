@@ -42,16 +42,17 @@ class PathResolver:
         return file
 
     def path_from_folder(self, folder: db_models.FolderEntity) -> UserPath:
-        path = ""
+        path_parts = []
         current_folder = folder
         while current_folder.parent_folder is not None:
-            path += current_folder.name
-            path += "/"
+            path_parts.insert(0, current_folder.name)
             current_folder = current_folder.parent_folder
         owner = self._user_repository.get_by_id(current_folder.name)
 
         if owner is None:
             raise LookupError(f"User for root folder not found, id: {current_folder.name}")
+
+        path = "/".join(path_parts)
 
         return UserPath(path=path, owner=owner)
 

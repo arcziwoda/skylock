@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Folder Contents</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+        h1 {
+            text-align: center;
+        }
+        .item-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .item-list li {
+            margin: 10px 0;
+        }
+        .item-list li a {
+            text-decoration: none;
+            color: #007BFF;
+        }
+        .item-list li a:hover {
+            text-decoration: underline;
+        }
+        .folder {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+            <h1>Folder: {{ name }}</h1>
+            <h2>{{ path }}</h2>
+
+        <h2>Folders</h2>
+        <ul class="item-list">
+            {% for folder in folders %}
+                <li class="folder">
+                    <a href="{{ folder.url }}">{{ folder.name }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <h2>Files</h2>
+        <ul class="item-list">
+            {% for file in files %}
+                <li class="file">
+                    <a href="{{ file.url }}">{{ file.name }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>
+
