@@ -86,8 +86,13 @@ def download_file(
     user: Annotated[db_models.UserEntity, Depends(get_current_user)],
     skylock: Annotated[SkylockFacade, Depends(get_skylock_facade)],
 ):
-    file_data = skylock.download_file(UserPath(path=path, owner=user))
-    return Response(content=file_data.read(), media_type="application/octet-stream")
+    user_path = UserPath(path=path, owner=user)
+    file_data = skylock.download_file(user_path)
+    return Response(
+        content=file_data.read(),
+        media_type="application/octet-stream",
+        headers={"Content-Disposition": f'attachment; filename="{user_path.name}"'},
+    )
 
 
 @router.delete(

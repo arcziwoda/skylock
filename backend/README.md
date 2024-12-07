@@ -81,5 +81,5 @@ When you make changes to your database schema, you need to perform a migration. 
 
 After running the app, the full API documentation will be available at:
 
-- **Swagger UI:** <http://localhost:8000/docs>
-- **Redoc:** <http://localhost:8000/redoc>
+- **Swagger UI:** <http://localhost:8000/api/v1/docs>
+- **Redoc:** <http://localhost:8000/api/v1/redoc>
