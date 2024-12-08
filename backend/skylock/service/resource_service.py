@@ -1,5 +1,3 @@
-from re import sub
-from typing import IO, Optional
 from typing import Optional
 
 from skylock.database import models as db_models
