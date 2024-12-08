@@ -69,3 +69,10 @@ class UserPath:
         if not isinstance(other, UserPath):
             return NotImplemented
         return self.owner == other.owner and self.path == other.path
+
+    def __truediv__(self, other: object) -> "UserPath":
+        if not isinstance(other, str):
+            return NotImplemented
+        current_path = self.path
+        new_path = current_path + "/" + other.strip("/")
+        return UserPath(path=new_path, owner=self.owner)

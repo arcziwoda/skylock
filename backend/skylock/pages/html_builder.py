@@ -38,10 +38,11 @@ class HtmlBuilder:
             },
         )
 
-    def build_403_page(self, request: Request, message: str) -> HTMLResponse:
+    def build_file_page(self, request: Request, file_id: str) -> HTMLResponse:
+        file = self._skylock.get_public_file(file_id)
+        download_url = self._url_generator.generate_download_url_for_file(file_id)
         return self._templates.TemplateResponse(
-            request, "403.html", {"message": message}, status_code=403
+            request,
+            "file.html",
+            {"file": {"name": file.name, "path": file.path, "download_url": download_url}},
         )
-
-    def build_404_page(self, request: Request) -> HTMLResponse:
-        return self._templates.TemplateResponse(request, "404.html", status_code=404)

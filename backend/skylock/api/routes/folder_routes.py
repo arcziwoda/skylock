@@ -28,13 +28,35 @@ router = APIRouter(tags=["Resource"], prefix="/folders")
             "content": {
                 "application/json": {
                     "example": {
+                        "folder_name": "folder",
+                        "folder_path": "/folder",
                         "files": [
-                            {"name": "file1.txt", "path": "/folder/file1.txt"},
-                            {"name": "file2.txt", "path": "/folder/file2.txt"},
+                            {
+                                "id": "file1-id",
+                                "name": "file1.txt",
+                                "path": "/folder/file1.txt",
+                                "is_public": True,
+                            },
+                            {
+                                "id": "file2-id",
+                                "name": "file2.txt",
+                                "path": "/folder/file2.txt",
+                                "is_public": False,
+                            },
                         ],
                         "folders": [
-                            {"name": "subfolder1", "path": "/folder/subfolder1"},
-                            {"name": "subfolder2", "path": "/folder/subfolder2"},
+                            {
+                                "id": "subfolder1-id",
+                                "name": "subfolder1",
+                                "path": "/folder/subfolder1",
+                                "is_public": True,
+                            },
+                            {
+                                "id": "subfolder2-id",
+                                "name": "subfolder2",
+                                "path": "/folder/subfolder2",
+                                "is_public": False,
+                            },
                         ],
                     }
                 }
