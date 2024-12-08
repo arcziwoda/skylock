@@ -89,7 +89,7 @@ def send_rmdir_request(token: Token, path: Path, recursive: bool) -> None:
         )
 
 
-def send_make_public_request(token: Token, path: Path) -> dict:
+def send_make_public_request(token: Token, path: Path, recursive: bool) -> dict:
     """
     Send a make public request to the SkyLock backend API.
 
@@ -99,7 +99,7 @@ def send_make_public_request(token: Token, path: Path) -> dict:
     """
     url = "/folders" + quote(str(path))
     auth = bearer_auth.BearerAuth(token)
-    body = {"is_public": True}
+    body = {"is_public": True, "recursive": recursive}
 
     response = client.patch(url=url, auth=auth, json=body, headers=API_HEADERS)
 
@@ -118,7 +118,7 @@ def send_make_public_request(token: Token, path: Path) -> dict:
     return response.json()
 
 
-def send_make_private_request(token: Token, path: Path) -> dict:
+def send_make_private_request(token: Token, path: Path, recursive: bool) -> dict:
     """
     Send a make private request to the SkyLock backend API.
 
@@ -128,7 +128,7 @@ def send_make_private_request(token: Token, path: Path) -> dict:
     """
     url = "/folders" + quote(str(path))
     auth = bearer_auth.BearerAuth(token)
-    body = {"is_public": False}
+    body = {"is_public": False, "recursive": recursive}
 
     response = client.patch(url=url, auth=auth, json=body, headers=API_HEADERS)
 

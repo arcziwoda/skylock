@@ -254,13 +254,21 @@ def make_public(
         typer.Argument(
             help="The path of the resource to set as public. If you want to set a directory as public, the path must end with /"
         ),
-    ]
+    ],
+    recursive: Annotated[
+        Optional[bool],
+        typer.Option(
+            "-r",
+            "--recursive",
+            help="Make sub-directories and their contents public recursively",
+        ),
+    ] = False,
 ) -> None:
     """
     Set a resource as public.
     """
     resource = (
-        dir_operations.make_directory_public(resource_path)
+        dir_operations.make_directory_public(resource_path, recursive)
         if path_parser.is_directory(resource_path)
         else file_operations.make_file_public(resource_path)
     )
@@ -278,13 +286,21 @@ def make_private(
         typer.Argument(
             help="The path of the resource to set as private. If you want to set a directory as private, the path must end with /"
         ),
-    ]
+    ],
+    recursive: Annotated[
+        Optional[bool],
+        typer.Option(
+            "-r",
+            "--recursive",
+            help="Make sub-directories and their contents public recursively",
+        ),
+    ] = False,
 ) -> None:
     """
     Set a resource as private.
     """
     resource = (
-        dir_operations.make_directory_private(resource_path)
+        dir_operations.make_directory_private(resource_path, recursive)
         if path_parser.is_directory(resource_path)
         else file_operations.make_file_private(resource_path)
     )
