@@ -51,9 +51,7 @@ def remove_directory(directory_path: str, recursive: bool) -> Path:
     return joind_path
 
 
-def make_directory_public(
-    directory_path: str, recursive: bool | None = False
-) -> Directory:
+def make_directory_public(directory_path: str, recursive: bool = False) -> Directory:
     """Make a directory public"""
     current_context = context_manager.ContextManager.get_context()
     with CLIExceptionHandler():
@@ -67,7 +65,7 @@ def make_directory_public(
     return changed_dir
 
 
-def make_directory_private(directory_path: str, recursive: bool | None = False) -> Directory:
+def make_directory_private(directory_path: str, recursive: bool = False) -> Directory:
     """Make a directory private"""
     current_context = context_manager.ContextManager.get_context()
     with CLIExceptionHandler():

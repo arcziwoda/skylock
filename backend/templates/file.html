@@ -8,6 +8,8 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
         }
         .container {
             max-width: 600px;
@@ -16,15 +18,21 @@
             border-radius: 8px;
             padding: 20px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background: #fff;
         }
         h1, h2 {
             text-align: center;
+            color: #007BFF;
         }
         .file-info {
             margin: 20px 0;
         }
         .file-info div {
             margin-bottom: 10px;
+            padding: 10px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
         .download-button {
             display: block;
@@ -37,11 +45,12 @@
             color: white;
             background-color: #007BFF;
             padding: 10px 20px;
-            border-radius: 5px;
-            font-weight: bold;
+            border-radius: 4px;
+            transition: background 0.3s, transform 0.3s;
         }
         .download-button a:hover {
             background-color: #0056b3;
+            transform: translateY(-2px);
         }
     </style>
 </head>
