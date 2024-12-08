@@ -787,8 +787,12 @@ class TestShareFile(unittest.TestCase):
                 share_file("test.txt")
             self.assertIn("File `/test.txt` does not exist!", mock_stderr.getvalue())
 
+    @patch(
+        "skylock_cli.core.context_manager.ContextManager.get_context",
+        return_value=mock_test_context(),
+    )
     @patch("skylock_cli.api.file_requests.client.get")
-    def test_share_file_not_public(self, mock_get):
+    def test_share_file_not_public(self, mock_get, _mock_get_context):
         """Test sharing a file that is not public"""
         mock_get.return_value = mock_response_with_status(HTTPStatus.FORBIDDEN)
 

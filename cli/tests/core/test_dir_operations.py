@@ -548,8 +548,12 @@ class TestShareDirectory(unittest.TestCase):
                 "Directory `/test1/test2` does not exist!\n", mock_stderr.getvalue()
             )
 
+    @patch(
+        "skylock_cli.core.context_manager.ContextManager.get_context",
+        return_value=mock_test_context(),
+    )
     @patch("skylock_cli.api.dir_requests.client.get")
-    def test_share_directory_not_public(self, mock_get):
+    def test_share_directory_not_public(self, mock_get, _mock_context):
         """Test sharing when the directory is not public"""
         mock_get.return_value = mock_response_with_status(HTTPStatus.FORBIDDEN)
 
