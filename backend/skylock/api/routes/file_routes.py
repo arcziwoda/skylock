@@ -52,7 +52,7 @@ def upload_file(
 ) -> models.File:
     return skylock.upload_file(
         user_path=UserPath(path=path, owner=user),
-        file_data=file.file,
+        file_data=file.file.read(),
         force=force,
         public=public,
     )
@@ -89,9 +89,9 @@ def download_file(
     user_path = UserPath(path=path, owner=user)
     file_data = skylock.download_file(user_path)
     return Response(
-        content=file_data.read(),
+        content=file_data.data,
         media_type="application/octet-stream",
-        headers={"Content-Disposition": f'attachment; filename="{user_path.name}"'},
+        headers={"Content-Disposition": f'attachment; filename="{file_data.name}"'},
     )
 
 

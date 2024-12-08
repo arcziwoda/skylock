@@ -15,7 +15,7 @@ def patch_files_folder_disk_path(tmp_path):
 
 
 def test_save_file_data_creates_file(tmp_path):
-    data = BytesIO(b"test data")
+    data = b"test data"
     filename = "testfile.txt"
     save_file_data(data, filename)
 
@@ -25,7 +25,7 @@ def test_save_file_data_creates_file(tmp_path):
 
 
 def test_save_file_data_raises_error_if_file_exists(tmp_path):
-    data = BytesIO(b"test data")
+    data = b"test data"
     filename = "testfile.txt"
     (tmp_path / filename).write_bytes(b"existing data")
 
@@ -39,7 +39,7 @@ def test_get_file_data_returns_file_content(tmp_path):
     (tmp_path / filename).write_bytes(expected_content)
 
     data = get_file_data(filename)
-    assert data.read() == expected_content
+    assert data == expected_content
 
 
 def test_get_file_data_raises_error_if_file_not_found():

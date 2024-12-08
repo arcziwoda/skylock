@@ -1,6 +1,3 @@
-from typing import IO
-
-
 from skylock.service.path_resolver import PathResolver
 from skylock.service.resource_service import ResourceService
 from skylock.service.response_builder import ResponseBuilder
@@ -65,17 +62,26 @@ class SkylockFacade:
         file = self._resource_service.update_file_visibility(user_path, is_public)
         return self._response_builder.get_file_response(file=file, user_path=user_path)
 
+    def get_public_file(self, file_id: str) -> models.File:
+        file = self._resource_service.get_public_file(file_id)
+        path = self._path_resolver.path_from_file(file)
+        return self._response_builder.get_file_response(file=file, user_path=path)
+
     def upload_file(
-        self, user_path: UserPath, file_data: IO[bytes], force: bool = False, public: bool = False
+        self, user_path: UserPath, file_data: bytes, force: bool = False, public: bool = False
     ) -> models.File:
         file = self._resource_service.create_file(user_path, file_data, force, public)
         return self._response_builder.get_file_response(file=file, user_path=user_path)
 
-    def download_file(self, user_path: UserPath) -> IO[bytes]:
-        return self._resource_service.get_file_data(user_path)
+    def download_file(self, user_path: UserPath) -> models.FileData:
+        file = self._resource_service.get_file(user_path=user_path)
+        data = self._resource_service.get_file_data(user_path)
+        return self._response_builder.get_file_data_response(file=file, file_data=data)
 
-    def download_public_file(self, file_id: str) -> IO[bytes]:
-        return self._resource_service.get_public_file_data(file_id)
+    def download_public_file(self, file_id: str) -> models.FileData:
+        file = self._resource_service.get_public_file(file_id)
+        data = self._resource_service.get_public_file_data(file_id)
+        return self._response_builder.get_file_data_response(file=file, file_data=data)
 
     def delete_file(self, user_path: UserPath):
         self._resource_service.delete_file(user_path)
