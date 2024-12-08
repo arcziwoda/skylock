@@ -15,33 +15,43 @@ class TestSetURLCommand(unittest.TestCase):
     def setUp(self):
         self.runner = CliRunner()
 
+    @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
+    @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
     @patch(
         "skylock_cli.core.context_manager.ContextManager.save_context",
         return_value=True,
     )
     @patch(
         "skylock_cli.core.context_manager.ContextManager.get_context",
-        return_value=mock_test_context(),
+        return_value=mock_test_context(path="test/"),
     )
-    def test_set_url_success(self, _mock_get_context, _mock_save_context):
+    def test_set_url_success(
+        self, _mock_get_context, _mock_save_context, _mock_is_valid, _mock_is_expired
+    ):
         """Test the set-url command"""
         result = self.runner.invoke(app, ["set-url", "http://localhost:8000"])
         self.assertEqual(result.exit_code, 0)
         self.assertIn("Base URL set to http://localhost:8000", result.output)
+        self.assertIn("Current working directory: /", result.output)
 
+    @patch("skylock_cli.model.token.Token.is_expired", return_value=False)
+    @patch("skylock_cli.model.token.Token.is_valid", return_value=True)
     @patch(
         "skylock_cli.core.context_manager.ContextManager.save_context",
         return_value=False,
     )
     @patch(
         "skylock_cli.core.context_manager.ContextManager.get_context",
-        return_value=mock_test_context(),
+        return_value=mock_test_context(path="test/"),
     )
-    def test_set_url_default(self, _mock_get_context, _mock_save_context):
+    def test_set_url_default(
+        self, _mock_get_context, _mock_save_context, _mock_is_valid, _mock_is_expired
+    ):
         """Test the set-url command with the default URL"""
         result = self.runner.invoke(app, ["set-url"])
         self.assertEqual(result.exit_code, 0)
         self.assertIn("Base URL set to http://localhost:8000", result.output)
+        self.assertIn("Current working directory: /", result.output)
 
     def test_set_url_invalid_url(self):
         """Test the set-url command with an invalid URL"""

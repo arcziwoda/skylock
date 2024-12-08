@@ -321,6 +321,7 @@ def set_url(
     Set the URL of the SkyLock server.
     """
     new_context = url_manager.set_url(base_url)
+    pwd()
     typer.secho(
         f"Base URL set to {typer.style(new_context.base_url, fg=typer.colors.CYAN, underline=True)}",
         fg=typer.colors.GREEN,

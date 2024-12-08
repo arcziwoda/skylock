@@ -1,5 +1,6 @@
 from re import sub
 from typing import IO, Optional
+from typing import Optional
 
 from skylock.database import models as db_models
 from skylock.database.repository import FileRepository, FolderRepository
@@ -46,7 +47,7 @@ class ResourceService:
 
         return folder
 
-    def create_folder(self, user_path: UserPath) -> db_models.FolderEntity:
+    def create_folder(self, user_path: UserPath, public: bool = False) -> db_models.FolderEntity:
         if user_path.is_root_folder():
             raise ForbiddenActionException("Creation of root folder is forbidden")
 
@@ -57,7 +58,7 @@ class ResourceService:
         self._assert_no_children_matching_name(parent, folder_name)
 
         new_folder = db_models.FolderEntity(
-            name=folder_name, parent_folder=parent, owner=user_path.owner
+            name=folder_name, parent_folder=parent, owner=user_path.owner, is_public=public
         )
         return self._folder_repository.save(new_folder)
 
@@ -82,7 +83,9 @@ class ResourceService:
         file.is_public = is_public
         self._file_repository.save(file)
 
-    def create_folder_with_parents(self, user_path: UserPath) -> db_models.FolderEntity:
+    def create_folder_with_parents(
+        self, user_path: UserPath, public: bool = False
+    ) -> db_models.FolderEntity:
         if user_path.is_root_folder():
             raise ForbiddenActionException("Creation of root folder is forbidden")
 
@@ -90,7 +93,7 @@ class ResourceService:
             if not parent.is_root_folder() and not self._folder_exists(parent):
                 self.create_folder(parent)
 
-        return self.create_folder(user_path)
+        return self.create_folder(user_path, public)
 
     def _folder_exists(self, user_path: UserPath) -> bool:
         try:
@@ -138,8 +141,16 @@ class ResourceService:
 
         return file
 
+    def get_public_file(self, file_id: str) -> db_models.FileEntity:
+        file = self.get_file_by_id(file_id)
+
+        if not file.is_public:
+            raise ForbiddenActionException(f"folder with id {file_id} is not public")
+
+        return file
+
     def create_file(
-        self, user_path: UserPath, data: IO[bytes], force: bool = False, public: bool = False
+        self, user_path: UserPath, data: bytes, force: bool = False, public: bool = False
     ) -> db_models.FileEntity:
         if not user_path.name:
             raise ForbiddenActionException("Creation of file with no name is forbidden")
@@ -179,22 +190,22 @@ class ResourceService:
         self._file_repository.delete(file)
         self._delete_file_data(file)
 
-    def get_file_data(self, user_path: UserPath) -> IO[bytes]:
+    def get_file_data(self, user_path: UserPath) -> bytes:
         file = self.get_file(user_path)
         return self._get_file_data(file)
 
-    def get_public_file_data(self, file_id: str) -> IO[bytes]:
+    def get_public_file_data(self, file_id: str) -> bytes:
         file = self.get_file_by_id(file_id)
 
         if not file.is_public:
-            raise ForbiddenActionException(f"File with id {id} is not public")
+            raise ForbiddenActionException(f"File with id {file_id} is not public")
 
         return self._get_file_data(file)
 
-    def _save_file_data(self, file: db_models.FileEntity, data: IO[bytes]):
+    def _save_file_data(self, file: db_models.FileEntity, data: bytes):
         save_file_data(data=data, filename=file.id)
 
-    def _get_file_data(self, file: db_models.FileEntity) -> IO[bytes]:
+    def _get_file_data(self, file: db_models.FileEntity) -> bytes:
         return get_file_data(filename=file.id)
 
     def _delete_file_data(self, file: db_models.FileEntity):

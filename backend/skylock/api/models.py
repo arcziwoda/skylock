@@ -27,6 +27,11 @@ class FolderContents(BaseModel):
     folders: list[Folder]
 
 
+class FileData(BaseModel):
+    name: str
+    data: bytes
+
+
 class LoginUserRequest(BaseModel):
     username: str
     password: str

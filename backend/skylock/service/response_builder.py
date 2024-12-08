@@ -44,3 +44,6 @@ class ResponseBuilder:
         return models.File(
             id=file.id, name=file.name, path=f"/{user_path.path}", is_public=file.is_public
         )
+
+    def get_file_data_response(self, file: db_models.FileEntity, file_data: bytes):
+        return models.FileData(name=file.name, data=file_data)

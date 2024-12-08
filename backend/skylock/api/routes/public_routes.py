@@ -36,4 +36,8 @@ def download_public_file(
     skylock: Annotated[SkylockFacade, Depends(get_skylock_facade)],
 ):
     file_data = skylock.download_public_file(file_id)
-    return Response(content=file_data.read(), media_type="application/octet-stream")
+    return Response(
+        content=file_data.data,
+        media_type="application/octet-stream",
+        headers={"Content-Disposition": f'attachment; filename="{file_data.name}"'},
+    )

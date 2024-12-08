@@ -56,5 +56,10 @@ class PathResolver:
 
         return UserPath(path=path, owner=owner)
 
+    def path_from_file(self, file: db_models.FileEntity) -> UserPath:
+        parent_folder = file.folder
+        parent_path = self.path_from_folder(parent_folder)
+        return parent_path / file.name
+
     def _get_root_folder(self, name: str) -> db_models.FolderEntity | None:
         return self._folder_repository.get_by_name_and_parent_id(name=name, parent_id=None)
