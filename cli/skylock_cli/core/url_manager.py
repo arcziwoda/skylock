@@ -2,7 +2,7 @@
 
 from urllib.parse import urlparse
 from skylock_cli.core.context_manager import ContextManager
-from skylock_cli.model.context import Context
+from skylock_cli.model import context, directory
 from skylock_cli.utils.cli_exception_handler import CLIExceptionHandler
 from skylock_cli.exceptions.api_exceptions import InvalidURLError
 from skylock_cli.config import LOCAL_HOST
@@ -16,13 +16,14 @@ def check_url(url: str) -> bool:
     return True
 
 
-def set_url(base_url: str) -> Context:
+def set_url(base_url: str) -> context.Context:
     """Set the URL of the SkyLock server."""
     if base_url is None:
         base_url = LOCAL_HOST
     with CLIExceptionHandler():
         check_url(base_url)
         context = ContextManager.get_context()
+        context.cwd = directory.Directory()
         context.base_url = base_url
         ContextManager.save_context(context)
     return context
