@@ -1,3 +1,4 @@
+from re import sub
 from typing import IO, Optional
 
 from skylock.database import models as db_models
@@ -60,6 +61,27 @@ class ResourceService:
         )
         return self._folder_repository.save(new_folder)
 
+    def _update_folder(
+        self, folder: db_models.FolderEntity, is_public: bool, recursive: bool = False
+    ) -> None:
+        if folder.is_root():
+            raise ForbiddenActionException("Setting public on root folder is forbidden")
+
+        folder.is_public = is_public
+
+        for file in folder.files:
+            self._update_file(file, is_public)
+
+        if recursive:
+            for subfolder in folder.subfolders:
+                self._update_folder(subfolder, is_public)
+
+        self._folder_repository.save(folder)
+
+    def _update_file(self, file: db_models.FileEntity, is_public: bool) -> None:
+        file.is_public = is_public
+        self._file_repository.save(file)
+
     def create_folder_with_parents(self, user_path: UserPath) -> db_models.FolderEntity:
         if user_path.is_root_folder():
             raise ForbiddenActionException("Creation of root folder is forbidden")
@@ -82,11 +104,11 @@ class ResourceService:
         self._delete_folder(folder, is_recursively=is_recursively)
 
     def update_folder_visibility(
-        self, user_path: UserPath, is_public: bool
+        self, user_path: UserPath, is_public: bool, recursive: bool
     ) -> db_models.FolderEntity:
         folder = self._path_resolver.folder_from_path(user_path)
-        folder.is_public = is_public
-        return self._folder_repository.save(folder)
+        self._update_folder(folder, is_public, recursive)
+        return folder
 
     def _delete_folder(self, folder: db_models.FolderEntity, is_recursively: bool = False):
         if folder.is_root():

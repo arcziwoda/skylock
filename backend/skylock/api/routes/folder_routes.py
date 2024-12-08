@@ -222,6 +222,10 @@ def change_folder_visability(
     path: Annotated[str, Depends(validate_path_not_empty)],
     user: Annotated[db_models.UserEntity, Depends(get_current_user)],
     skylock: Annotated[SkylockFacade, Depends(get_skylock_facade)],
-    is_public: models.VisabilityRequest,
+    options: models.VisabilityRequest,
 ) -> models.Folder:
-    return skylock.update_folder_visability(UserPath(path=path, owner=user), is_public.is_public)
+    return skylock.update_folder_visability(
+        user_path=UserPath(path=path, owner=user),
+        is_public=options.is_public,
+        recursive=options.recursive,
+    )

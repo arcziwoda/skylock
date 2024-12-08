@@ -57,8 +57,10 @@ class SkylockFacade:
     def delete_folder(self, user_path: UserPath, is_recursively: bool = False):
         self._resource_service.delete_folder(user_path, is_recursively=is_recursively)
 
-    def update_folder_visability(self, user_path: UserPath, is_public: bool) -> models.Folder:
-        folder = self._resource_service.update_folder_visibility(user_path, is_public)
+    def update_folder_visability(
+        self, user_path: UserPath, is_public: bool, recursive: bool
+    ) -> models.Folder:
+        folder = self._resource_service.update_folder_visibility(user_path, is_public, recursive)
         return self._response_builder.get_folder_response(folder=folder, user_path=user_path)
 
     def update_file_visability(self, user_path: UserPath, is_public: bool) -> models.File:
