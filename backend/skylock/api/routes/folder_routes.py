@@ -133,8 +133,11 @@ def create_folder(
     user: Annotated[db_models.UserEntity, Depends(get_current_user)],
     skylock: Annotated[SkylockFacade, Depends(get_skylock_facade)],
     parent: bool = False,
+    is_public: bool = False,
 ) -> models.Folder:
-    return skylock.create_folder_for_user(UserPath(path=path, owner=user), with_parents=parent)
+    return skylock.create_folder_for_user(
+        UserPath(path=path, owner=user), with_parents=parent, public=is_public
+    )
 
 
 @router.delete(
