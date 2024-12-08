@@ -8,13 +8,22 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
         }
         .container {
             max-width: 800px;
             margin: auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
         }
         h1 {
             text-align: center;
+            color: #007BFF;
+            font-size: 2.5em;
+            margin-bottom: 20px;
         }
         .item-list {
             list-style-type: none;
@@ -22,16 +31,27 @@
         }
         .item-list li {
             margin: 10px 0;
+            padding: 10px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            transition: background 0.3s, transform 0.3s;
+        }
+        .item-list li:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
         }
         .item-list li a {
             text-decoration: none;
             color: #007BFF;
+            font-weight: bold;
         }
         .item-list li a:hover {
             text-decoration: underline;
         }
         .folder {
             font-weight: bold;
+            color: #28a745;
         }
     </style>
 </head>
