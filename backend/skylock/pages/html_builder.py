@@ -19,13 +19,15 @@ class HtmlBuilder:
 
     def build_folder_contents_page(self, request: Request, folder_id: str) -> HTMLResponse:
         folder_contents = self._skylock.get_public_folder_contents(folder_id)
-        folders = [
+        public_folders = [
             {"name": folder.name, "url": self._url_generator.generate_url_for_folder(folder.id)}
             for folder in folder_contents.folders
+            if folder.is_public
         ]
-        files = [
+        public_files = [
             {"name": file.name, "url": self._url_generator.generate_url_for_file(file.id)}
             for file in folder_contents.files
+            if file.is_public
         ]
         return self._templates.TemplateResponse(
             request,
@@ -33,8 +35,8 @@ class HtmlBuilder:
             {
                 "name": folder_contents.folder_name,
                 "path": folder_contents.folder_path,
-                "folders": folders,
-                "files": files,
+                "folders": public_folders,
+                "files": public_files,
             },
         )
 
