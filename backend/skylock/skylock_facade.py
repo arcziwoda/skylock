@@ -31,12 +31,14 @@ class SkylockFacade:
         return self._user_service.login_user(username, password)
 
     def create_folder_for_user(
-        self, user_path: UserPath, with_parents: bool = False
+        self, user_path: UserPath, with_parents: bool = False, public: bool = False
     ) -> models.Folder:
         if with_parents:
-            folder = self._resource_service.create_folder_with_parents(user_path=user_path)
+            folder = self._resource_service.create_folder_with_parents(
+                user_path=user_path, public=public
+            )
         else:
-            folder = self._resource_service.create_folder(user_path=user_path)
+            folder = self._resource_service.create_folder(user_path=user_path, public=public)
 
         return self._response_builder.get_folder_response(folder=folder, user_path=user_path)
 
