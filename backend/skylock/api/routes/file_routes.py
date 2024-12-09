@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Response, UploadFile, status
+from fastapi.responses import StreamingResponse
 
 
 from skylock.api.dependencies import get_current_user, get_skylock_facade
@@ -88,7 +89,7 @@ def download_file(
 ):
     user_path = UserPath(path=path, owner=user)
     file_data = skylock.download_file(user_path)
-    return Response(
+    return StreamingResponse(
         content=file_data.data,
         media_type="application/octet-stream",
         headers={"Content-Disposition": f'attachment; filename="{file_data.name}"'},

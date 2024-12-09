@@ -1,4 +1,6 @@
-from pydantic import BaseModel
+from dataclasses import dataclass
+from typing import IO
+from pydantic import BaseModel, ConfigDict
 
 
 class Token(BaseModel):
@@ -27,9 +29,10 @@ class FolderContents(BaseModel):
     folders: list[Folder]
 
 
-class FileData(BaseModel):
+@dataclass
+class FileData:
     name: str
-    data: bytes
+    data: IO[bytes]
 
 
 class LoginUserRequest(BaseModel):

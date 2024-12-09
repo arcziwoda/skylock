@@ -8,7 +8,7 @@ def preconfigured_files(skylock, mock_user):
     user_path_folder = UserPath(path="folder1", owner=mock_user)
     user_path_file1 = UserPath(path="file1.txt", owner=mock_user)
     user_path_file2 = UserPath(path="folder1/file2.txt", owner=mock_user)
-    skylock.create_folder_for_user(user_path_folder)
+    skylock.create_folder(user_path_folder)
     skylock.upload_file(user_path=user_path_file1, file_data=b"File 1 content")
     skylock.upload_file(user_path=user_path_file2, file_data=b"File 2 content")
 
@@ -36,7 +36,8 @@ def test_upload_file_success(client, mock_user, skylock):
     response = client.post("/files/upload/file3.txt", files=file_data)
     assert response.status_code == 201
     assert (
-        skylock.download_file(UserPath(path="file3.txt", owner=mock_user)).data == b"File 1 content"
+        skylock.download_file(UserPath(path="file3.txt", owner=mock_user)).data.read()
+        == b"File 1 content"
     )
 
 

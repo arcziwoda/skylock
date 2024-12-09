@@ -135,7 +135,7 @@ def create_folder(
     parent: bool = False,
     is_public: bool = False,
 ) -> models.Folder:
-    return skylock.create_folder_for_user(
+    return skylock.create_folder(
         UserPath(path=path, owner=user), with_parents=parent, public=is_public
     )
 

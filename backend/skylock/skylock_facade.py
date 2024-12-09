@@ -1,7 +1,9 @@
+from typing import IO
 from skylock.service.path_resolver import PathResolver
 from skylock.service.resource_service import ResourceService
 from skylock.service.response_builder import ResponseBuilder
 from skylock.service.user_service import UserService
+from skylock.service.zip_service import ZipService
 from skylock.api import models
 from skylock.utils.exceptions import ForbiddenActionException
 from skylock.utils.path import UserPath
@@ -11,18 +13,22 @@ from skylock.utils.url_generator import UrlGenerator
 class SkylockFacade:
     def __init__(
         self,
+        *,
         user_service: UserService,
         resource_service: ResourceService,
         path_resolver: PathResolver,
         url_generator: UrlGenerator,
         response_builder: ResponseBuilder,
+        zip_service: ZipService,
     ):
         self._user_service = user_service
         self._resource_service = resource_service
         self._path_resolver = path_resolver
         self._url_generator = url_generator
         self._response_builder = response_builder
+        self._zip_service = zip_service
 
+    # User Management Methods
     def register_user(self, username: str, password: str):
         user = self._user_service.register_user(username, password)
         self._resource_service.create_root_folder(UserPath.root_folder_of(user))
@@ -30,7 +36,8 @@ class SkylockFacade:
     def login_user(self, username: str, password: str) -> models.Token:
         return self._user_service.login_user(username, password)
 
-    def create_folder_for_user(
+    # Folder Operations
+    def create_folder(
         self, user_path: UserPath, with_parents: bool = False, public: bool = False
     ) -> models.Folder:
         if with_parents:
@@ -53,22 +60,22 @@ class SkylockFacade:
         path = self._path_resolver.path_from_folder(folder)
         return self._response_builder.get_folder_contents_response(folder=folder, user_path=path)
 
-    def delete_folder(self, user_path: UserPath, is_recursively: bool = False):
-        self._resource_service.delete_folder(user_path, is_recursively=is_recursively)
-
     def update_folder(self, user_path: UserPath, is_public: bool, recursive: bool) -> models.Folder:
         folder = self._resource_service.update_folder(user_path, is_public, recursive)
         return self._response_builder.get_folder_response(folder=folder, user_path=user_path)
 
-    def update_file(self, user_path: UserPath, is_public: bool) -> models.File:
-        file = self._resource_service.update_file(user_path, is_public)
-        return self._response_builder.get_file_response(file=file, user_path=user_path)
+    def delete_folder(self, user_path: UserPath, is_recursively: bool = False):
+        self._resource_service.delete_folder(user_path, is_recursively=is_recursively)
 
-    def get_public_file(self, file_id: str) -> models.File:
-        file = self._resource_service.get_public_file(file_id)
-        path = self._path_resolver.path_from_file(file)
-        return self._response_builder.get_file_response(file=file, user_path=path)
+    def get_folder_url(self, user_path: UserPath) -> str:
+        folder = self._resource_service.get_folder(user_path)
 
+        if not folder.is_public:
+            raise ForbiddenActionException(f"Folder {folder.name} is not public, cannot be shared")
+
+        return self._url_generator.generate_url_for_folder(folder.id)
+
+    # File Operations
     def upload_file(
         self, user_path: UserPath, file_data: bytes, force: bool = False, public: bool = False
     ) -> models.File:
@@ -85,16 +92,12 @@ class SkylockFacade:
         data = self._resource_service.get_public_file_data(file_id)
         return self._response_builder.get_file_data_response(file=file, file_data=data)
 
+    def update_file(self, user_path: UserPath, is_public: bool) -> models.File:
+        file = self._resource_service.update_file(user_path, is_public)
+        return self._response_builder.get_file_response(file=file, user_path=user_path)
+
     def delete_file(self, user_path: UserPath):
         self._resource_service.delete_file(user_path)
-
-    def get_folder_url(self, user_path: UserPath) -> str:
-        folder = self._resource_service.get_folder(user_path)
-
-        if not folder.is_public:
-            raise ForbiddenActionException(f"Folder {folder.name} is not public, cannot be shared")
-
-        return self._url_generator.generate_url_for_folder(folder.id)
 
     def get_file_url(self, user_path: UserPath) -> str:
         file = self._resource_service.get_file(user_path)
@@ -103,3 +106,9 @@ class SkylockFacade:
             raise ForbiddenActionException(f"File {file.name} is not public, cannot be shared")
 
         return self._url_generator.generate_url_for_file(file.id)
+
+    # Public Resource Access
+    def get_public_file(self, file_id: str) -> models.File:
+        file = self._resource_service.get_public_file(file_id)
+        path = self._path_resolver.path_from_file(file)
+        return self._response_builder.get_file_response(file=file, user_path=path)

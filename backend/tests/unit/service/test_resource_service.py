@@ -9,7 +9,6 @@ from skylock.utils.exceptions import (
 )
 from skylock.database.models import FileEntity, FolderEntity, UserEntity
 from skylock.utils.path import UserPath
-from tests.integration.conftest import user_repository
 
 
 def test_get_root_folder_success(resource_service, mock_folder_repository):

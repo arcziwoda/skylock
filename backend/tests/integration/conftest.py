@@ -13,8 +13,10 @@ from skylock.service.path_resolver import PathResolver
 from skylock.service.resource_service import ResourceService
 from skylock.service.response_builder import ResponseBuilder
 from skylock.service.user_service import UserService
+from skylock.service.zip_service import ZipService
 from skylock.skylock_facade import SkylockFacade
 from skylock.utils.path import UserPath
+from skylock.utils.storage import FileStorageService
 from skylock.utils.url_generator import UrlGenerator
 
 TEST_DATABASE_URL = "sqlite://"
@@ -73,22 +75,34 @@ def path_resolver(file_repository, folder_repository, user_repository):
 
 
 @pytest.fixture
-def resource_service(file_repository, folder_repository, path_resolver):
+def storage_service(tmp_path):
+    return FileStorageService(storage_path=tmp_path)
+
+
+@pytest.fixture
+def resource_service(file_repository, folder_repository, path_resolver, storage_service):
     return ResourceService(
         file_repository=file_repository,
         folder_repository=folder_repository,
         path_resolver=path_resolver,
+        file_storage_service=storage_service,
     )
 
 
 @pytest.fixture
-def skylock(user_service, resource_service, path_resolver):
+def zip_service(storage_service):
+    return ZipService(storage_service)
+
+
+@pytest.fixture
+def skylock(user_service, resource_service, path_resolver, zip_service):
     return SkylockFacade(
         user_service=user_service,
         resource_service=resource_service,
         url_generator=UrlGenerator(),
         path_resolver=path_resolver,
         response_builder=ResponseBuilder(),
+        zip_service=zip_service,
     )
 
 

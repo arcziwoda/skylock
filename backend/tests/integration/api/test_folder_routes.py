@@ -9,10 +9,10 @@ def preconfigured_folders(skylock, mock_user):
     user_path_subfolder1 = UserPath(path="folder1/subfolder1", owner=mock_user)
     user_path_subfolder2 = UserPath(path="folder1/subfolder2", owner=mock_user)
 
-    skylock.create_folder_for_user(user_path_folder1)
-    skylock.create_folder_for_user(user_path_folder2)
-    skylock.create_folder_for_user(user_path_subfolder1)
-    skylock.create_folder_for_user(user_path_subfolder2)
+    skylock.create_folder(user_path_folder1)
+    skylock.create_folder(user_path_folder2)
+    skylock.create_folder(user_path_subfolder1)
+    skylock.create_folder(user_path_subfolder2)
 
 
 # GET METHODS
