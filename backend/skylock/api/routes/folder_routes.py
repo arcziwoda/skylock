@@ -243,13 +243,13 @@ def delete_folder(
         },
     },
 )
-def change_folder_visability(
+def update_folder(
     path: Annotated[str, Depends(validate_path_not_empty)],
     user: Annotated[db_models.UserEntity, Depends(get_current_user)],
     skylock: Annotated[SkylockFacade, Depends(get_skylock_facade)],
-    options: models.VisabilityRequest,
+    options: models.UpdateFolderRequest,
 ) -> models.Folder:
-    return skylock.update_folder_visability(
+    return skylock.update_folder(
         user_path=UserPath(path=path, owner=user),
         is_public=options.is_public,
         recursive=options.recursive,

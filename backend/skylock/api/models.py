@@ -42,9 +42,13 @@ class RegisterUserRequest(BaseModel):
     password: str
 
 
-class VisabilityRequest(BaseModel):
+class UpdateFolderRequest(BaseModel):
     is_public: bool
     recursive: bool
+
+
+class UpdateFileRequest(BaseModel):
+    is_public: bool
 
 
 class UploadOptions(BaseModel):

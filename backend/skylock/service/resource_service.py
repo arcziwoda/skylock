@@ -104,7 +104,7 @@ class ResourceService:
         folder = self._path_resolver.folder_from_path(user_path)
         self._delete_folder(folder, is_recursively=is_recursively)
 
-    def update_folder_visibility(
+    def update_folder(
         self, user_path: UserPath, is_public: bool, recursive: bool
     ) -> db_models.FolderEntity:
         folder = self._path_resolver.folder_from_path(user_path)
@@ -175,7 +175,7 @@ class ResourceService:
 
         return new_file
 
-    def update_file_visibility(self, user_path: UserPath, is_public: bool) -> db_models.FileEntity:
+    def update_file(self, user_path: UserPath, is_public: bool) -> db_models.FileEntity:
         file = self._path_resolver.file_from_path(user_path)
         file.is_public = is_public
         return self._file_repository.save(file)
