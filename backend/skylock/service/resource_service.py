@@ -60,8 +60,15 @@ class ResourceService:
         )
         return self._folder_repository.save(new_folder)
 
+    def update_folder(
+        self, user_path: UserPath, is_public: bool, recursive: bool
+    ) -> db_models.FolderEntity:
+        folder = self._path_resolver.folder_from_path(user_path)
+        self._update_folder(folder, is_public, recursive)
+        return folder
+
     def _update_folder(
-        self, folder: db_models.FolderEntity, is_public: bool, recursive: bool = False
+        self, folder: db_models.FolderEntity, is_public: bool, recursive: bool
     ) -> None:
         if folder.is_root():
             raise ForbiddenActionException("Setting public on root folder is forbidden")
@@ -73,7 +80,7 @@ class ResourceService:
 
         if recursive:
             for subfolder in folder.subfolders:
-                self._update_folder(subfolder, is_public)
+                self._update_folder(subfolder, is_public, recursive)
 
         self._folder_repository.save(folder)
 
@@ -103,13 +110,6 @@ class ResourceService:
     def delete_folder(self, user_path: UserPath, is_recursively: bool = False):
         folder = self._path_resolver.folder_from_path(user_path)
         self._delete_folder(folder, is_recursively=is_recursively)
-
-    def update_folder(
-        self, user_path: UserPath, is_public: bool, recursive: bool
-    ) -> db_models.FolderEntity:
-        folder = self._path_resolver.folder_from_path(user_path)
-        self._update_folder(folder, is_public, recursive)
-        return folder
 
     def _delete_folder(self, folder: db_models.FolderEntity, is_recursively: bool = False):
         if folder.is_root():
