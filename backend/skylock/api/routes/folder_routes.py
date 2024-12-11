@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
+from fastapi.responses import StreamingResponse
 
 from skylock.api import models
 from skylock.api.dependencies import get_current_user, get_skylock_facade
@@ -135,7 +136,7 @@ def create_folder(
     parent: bool = False,
     is_public: bool = False,
 ) -> models.Folder:
-    return skylock.create_folder_for_user(
+    return skylock.create_folder(
         UserPath(path=path, owner=user), with_parents=parent, public=is_public
     )
 

@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+from typing import IO
 from pydantic import BaseModel
 
 
@@ -27,9 +29,16 @@ class FolderContents(BaseModel):
     folders: list[Folder]
 
 
-class FileData(BaseModel):
+@dataclass
+class FileData:
     name: str
-    data: bytes
+    data: IO[bytes]
+
+
+@dataclass
+class FolderData:
+    name: str
+    data: IO[bytes]
 
 
 class LoginUserRequest(BaseModel):

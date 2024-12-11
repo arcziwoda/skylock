@@ -2,10 +2,12 @@ from fastapi import FastAPI
 
 from skylock.api.routes import (
     auth_routes,
+    download_routes,
     file_routes,
     folder_routes,
     public_routes,
     share_routes,
+    upload_routes,
 )
 from skylock.utils.exception_handlers import (
     folder_not_empty_handler,
@@ -40,3 +42,5 @@ api.include_router(folder_routes.router)
 api.include_router(file_routes.router)
 api.include_router(public_routes.router)
 api.include_router(share_routes.router)
+api.include_router(download_routes.router)
+api.include_router(upload_routes.router)

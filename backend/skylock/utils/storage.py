@@ -1,46 +1,54 @@
 import pathlib
 import shutil
 from io import BytesIO
+from typing import IO
 
+from skylock.database import models as db_models
 
 FILES_FOLDER_DISK_PATH = "./data/files"
 
 
-def save_file_data(data: bytes, filename: str):
-    folder = create_files_folder_if_non_existent()
+class FileStorageService:
+    def __init__(self, storage_path: str = FILES_FOLDER_DISK_PATH):
+        self.storage_path = pathlib.Path(storage_path)
 
-    path = folder / filename
+    def _ensure_files_folder(self) -> pathlib.Path:
+        self.storage_path.mkdir(parents=True, exist_ok=True)
+        return self.storage_path
 
-    if path.exists():
-        raise ValueError(f"File of given path: {path} already exists")
+    def save_file(self, data: bytes, file: db_models.FileEntity) -> None:
+        filename = self._get_filename(file)
 
-    with path.open("wb") as buffer:
-        shutil.copyfileobj(BytesIO(data), buffer)
+        folder = self._ensure_files_folder()
+        path = folder / filename
 
+        if path.exists():
+            raise ValueError(f"File of given path: {path} already exists")
 
-def get_file_data(filename: str) -> bytes:
-    folder = create_files_folder_if_non_existent()
+        with path.open("wb") as buffer:
+            shutil.copyfileobj(BytesIO(data), buffer)
 
-    path = folder / filename
+    def get_file(self, file: db_models.FileEntity) -> IO[bytes]:
+        filename = self._get_filename(file)
 
-    if not path.exists():
-        raise ValueError(f"File of given path: {path} does not exist")
+        folder = self._ensure_files_folder()
+        path = folder / filename
 
-    return path.read_bytes()
+        if not path.exists():
+            raise ValueError(f"File of given path: {path} does not exist")
 
+        return BytesIO(path.read_bytes())
 
-def delete_file_data(filename: str):
-    folder = create_files_folder_if_non_existent()
+    def delete_file(self, file: db_models.FileEntity) -> None:
+        filename = self._get_filename(file)
 
-    path = folder / filename
+        folder = self._ensure_files_folder()
+        path = folder / filename
 
-    if not path.exists():
-        raise ValueError(f"File of given path: {path} does not exist")
+        if not path.exists():
+            raise ValueError(f"File of given path: {path} does not exist")
 
-    path.unlink()
+        path.unlink()
 
-
-def create_files_folder_if_non_existent() -> pathlib.Path:
-    folder = pathlib.Path(FILES_FOLDER_DISK_PATH)
-    folder.mkdir(parents=True, exist_ok=True)
-    return folder
+    def _get_filename(self, file: db_models.FileEntity) -> str:
+        return file.id

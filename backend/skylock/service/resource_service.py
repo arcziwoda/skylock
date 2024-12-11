@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import IO, Optional
 
 from skylock.database import models as db_models
 from skylock.database.repository import FileRepository, FolderRepository
@@ -11,7 +11,7 @@ from skylock.utils.exceptions import (
     RootFolderAlreadyExistsException,
 )
 from skylock.utils.path import UserPath
-from skylock.utils.storage import delete_file_data, get_file_data, save_file_data
+from skylock.utils.storage import FileStorageService
 
 
 class ResourceService:
@@ -20,13 +20,14 @@ class ResourceService:
         file_repository: FileRepository,
         folder_repository: FolderRepository,
         path_resolver: PathResolver,
+        file_storage_service: FileStorageService,
     ):
         self._file_repository = file_repository
         self._folder_repository = folder_repository
         self._path_resolver = path_resolver
+        self._file_storage_service = file_storage_service
 
     def get_folder(self, user_path: UserPath) -> db_models.FolderEntity:
-        # TODO: check access rules
         return self._path_resolver.folder_from_path(user_path)
 
     def get_folder_by_id(self, folder_id: str) -> db_models.FolderEntity:
@@ -128,7 +129,6 @@ class ResourceService:
         self._folder_repository.delete(folder)
 
     def get_file(self, user_path: UserPath) -> db_models.FileEntity:
-        # TODO: check access rules
         return self._path_resolver.file_from_path(user_path)
 
     def get_file_by_id(self, file_id: str) -> db_models.FileEntity:
@@ -188,11 +188,11 @@ class ResourceService:
         self._file_repository.delete(file)
         self._delete_file_data(file)
 
-    def get_file_data(self, user_path: UserPath) -> bytes:
+    def get_file_data(self, user_path: UserPath) -> IO[bytes]:
         file = self.get_file(user_path)
         return self._get_file_data(file)
 
-    def get_public_file_data(self, file_id: str) -> bytes:
+    def get_public_file_data(self, file_id: str) -> IO[bytes]:
         file = self.get_file_by_id(file_id)
 
         if not file.is_public:
@@ -201,13 +201,13 @@ class ResourceService:
         return self._get_file_data(file)
 
     def _save_file_data(self, file: db_models.FileEntity, data: bytes):
-        save_file_data(data=data, filename=file.id)
+        self._file_storage_service.save_file(data=data, file=file)
 
-    def _get_file_data(self, file: db_models.FileEntity) -> bytes:
-        return get_file_data(filename=file.id)
+    def _get_file_data(self, file: db_models.FileEntity) -> IO[bytes]:
+        return self._file_storage_service.get_file(file=file)
 
     def _delete_file_data(self, file: db_models.FileEntity):
-        return delete_file_data(file.id)
+        return self._file_storage_service.delete_file(file)
 
     def create_root_folder(self, user_path: UserPath):
         if not user_path.is_root_folder():

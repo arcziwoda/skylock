@@ -1,3 +1,4 @@
+from typing import IO
 from skylock.api import models
 from skylock.database import models as db_models
 from skylock.utils.path import UserPath
@@ -45,5 +46,12 @@ class ResponseBuilder:
             id=file.id, name=file.name, path=f"/{user_path.path}", is_public=file.is_public
         )
 
-    def get_file_data_response(self, file: db_models.FileEntity, file_data: bytes):
+    def get_file_data_response(
+        self, file: db_models.FileEntity, file_data: IO[bytes]
+    ) -> models.FileData:
         return models.FileData(name=file.name, data=file_data)
+
+    def get_folder_data_response(
+        self, folder: db_models.FolderEntity, folder_data: IO[bytes]
+    ) -> models.FolderData:
+        return models.FolderData(name=f"{folder.name}.zip", data=folder_data)
