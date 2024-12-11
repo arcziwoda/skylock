@@ -22,6 +22,10 @@ class ZipService:
         self, zip_file: zipfile.ZipFile, folder: db_models.FolderEntity, current_path: str
     ):
         folder_path = f"{current_path}{folder.name}/"
+
+        if not folder.files and not folder.subfolders:
+            zip_file.writestr(folder_path, "")
+
         for file in folder.files:
             file_path = f"{folder_path}{file.name}"
             zip_file.writestr(file_path, self._file_storage_service.get_file(file).read())
