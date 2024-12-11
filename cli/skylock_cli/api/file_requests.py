@@ -27,7 +27,7 @@ def send_upload_request(
         virtual_path (Path): The path where the file should be uploaded.
         files (dict): The file to upload.
     """
-    url = "/files/upload" + quote(str(virtual_path))
+    url = "/upload/files" + quote(str(virtual_path))
     auth = bearer_auth.BearerAuth(token)
     params = {"force": force, "public": public}
 
@@ -66,7 +66,7 @@ def send_download_request(token: Token, virtual_path: Path) -> bytes:
     Returns:
         bytes: The binary content of the downloaded file.
     """
-    url = "/files/download" + quote(str(virtual_path))
+    url = "/download/files" + quote(str(virtual_path))
     auth = bearer_auth.BearerAuth(token)
 
     response = client.get(url=url, auth=auth, headers=API_HEADERS)

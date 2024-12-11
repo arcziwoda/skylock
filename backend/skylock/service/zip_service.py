@@ -1,7 +1,5 @@
-from contextlib import contextmanager
 import zipfile
 import io
-from collections.abc import Generator
 from typing import IO
 from skylock.database import models as db_models
 from skylock.utils.storage import FileStorageService

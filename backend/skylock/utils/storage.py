@@ -37,7 +37,7 @@ class FileStorageService:
         if not path.exists():
             raise ValueError(f"File of given path: {path} does not exist")
 
-        return path.open("rb")
+        return BytesIO(path.read_bytes())
 
     def delete_file(self, file: db_models.FileEntity) -> None:
         filename = self._get_filename(file)

@@ -1,4 +1,3 @@
-from typing import IO
 from skylock.service.path_resolver import PathResolver
 from skylock.service.resource_service import ResourceService
 from skylock.service.response_builder import ResponseBuilder
@@ -48,6 +47,11 @@ class SkylockFacade:
             folder = self._resource_service.create_folder(user_path=user_path, public=public)
 
         return self._response_builder.get_folder_response(folder=folder, user_path=user_path)
+
+    def download_folder(self, user_path: UserPath) -> models.FolderData:
+        folder = self._resource_service.get_folder(user_path)
+        data = self._zip_service.create_zip_from_folder(folder)
+        return self._response_builder.get_folder_data_response(folder=folder, folder_data=data)
 
     def get_folder_contents(self, user_path: UserPath) -> models.FolderContents:
         folder = self._resource_service.get_folder(user_path)

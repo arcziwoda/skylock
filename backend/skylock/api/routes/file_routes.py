@@ -59,43 +59,6 @@ def upload_file(
     )
 
 
-@router.get(
-    "/download/{path:path}",
-    summary="Download a file",
-    description="This endpoint allows users to download a file from a specified path.",
-    responses={
-        200: {
-            "description": "File downloaded successfully",
-            "content": {"application/octet-stream": {}},
-        },
-        400: {
-            "description": "Invalid path provided, most likely empty",
-            "content": {"application/json": {"example": {"detail": "Invalid path"}}},
-        },
-        401: {
-            "description": "Unauthorized user",
-            "content": {"application/json": {"example": {"detail": "Not authenticated"}}},
-        },
-        404: {
-            "description": "File not found",
-            "content": {"application/json": {"example": {"detail": "File not found"}}},
-        },
-    },
-)
-def download_file(
-    path: Annotated[str, Depends(validate_path_not_empty)],
-    user: Annotated[db_models.UserEntity, Depends(get_current_user)],
-    skylock: Annotated[SkylockFacade, Depends(get_skylock_facade)],
-):
-    user_path = UserPath(path=path, owner=user)
-    file_data = skylock.download_file(user_path)
-    return StreamingResponse(
-        content=file_data.data,
-        media_type="application/octet-stream",
-        headers={"Content-Disposition": f'attachment; filename="{file_data.name}"'},
-    )
-
-
 @router.delete(
     "/{path:path}",
     summary="Delete a file",

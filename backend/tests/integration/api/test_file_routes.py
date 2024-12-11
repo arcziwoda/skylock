@@ -15,18 +15,18 @@ def preconfigured_files(skylock, mock_user):
 
 # GET methods
 def test_download_file_success(client):
-    response = client.get("/files/download/file1.txt")
+    response = client.get("/download/files/file1.txt")
     assert response.status_code == 200
     assert response.content == b"File 1 content"
 
 
 def test_download_file_not_found(client):
-    response = client.get("/files/download/missing_file.txt")
+    response = client.get("/download/files/missing_file.txt")
     assert response.status_code == 404
 
 
 def test_download_file_empty_path(client):
-    response = client.get("/files/download/")
+    response = client.get("/download/files/")
     assert response.status_code == 400
 
 

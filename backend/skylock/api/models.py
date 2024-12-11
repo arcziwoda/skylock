@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import IO
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 
 
 class Token(BaseModel):
@@ -31,6 +31,12 @@ class FolderContents(BaseModel):
 
 @dataclass
 class FileData:
+    name: str
+    data: IO[bytes]
+
+
+@dataclass
+class FolderData:
     name: str
     data: IO[bytes]
 
