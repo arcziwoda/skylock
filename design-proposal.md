@@ -1,45 +1,45 @@
 # ZPRP - Design Proposal
 
-Autorzy: Oliwier Szypczyn, Artur Kempiński, Filip Budzyński
+Authors: Oliwier Szypczyn, Artur Kempiński, Filip Budzyński
 
-## Harmonogram
+## Schedule
 
-### Planowanie i śledzenie postępów
+### Planning and Progress Tracking
 
 - [trello](https://trello.com/invite/b/6717e8983e448098895c9abd/ATTIf472471e95b03fbfd2a64e328e9d56805C7AD1F2/zprp)
-- [wstępna propozycja realizacji](https://docs.google.com/document/d/1Ja9pGZcc4Bm5onkOSrGuZB2RC4V7GIif2MGYyNo782I/edit?tab=t.0#heading=h.5zv4f977yngz)
+- [Initial Implementation Proposal](https://docs.google.com/document/d/1Ja9pGZcc4Bm5onkOSrGuZB2RC4V7GIif2MGYyNo782I/edit?tab=t.0#heading=h.5zv4f977yngz)
 
 | Date       | Task                                            |
 | ---------- | ----------------------------------------------- |
-| 18.10.2024 | Gitlab Repo                                     |
+| 18.10.2024 | GitLab Repository                               |
 |            | Architecture Proposals                          |
-|            | Initial requirements                            |
-| 25.10.2024 | Base FastAPI setup                              |
-|            | Base CLI with Type setup                        |
-|            | Setup Server Hosting for resources              |
-| 1.11.2024  | CI/CD Pipelines setup                           |
-|            | Registration and Logging in                     |
-|            | Security auth                                   |
-| 8.11.2024  | Private Files Handling                          |
-|            | Private Folders Handling                        |
-| 15.11.2024 | Public Files Handling                           |
+|            | Initial Requirements                            |
+| 25.10.2024 | Base FastAPI Setup                              |
+|            | Base CLI with Typer Setup                       |
+|            | Setup Server Hosting for Resources              |
+| 1.11.2024  | CI/CD Pipelines Setup                           |
+|            | Registration and Login                          |
+|            | Security Authentication                         |
+| 8.11.2024  | Private File Handling                           |
+|            | Private Folder Handling                         |
+| 15.11.2024 | Public File Handling                            |
 |            | Public Folder Handling                          |
-| 22.11.2024 | Changing files path/directory                   |
-|            | Changing folders path/directory                 |
-| 29.11.2024 | Docker                                          |
+| 22.11.2024 | Changing File Paths/Directories                 |
+|            | Changing Folder Paths/Directories               |
+| 29.11.2024 | Docker Setup                                    |
 |            | Error Handling                                  |
 |            | Scripts                                         |
-|            | Changing Resource Visibility (Public / Private) |
-| 6.12.2024  | HTML website                                    |
-|            | Handling downloads for resources                |
+|            | Changing Resource Visibility (Public/Private)   |
+| 6.12.2024  | HTML Website                                    |
+|            | Resource Download Handling                      |
 
-### Zadania wdrażane na bierząco
+### Ongoing Tasks
 
 - Unit and Integration Testing
-- Documenting Project functionalities and progress
-- Error handling
+- Documenting Project Functionalities and Progress
+- Error Handling
 
-## Bibliografia
+## Bibliography
 
 - <https://chaoticengineer.hashnode.dev/fastapi-sqlalchemy>
 - <https://fastapi.tiangolo.com/>
@@ -57,43 +57,43 @@ Autorzy: Oliwier Szypczyn, Artur Kempiński, Filip Budzyński
 - <https://www.mkdocs.org/getting-starte/>
 - <https://alembic.sqlalchemy.org/en/latest/>
 
-## Planowana Funkcjonalność
+## Planned Functionality
 
-### Funkcjonalne
+### Functional
 
-- Dodawanie publicznego i prywatnego pliku/folderu
-- Usuwanie plików/folderów (tylko prywatnych)
-- Nadpisywanie własnych plików
-- Możliwość zagnieżdżania folderów
-- Wyświetlenie zawartości folderu
-- Zmiana widoczności pliku i folderu
-- Pobieranie pliku (własnego/publicznego)
-- Pobranie folderu (zip)
-- Założenie konta i Zalogowanie
-- CLI umożliwia “poruszanie się” po swoim drzewie plików w stylu uniksowym
-- Wyświetlanie HTML z drzewkiem plików/folderów od podanej ścieżki
+- Adding public and private files/folders.
+- Deleting files/folders (private only).
+- Overwriting owned files.
+- Nesting folders.
+- Displaying folder contents.
+- Changing file and folder visibility.
+- Downloading files (owned/public).
+- Downloading folders as ZIP archives.
+- Account creation and login.
+- CLI navigation through the file tree in Unix-style.
+- HTML display of a file/folder tree starting from a specified path.
 
-### Niefunkcjonalne
+### Non-functional
 
-- Zmiana widoczności folderu - rekursywne zejście aż do najgłębiej zagnieżdżonego folderu (potencjalnie należy określić możliwość serwera i maksymalną głębokość zagnieżdżeń),
-- CLI przechowuje kontekst klienta (path, token)
-- Każdy użytkownik posiada root folder w który jest ojcem każdych innych zasobów
-- Uwierzytelnienie za pomocą JWT
-- Monitoring (logowanie błędów, logowanie przemieszczania po drzewie plików)
+- Recursive folder visibility change—processes all nested folders down to the deepest level (with potential server-defined limits for maximum nesting depth).
+- CLI stores client context (path, token).
+- Each user has a root folder that serves as the parent of all other resources.
+- Authentication using JWT.
+- Monitoring (logging errors and user navigation within the file tree).
 
-## Stack Technologiczny
+## Technology Stack
 
-### Zarządzanie plikami
+### File Management
 
-- pathlib
+- `pathlib`
 
-### Baza danych
+### Database
 
 - SQLite
-- SQLalchemy
+- SQLAlchemy
 - Alembic
 
-### Serwer (rest api)
+### Server (REST API)
 
 - FastAPI
 - pyJWT
@@ -103,13 +103,15 @@ Autorzy: Oliwier Szypczyn, Artur Kempiński, Filip Budzyński
 - Typer
 - httpx
 
-### Organizacja projektu
+### Project Organization
 
-- pre-commit
-- poetry
-- gitlab z wykorzystaniem gitlab CI\CD
+- `pre-commit`
+- Poetry
+- GitLab with CI/CD
 - Docker
-- pylint
-- black formatter
-- mkdocs
-- makefile (potencjalnie)
+- Pylint
+- Black formatter
+- MkDocs
+- Tox
+- Scripted build, test, and run processes using a Makefile
+- Commit messages following the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) standard
