@@ -1,5 +1,5 @@
-from fastapi import Response
 import pytest
+from skylock.api.routes import folder_routes
 from skylock.utils.path import UserPath
 
 
@@ -80,7 +80,6 @@ def test_create_folder_with_parents_public(client):
     folder2 = client.get("/folders/non_existent1/non_existent2").json()
 
     assert response.status_code == 201
-    print(folder2)
     assert folder1["folders"][0]["is_public"] == True
     assert folder2["folders"][0]["is_public"] == True
 
@@ -99,3 +98,45 @@ def test_delete_folder_not_empty(client):
 def test_delete_not_found(client):
     response = client.delete("/folders/invalid_folder")
     assert response.status_code == 404
+
+
+# PATCH METHODS
+def test_update_folder_visibility_success(client):
+    response = client.patch("/folders/folder1", json={"is_public": True, "recursive": False})
+    folder = response.json()
+    folder_contents = client.get("/folders/folder1").json()
+
+    assert response.status_code == 200
+    assert folder["is_public"] == True
+    assert response.status_code == 200
+    assert folder_contents["folders"][0]["is_public"] == False
+
+
+def test_update_nested_folder_visibility_success(client):
+    response = client.patch("/folders/folder1/subfolder1", json={"is_public": True})
+    folder = response.json()
+    assert response.status_code == 200
+    assert folder["is_public"] == True
+
+
+def test_update_folder_visibility_invalid_folder(client):
+    response = client.patch("/folders/non_existent_folder", json={"is_public": True})
+    assert response.status_code == 404
+
+
+def test_update_folder_visibility_root_folder_path(client):
+    response = client.patch("/folders", json={"is_public": True})
+    assert response.status_code == 200
+
+
+def test_update_folder_visibility_invalid_payload(client):
+    response = client.patch("/folders/folder1", json={"invalid_key": True})
+    assert response.status_code == 422
+
+
+def test_update_folder_visibility_recursive(client):
+    response = client.patch("/folders/folder1", json={"is_public": True, "recursive": True})
+    folder_contents = client.get("/folders/folder1").json()
+
+    assert response.status_code == 200
+    assert folder_contents["folders"][0]["is_public"] == True

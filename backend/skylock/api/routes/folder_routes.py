@@ -245,7 +245,7 @@ def delete_folder(
     },
 )
 def update_folder(
-    path: Annotated[str, Depends(validate_path_not_empty)],
+    path: str,
     user: Annotated[db_models.UserEntity, Depends(get_current_user)],
     skylock: Annotated[SkylockFacade, Depends(get_skylock_facade)],
     options: models.UpdateFolderRequest,

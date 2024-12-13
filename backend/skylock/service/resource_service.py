@@ -71,8 +71,6 @@ class ResourceService:
     def _update_folder(
         self, folder: db_models.FolderEntity, is_public: bool, recursive: bool
     ) -> None:
-        if folder.is_root():
-            raise ForbiddenActionException("Setting public on root folder is forbidden")
 
         folder.is_public = is_public
 

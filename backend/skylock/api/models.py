@@ -53,7 +53,7 @@ class RegisterUserRequest(BaseModel):
 
 class UpdateFolderRequest(BaseModel):
     is_public: bool
-    recursive: bool
+    recursive: bool = False
 
 
 class UpdateFileRequest(BaseModel):
