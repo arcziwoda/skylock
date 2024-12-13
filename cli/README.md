@@ -60,10 +60,6 @@ slock cd [directory_path]
 slock --help
 ```
 
-## Installation
-
-**TODO**: Put example instructions of how to use the package once we deploy
-
 ## Configuration
 
 The CLI automatically stores the user session and current directory context for your convenience.
