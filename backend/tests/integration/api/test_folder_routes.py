@@ -1,3 +1,4 @@
+from fastapi import Response
 import pytest
 from skylock.utils.path import UserPath
 
@@ -69,6 +70,19 @@ def test_create_folder_with_parents(client):
     assert response.status_code == 201
     assert client.get("/folders/non_existent").status_code == 200
     assert client.get("/folders/non_existent/subfolder1").status_code == 200
+
+
+def test_create_folder_with_parents_public(client):
+    response = client.post(
+        "/folders/non_existent1/non_existent2/subfolder1?parent=true&is_public=true"
+    )
+    folder1 = client.get("/folders/non_existent1").json()
+    folder2 = client.get("/folders/non_existent1/non_existent2").json()
+
+    assert response.status_code == 201
+    print(folder2)
+    assert folder1["folders"][0]["is_public"] == True
+    assert folder2["folders"][0]["is_public"] == True
 
 
 # DELETE METHODS

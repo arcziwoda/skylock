@@ -95,9 +95,9 @@ class ResourceService:
         if user_path.is_root_folder():
             raise ForbiddenActionException("Creation of root folder is forbidden")
 
-        for parent in user_path.parents:
+        for parent in reversed(user_path.parents):
             if not parent.is_root_folder() and not self._folder_exists(parent):
-                self.create_folder(parent)
+                self.create_folder(parent, public=public)
 
         return self.create_folder(user_path, public)
 
